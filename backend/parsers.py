@@ -185,6 +185,7 @@ def parse_dna_file(filepath: str) -> dict:
 
     # --- FamilyTreeDNA ---
     elif provider == "ftdna":
+        # FTDNA typically: RSID, CHROMOSOME, POSITION, RESULT
         gt_col = "result"
         col_map = {
             "rsid":       _col_index(cols, "rsid", "snpid") or 0,
@@ -196,6 +197,7 @@ def parse_dna_file(filepath: str) -> dict:
 
     # --- Generic fallback ---
     else:
+        # Try dual-allele first, then single genotype
         if "allele1" in cols or "allele 1" in cols:
             col_map = {
                 "rsid":       _col_index(cols, "rsid", "snpid") or 0,

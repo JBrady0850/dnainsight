@@ -24,6 +24,7 @@ def _resolve_db_path() -> Path:
         path.parent.mkdir(parents=True, exist_ok=True)
         try:
             conn = _sqlite3.connect(str(path))
+            # Test WAL mode -- this is what the app uses; FUSE mounts often fail here
             conn.execute("PRAGMA journal_mode=WAL")
             conn.executescript("""
                 CREATE TABLE IF NOT EXISTS _write_test (x INTEGER);
@@ -31,6 +32,7 @@ def _resolve_db_path() -> Path:
                 DROP TABLE _write_test;
             """)
             conn.close()
+            # Clean up test file
             try:
                 path.unlink(missing_ok=True)
             except Exception:
@@ -51,6 +53,7 @@ def _resolve_db_path() -> Path:
     for p in candidates:
         if _test_sqlite(p):
             return p
+    # Absolute fallback -- should never reach here
     return candidates[-1]
 
 DB_PATH = _resolve_db_path()
@@ -127,6 +130,10 @@ def init_db():
     conn.close()
 
 
+# ---------------------------------------------------------------------------
+# Profile operations
+# ---------------------------------------------------------------------------
+
 def create_profile(name: str, dob: str, sex: str, provider: str) -> int:
     conn = get_connection()
     cur = conn.execute(
@@ -164,6 +171,10 @@ def delete_profile(profile_id: int):
     conn.close()
 
 
+# ---------------------------------------------------------------------------
+# Upload operations
+# ---------------------------------------------------------------------------
+
 def record_upload(profile_id: int, filename: str, snp_count: int) -> int:
     conn = get_connection()
     cur = conn.execute(
@@ -175,6 +186,10 @@ def record_upload(profile_id: int, filename: str, snp_count: int) -> int:
     conn.close()
     return uid
 
+
+# ---------------------------------------------------------------------------
+# Findings operations
+# ---------------------------------------------------------------------------
 
 def upsert_finding(profile_id: int, upload_id: int, finding: dict):
     """Insert or update a finding (keyed on profile_id + rsid)."""
@@ -255,6 +270,10 @@ def get_findings_summary(profile_id: int) -> dict:
     return {r["silo"]: r["cnt"] for r in rows}
 
 
+# ---------------------------------------------------------------------------
+# Scan state
+# ---------------------------------------------------------------------------
+
 def get_scan_state(profile_id: int) -> dict:
     conn = get_connection()
     row = conn.execute(
@@ -278,6 +297,10 @@ def save_scan_state(profile_id: int, state: dict):
     conn.commit()
     conn.close()
 
+
+# ---------------------------------------------------------------------------
+# Reports
+# ---------------------------------------------------------------------------
 
 def record_report(profile_id: int, report_type: str, fmt: str, filepath: str) -> int:
     conn = get_connection()

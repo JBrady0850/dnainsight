@@ -1,5 +1,16 @@
 """
 doctor_report.py -- Generate the Doctor Discussion Report.
+
+Produces a clinical-style HTML document designed to be brought to a
+physician, pharmacist, or genetic counselor appointment.
+
+Content:
+  - Patient summary block
+  - Prescription-critical findings table (flagged for prescriber review)
+  - Actionable findings (monitoring, supplements, lifestyle)
+  - Drug interaction warnings organized by gene/drug class
+  - Recommended lab follow-ups
+  - AI analysis prompt block (for use with Grok or other LLMs)
 """
 
 from datetime import datetime
@@ -38,6 +49,7 @@ LAB_RECOMMENDATIONS = {
 
 
 def _build_drug_warning_table(findings: list[dict]) -> str:
+    # Gather genes with pre_prescription or actionable findings
     genes = {}
     for f in findings:
         gene = f.get("gene", "")
@@ -141,6 +153,7 @@ def generate_doctor_report(profile: dict, findings: list[dict]) -> str:
     genes_list = sorted({f.get("gene","") for f in pre_rx + actionable if f.get("gene")})
     genes_str  = ", ".join(genes_list) if genes_list else "None"
 
+    # Build JSON summary for AI prompt block
     import json
     ai_findings = []
     for f in (pre_rx + actionable)[:30]:

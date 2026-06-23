@@ -56,6 +56,7 @@ def _silo_section(findings: list[dict], silo: str) -> str:
       <div style="border:1px solid {color};border-top:none;border-radius:0 0 6px 6px;overflow:hidden;">
     """
 
+    # Group by gene
     by_gene: dict[str, list[dict]] = {}
     for f in items:
         gene = f.get("gene") or "Unknown"
@@ -93,6 +94,15 @@ def _silo_section(findings: list[dict], silo: str) -> str:
 
 
 def generate_genetic_report(profile: dict, findings: list[dict]) -> str:
+    """
+    Generate full genetic HTML report.
+
+    Args:
+        profile:  dict from database.get_profile()
+        findings: list of finding dicts from database.get_findings()
+
+    Returns: HTML string
+    """
     name     = profile.get("name", "Unknown")
     dob      = profile.get("dob", "N/A")
     sex      = profile.get("sex", "N/A").title()

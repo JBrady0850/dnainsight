@@ -93,6 +93,7 @@ else
     echo "[AUTO] Creating virtual environment to avoid system pip conflict..."
     python3 -m venv .venv
     .venv/bin/pip install -r requirements.txt --quiet
+    # Rewrite launcher to use venv
     VENV_PYTHON=".venv/bin/python3"
     echo "[OK] Dependencies installed in virtual environment."
 fi

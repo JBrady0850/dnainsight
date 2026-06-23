@@ -51,7 +51,7 @@ LOCAL_DB     = _BASE / "db" / "clinvar_local.db"
 
 
 # ---------------------------------------------------------------------------
-# Risk text classifier
+# Risk text classifier (adapted from batch_snp_scan.py)
 # ---------------------------------------------------------------------------
 _RISK_FRAGS = [
     'no function', 'decreased function', 'reduced function', 'poor function',
@@ -239,6 +239,7 @@ def annotate_via_api(snps: list[dict], progress_cb=None) -> list[dict]:
     Annotate a list of SNP dicts via MyVariant.info API.
     Returns findings list.
     """
+    # Index snps by rsid for fast genotype lookup
     snp_index = {s["rsid"]: s for s in snps if s["rsid"].startswith("rs")}
     rsids = list(snp_index.keys())
     chunks = [rsids[i:i+CHUNK_SIZE] for i in range(0, len(rsids), CHUNK_SIZE)]

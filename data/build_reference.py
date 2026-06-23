@@ -15,7 +15,17 @@ Usage:
 import json
 from pathlib import Path
 
+# ---------------------------------------------------------------------------
+# Master SNP reference table
+# Format: rsid | gene | category | clinical_sig | interpretation
+#
+# Categories: PHARM, METAB, INFLAM, NEURO, DETOX, CARDIO
+# Silos: pre_prescription (drug-safety), actionable (health action needed),
+#         informational (background)
+# ---------------------------------------------------------------------------
+
 REFERENCE = [
+    # PHARMACOGENOMICS -- Prescription-critical
     ("rs429358",   "APOE",    "PHARM",  "risk factor",    "APOE e4 allele: increased Alzheimer disease risk and altered lipid metabolism. Statins may have reduced efficacy. Discuss with cardiologist before lipid-lowering therapy."),
     ("rs7412",     "APOE",    "PHARM",  "risk factor",    "APOE e2 allele marker: associated with lower LDL but elevated triglycerides. Modifies cardiovascular and neurological risk profile."),
     ("rs1799971",  "CYP2D6",  "PHARM",  "drug response",  "CYP2D6 reduced function: impacts metabolism of codeine, tramadol, oxycodone, tamoxifen, antidepressants (fluoxetine, paroxetine), antipsychotics, and beta-blockers. Alert prescriber before use."),
@@ -44,9 +54,13 @@ REFERENCE = [
     ("rs4343",     "ACE",     "PHARM",  "drug response",  "ACE D/I polymorphism: linked to ACE inhibitor drug response and hypertension management. DD genotype associated with higher ACE activity."),
     ("rs1801275",  "GNB3",    "PHARM",  "drug response",  "GNB3 C825T variant: influences blood pressure response to thiazide diuretics and other antihypertensives."),
     ("rs20455",    "KIF6",    "PHARM",  "drug response",  "KIF6 variant: associated with differential statin benefit for coronary heart disease risk reduction."),
+
+    # PHARMACOGENOMICS -- Informational
     ("rs1056836",  "CYP1B1",  "PHARM",  "drug response",  "CYP1B1 variant: phase-1 enzyme for estrogen and environmental toxin activation. Relevant for estrogen-based therapies and cancer risk screening."),
     ("rs2228570",  "VDR",     "METAB",  "drug response",  "VDR (vitamin D receptor) variant: altered vitamin D sensitivity. May require higher supplementation to achieve target 25-OH-D levels."),
     ("rs11568818", "VDR",     "METAB",  "drug response",  "VDR secondary variant: secondary marker for vitamin D receptor signaling. Consider vitamin D monitoring."),
+
+    # METABOLIC HEALTH
     ("rs9939609",  "FTO",     "METAB",  "risk factor",    "FTO A allele (obesity risk): master regulator of appetite and fat storage. Associated with 20-30% higher obesity risk. High-protein, lower-carb diet and regular aerobic exercise shown to attenuate genetic effect."),
     ("rs1421085",  "FTO",     "METAB",  "risk factor",    "FTO rs1421085 T>C: 'master switch' for thermogenesis and fat browning. C/C genotype associated with reduced beige fat activation and higher obesity susceptibility."),
     ("rs8050136",  "FTO",     "METAB",  "risk factor",    "FTO secondary obesity marker: preference for high-calorie foods and reduced satiety signaling. Caloric density awareness and mindful eating strategies recommended."),
@@ -67,6 +81,8 @@ REFERENCE = [
     ("rs1799883",  "FABP2",   "METAB",  "risk factor",    "FABP2 Ala54Thr: Thr allele associated with higher postprandial fat absorption and insulin resistance."),
     ("rs1800588",  "LIPC",    "METAB",  "risk factor",    "LIPC variant: hepatic lipase activity affecting HDL cholesterol metabolism and cardiovascular risk."),
     ("rs1137101",  "LEPR",    "METAB",  "risk factor",    "Leptin receptor variant: reduced satiety signaling efficiency. Protein-rich diet and resistance training may partially compensate."),
+
+    # INFLAMMATION
     ("rs1800795",  "IL6",     "INFLAM", "risk factor",    "IL-6 promoter variant: elevated systemic inflammation and cytokine production. Monitor hsCRP; anti-inflammatory diet (Mediterranean), omega-3 supplementation, and exercise recommended."),
     ("rs1800629",  "TNFA",    "INFLAM", "risk factor",    "TNF-alpha -308G>A: increased TNF-alpha production, promoting chronic low-grade inflammation. Higher risk of autoimmune and metabolic conditions."),
     ("rs1205",     "CRP",     "INFLAM", "risk factor",    "CRP genetic variant: influences baseline C-reactive protein levels. Elevated baseline CRP predicts cardiovascular and metabolic risk."),
@@ -81,6 +97,8 @@ REFERENCE = [
     ("rs4586",     "CCL2",    "INFLAM", "risk factor",    "CCL2 (MCP-1) variant: monocyte chemoattractant protein influencing vessel inflammation and atherosclerosis risk."),
     ("rs2228145",  "IL6R",    "INFLAM", "drug response",  "IL-6 receptor Asp358Ala: reduced IL-6 receptor shedding. Predictive marker for tocilizumab (IL-6 blocker) response in rheumatoid arthritis."),
     ("rs30187",    "CRP",     "INFLAM", "risk factor",    "CRP variant: baseline systemic inflammation predictor. Elevated values correlate with cardiovascular and metabolic risk."),
+
+    # NEUROLOGICAL
     ("rs1801133",  "MTHFR",   "NEURO",  "risk factor",    "MTHFR C677T: reduced methylenetetrahydrofolate reductase activity. Impairs folate conversion and homocysteine clearance. Elevated homocysteine raises cardiovascular and neurological risk. Supplementation: methylfolate (5-MTHF), NOT folic acid."),
     ("rs1801131",  "MTHFR",   "NEURO",  "risk factor",    "MTHFR A1298C: secondary folate metabolism variant. Combined with C677T creates compound heterozygosity. Check homocysteine level; methylated B-vitamin supplementation recommended."),
     ("rs4680",     "COMT",    "NEURO",  "informational",  "COMT Val158Met: dictates dopamine and estrogen clearance. Val/Val (fast COMT): lower dopamine in prefrontal cortex, better stress resilience but lower working memory ceiling. Met/Met (slow COMT): higher dopamine, better cognition under low stress, worse under high stress."),
@@ -101,6 +119,8 @@ REFERENCE = [
     ("rs13235612", "GAD1",    "NEURO",  "risk factor",    "GAD1 (glutamate decarboxylase): GABA synthesis enzyme. Variant associated with anxiety vulnerability and panic disorder risk."),
     ("rs1051740",  "CHRNA5",  "NEURO",  "risk factor",    "CHRNA5 (nicotinic acetylcholine receptor): strongly associated with nicotine dependence and lung cancer risk in smokers."),
     ("rs1655991",  "COMT",    "NEURO",  "informational",  "COMT secondary variant: influences cognitive processing speed and emotional regulation; modulates primary COMT effect."),
+
+    # DETOX / OXIDATIVE STRESS
     ("rs1695",     "GSTP1",   "DETOX",  "risk factor",    "GSTP1 Ile105Val: reduced glutathione-S-transferase activity. Decreased detoxification of carcinogens and chemotherapy agents. Increased sensitivity to oxidative stress and environmental pollutants."),
     ("rs4880",     "SOD2",    "DETOX",  "risk factor",    "SOD2 Ala16Val: mitochondrial superoxide dismutase. Val/Val (homozygous T on forward strand): reduced mitochondrial import and antioxidant capacity. Consider CoQ10 and mitochondrial antioxidant support."),
     ("rs1800566",  "NQO1",    "DETOX",  "risk factor",    "NQO1 Pro187Ser: near-zero enzyme activity for homozygous Ser/Ser. Impaired quinone reduction and CoQ10 recycling. Avoid benzene exposure; may increase sensitivity to certain chemotherapy drugs."),
@@ -109,6 +129,9 @@ REFERENCE = [
     ("rs2228001",  "XPC",     "DETOX",  "risk factor",    "XPC (DNA repair): nucleotide excision repair capacity. Variant associated with reduced UV-induced DNA repair and elevated skin cancer risk."),
 ]
 
+# ---------------------------------------------------------------------------
+# Build the reference dict
+# ---------------------------------------------------------------------------
 
 def build_reference() -> dict:
     ref = {}
