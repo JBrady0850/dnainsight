@@ -1,0 +1,639 @@
+{
+  "rs429358": {
+    "gene": "APOE",
+    "category": "PHARM",
+    "clinical_sig": "risk factor",
+    "interpretation": "APOE e4 allele: increased Alzheimer disease risk and altered lipid metabolism. Statins may have reduced efficacy. Discuss with cardiologist before lipid-lowering therapy.",
+    "conditions": "APOE e4 allele: increased Alzheimer disease risk and altered lipid metabolism. Statins may have reduced efficacy. Discuss with cardiologist before lipid-lowering therapy."
+  },
+  "rs7412": {
+    "gene": "APOE",
+    "category": "PHARM",
+    "clinical_sig": "risk factor",
+    "interpretation": "APOE e2 allele marker: associated with lower LDL but elevated triglycerides. Modifies cardiovascular and neurological risk profile.",
+    "conditions": "APOE e2 allele marker: associated with lower LDL but elevated triglycerides. Modifies cardiovascular and neurological risk profile."
+  },
+  "rs1799971": {
+    "gene": "CYP2D6",
+    "category": "PHARM",
+    "clinical_sig": "drug response",
+    "interpretation": "CYP2D6 reduced function: impacts metabolism of codeine, tramadol, oxycodone, tamoxifen, antidepressants (fluoxetine, paroxetine), antipsychotics, and beta-blockers. Alert prescriber before use.",
+    "conditions": "CYP2D6 reduced function: impacts metabolism of codeine, tramadol, oxycodone, tamoxifen, antidepressants (fluoxetine, paroxetine), antipsychotics, and beta-blockers. Alert prescriber before use."
+  },
+  "rs1065852": {
+    "gene": "CYP2D6",
+    "category": "PHARM",
+    "clinical_sig": "drug response",
+    "interpretation": "CYP2D6 *10 reduced function allele: decreased enzyme activity for pain medications, antidepressants, and opioids. Dose adjustment may be required.",
+    "conditions": "CYP2D6 *10 reduced function allele: decreased enzyme activity for pain medications, antidepressants, and opioids. Dose adjustment may be required."
+  },
+  "rs3892097": {
+    "gene": "CYP2D6",
+    "category": "PHARM",
+    "clinical_sig": "drug response",
+    "interpretation": "CYP2D6 *4 non-functional allele (most common European PM allele): zero enzyme contribution from this allele. Significant impact on opioid efficacy and antidepressant dosing.",
+    "conditions": "CYP2D6 *4 non-functional allele (most common European PM allele): zero enzyme contribution from this allele. Significant impact on opioid efficacy and antidepressant dosing."
+  },
+  "rs5030658": {
+    "gene": "CYP2D6",
+    "category": "PHARM",
+    "clinical_sig": "drug response",
+    "interpretation": "CYP2D6 *6 null allele: no functional enzyme from this allele. Combined with other reduced-function alleles may result in poor metabolizer status.",
+    "conditions": "CYP2D6 *6 null allele: no functional enzyme from this allele. Combined with other reduced-function alleles may result in poor metabolizer status."
+  },
+  "rs1057910": {
+    "gene": "CYP2C9",
+    "category": "PHARM",
+    "clinical_sig": "drug response",
+    "interpretation": "CYP2C9 *3 allele: significantly reduced metabolism of warfarin, NSAIDs, phenytoin, and sulfonylureas. Requires dose reduction for warfarin; risk of drug toxicity.",
+    "conditions": "CYP2C9 *3 allele: significantly reduced metabolism of warfarin, NSAIDs, phenytoin, and sulfonylureas. Requires dose reduction for warfarin; risk of drug toxicity."
+  },
+  "rs1799853": {
+    "gene": "CYP2C9",
+    "category": "PHARM",
+    "clinical_sig": "drug response",
+    "interpretation": "CYP2C9 *2 allele: intermediate metabolism of warfarin and NSAIDs. Warfarin dose adjustment recommended. Monitor INR closely.",
+    "conditions": "CYP2C9 *2 allele: intermediate metabolism of warfarin and NSAIDs. Warfarin dose adjustment recommended. Monitor INR closely."
+  },
+  "rs1057911": {
+    "gene": "CYP2C9",
+    "category": "PHARM",
+    "clinical_sig": "drug response",
+    "interpretation": "CYP2C9 variant: slower clearance of anti-inflammatory drugs and oral hypoglycemics. Dose reduction may be needed.",
+    "conditions": "CYP2C9 variant: slower clearance of anti-inflammatory drugs and oral hypoglycemics. Dose reduction may be needed."
+  },
+  "rs4244285": {
+    "gene": "CYP2C19",
+    "category": "PHARM",
+    "clinical_sig": "drug response",
+    "interpretation": "CYP2C19 *2 loss-of-function allele: poor metabolism of clopidogrel (antiplatelet), PPIs, SSRIs, and TCAs. Clopidogrel may be ineffective -- consider alternative antiplatelet agent.",
+    "conditions": "CYP2C19 *2 loss-of-function allele: poor metabolism of clopidogrel (antiplatelet), PPIs, SSRIs, and TCAs. Clopidogrel may be ineffective -- consider alternative antiplatelet agent."
+  },
+  "rs12248560": {
+    "gene": "CYP2C19",
+    "category": "PHARM",
+    "clinical_sig": "drug response",
+    "interpretation": "CYP2C19 *17 ultrarapid metabolizer allele: accelerated clearance of PPIs, SSRIs, and clopidogrel. PPIs may fail at standard dose; dose increase or switch to rabeprazole warranted.",
+    "conditions": "CYP2C19 *17 ultrarapid metabolizer allele: accelerated clearance of PPIs, SSRIs, and clopidogrel. PPIs may fail at standard dose; dose increase or switch to rabeprazole warranted."
+  },
+  "rs1058204": {
+    "gene": "CYP2C19",
+    "category": "PHARM",
+    "clinical_sig": "drug response",
+    "interpretation": "CYP2C19 variant: influences proton pump inhibitor effectiveness and psychiatric medication response.",
+    "conditions": "CYP2C19 variant: influences proton pump inhibitor effectiveness and psychiatric medication response."
+  },
+  "rs2108622": {
+    "gene": "CYP4F2",
+    "category": "PHARM",
+    "clinical_sig": "drug response",
+    "interpretation": "CYP4F2 *3 allele: reduced vitamin K metabolism, leading to higher warfarin sensitivity. Requires lower initial warfarin dose.",
+    "conditions": "CYP4F2 *3 allele: reduced vitamin K metabolism, leading to higher warfarin sensitivity. Requires lower initial warfarin dose."
+  },
+  "rs9923231": {
+    "gene": "VKORC1",
+    "category": "PHARM",
+    "clinical_sig": "drug response",
+    "interpretation": "VKORC1 variant (rs9923231): lower enzyme activity, significantly increased warfarin and anticoagulant sensitivity. Reduce starting dose; use CPIC warfarin dosing algorithm.",
+    "conditions": "VKORC1 variant (rs9923231): lower enzyme activity, significantly increased warfarin and anticoagulant sensitivity. Reduce starting dose; use CPIC warfarin dosing algorithm."
+  },
+  "rs4149056": {
+    "gene": "SLCO1B1",
+    "category": "PHARM",
+    "clinical_sig": "drug response",
+    "interpretation": "SLCO1B1 *5 allele: reduced statin transport into hepatocytes, leading to higher plasma statin concentrations and myopathy/rhabdomyolysis risk. Use lowest effective statin dose; consider pravastatin.",
+    "conditions": "SLCO1B1 *5 allele: reduced statin transport into hepatocytes, leading to higher plasma statin concentrations and myopathy/rhabdomyolysis risk. Use lowest effective statin dose; consider pravastatin."
+  },
+  "rs2241766": {
+    "gene": "CYP3A4",
+    "category": "PHARM",
+    "clinical_sig": "drug response",
+    "interpretation": "CYP3A4 *1B variant: altered metabolism of immunosuppressants, statins, antibiotics, and hormonal medications.",
+    "conditions": "CYP3A4 *1B variant: altered metabolism of immunosuppressants, statins, antibiotics, and hormonal medications."
+  },
+  "rs2740574": {
+    "gene": "CYP3A4",
+    "category": "PHARM",
+    "clinical_sig": "drug response",
+    "interpretation": "CYP3A4 variant: impacts metabolism of many common antibiotics and statins. Review drug-drug interactions carefully.",
+    "conditions": "CYP3A4 variant: impacts metabolism of many common antibiotics and statins. Review drug-drug interactions carefully."
+  },
+  "rs776746": {
+    "gene": "CYP3A5",
+    "category": "PHARM",
+    "clinical_sig": "drug response",
+    "interpretation": "CYP3A5 *3 non-expresser allele: standard tacrolimus and cyclosporine starting dose for non-expressers. Transplant patients: use clinical dosing protocol.",
+    "conditions": "CYP3A5 *3 non-expresser allele: standard tacrolimus and cyclosporine starting dose for non-expressers. Transplant patients: use clinical dosing protocol."
+  },
+  "rs1045642": {
+    "gene": "ABCB1",
+    "category": "PHARM",
+    "clinical_sig": "drug response",
+    "interpretation": "ABCB1 (P-gp) variant: altered multidrug transporter efficiency affecting absorption of digoxin, antiretrovirals, and chemotherapy agents.",
+    "conditions": "ABCB1 (P-gp) variant: altered multidrug transporter efficiency affecting absorption of digoxin, antiretrovirals, and chemotherapy agents."
+  },
+  "rs2032582": {
+    "gene": "ABCB1",
+    "category": "PHARM",
+    "clinical_sig": "drug response",
+    "interpretation": "ABCB1 variant: affects blood-brain barrier drug transport, impacting CNS drug concentrations.",
+    "conditions": "ABCB1 variant: affects blood-brain barrier drug transport, impacting CNS drug concentrations."
+  },
+  "rs1128503": {
+    "gene": "ABCB1",
+    "category": "PHARM",
+    "clinical_sig": "drug response",
+    "interpretation": "ABCB1 variant: impacts absorption of multiple clinical medications including antiepileptics and opioids.",
+    "conditions": "ABCB1 variant: impacts absorption of multiple clinical medications including antiepileptics and opioids."
+  },
+  "rs762551": {
+    "gene": "CYP1A2",
+    "category": "DETOX",
+    "clinical_sig": "drug response",
+    "interpretation": "CYP1A2 fast/slow metabolizer: affects caffeine, clozapine, olanzapine, theophylline metabolism. Slow metabolizers: higher caffeine and drug exposure.",
+    "conditions": "CYP1A2 fast/slow metabolizer: affects caffeine, clozapine, olanzapine, theophylline metabolism. Slow metabolizers: higher caffeine and drug exposure."
+  },
+  "rs10455872": {
+    "gene": "LPA",
+    "category": "CARDIO",
+    "clinical_sig": "risk factor",
+    "interpretation": "LPA variant: elevated lipoprotein(a) levels, a significant independent cardiovascular risk factor. Discuss with cardiologist; niacin or PCSK9 inhibitor may be indicated.",
+    "conditions": "LPA variant: elevated lipoprotein(a) levels, a significant independent cardiovascular risk factor. Discuss with cardiologist; niacin or PCSK9 inhibitor may be indicated."
+  },
+  "rs1799983": {
+    "gene": "NOS3",
+    "category": "CARDIO",
+    "clinical_sig": "drug response",
+    "interpretation": "NOS3 (eNOS) variant: reduced nitric oxide production, impacting blood pressure regulation and cardiovascular drug response (ACE inhibitors, nitrates).",
+    "conditions": "NOS3 (eNOS) variant: reduced nitric oxide production, impacting blood pressure regulation and cardiovascular drug response (ACE inhibitors, nitrates)."
+  },
+  "rs1050102": {
+    "gene": "ACE",
+    "category": "PHARM",
+    "clinical_sig": "drug response",
+    "interpretation": "ACE gene variant: influences response to ACE inhibitor medications (lisinopril, enalapril) and cardiovascular risk.",
+    "conditions": "ACE gene variant: influences response to ACE inhibitor medications (lisinopril, enalapril) and cardiovascular risk."
+  },
+  "rs4343": {
+    "gene": "ACE",
+    "category": "PHARM",
+    "clinical_sig": "drug response",
+    "interpretation": "ACE D/I polymorphism: linked to ACE inhibitor drug response and hypertension management. DD genotype associated with higher ACE activity.",
+    "conditions": "ACE D/I polymorphism: linked to ACE inhibitor drug response and hypertension management. DD genotype associated with higher ACE activity."
+  },
+  "rs1801275": {
+    "gene": "GNB3",
+    "category": "PHARM",
+    "clinical_sig": "drug response",
+    "interpretation": "GNB3 C825T variant: influences blood pressure response to thiazide diuretics and other antihypertensives.",
+    "conditions": "GNB3 C825T variant: influences blood pressure response to thiazide diuretics and other antihypertensives."
+  },
+  "rs20455": {
+    "gene": "KIF6",
+    "category": "PHARM",
+    "clinical_sig": "drug response",
+    "interpretation": "KIF6 variant: associated with differential statin benefit for coronary heart disease risk reduction.",
+    "conditions": "KIF6 variant: associated with differential statin benefit for coronary heart disease risk reduction."
+  },
+  "rs1056836": {
+    "gene": "CYP1B1",
+    "category": "PHARM",
+    "clinical_sig": "drug response",
+    "interpretation": "CYP1B1 variant: phase-1 enzyme for estrogen and environmental toxin activation. Relevant for estrogen-based therapies and cancer risk screening.",
+    "conditions": "CYP1B1 variant: phase-1 enzyme for estrogen and environmental toxin activation. Relevant for estrogen-based therapies and cancer risk screening."
+  },
+  "rs2228570": {
+    "gene": "VDR",
+    "category": "METAB",
+    "clinical_sig": "drug response",
+    "interpretation": "VDR (vitamin D receptor) variant: altered vitamin D sensitivity. May require higher supplementation to achieve target 25-OH-D levels.",
+    "conditions": "VDR (vitamin D receptor) variant: altered vitamin D sensitivity. May require higher supplementation to achieve target 25-OH-D levels."
+  },
+  "rs11568818": {
+    "gene": "VDR",
+    "category": "METAB",
+    "clinical_sig": "drug response",
+    "interpretation": "VDR secondary variant: secondary marker for vitamin D receptor signaling. Consider vitamin D monitoring.",
+    "conditions": "VDR secondary variant: secondary marker for vitamin D receptor signaling. Consider vitamin D monitoring."
+  },
+  "rs9939609": {
+    "gene": "FTO",
+    "category": "METAB",
+    "clinical_sig": "risk factor",
+    "interpretation": "FTO A allele (obesity risk): master regulator of appetite and fat storage. Associated with 20-30% higher obesity risk. High-protein, lower-carb diet and regular aerobic exercise shown to attenuate genetic effect.",
+    "conditions": "FTO A allele (obesity risk): master regulator of appetite and fat storage. Associated with 20-30% higher obesity risk. High-protein, lower-carb diet and regular aerobic exercise shown to attenuate genetic effect."
+  },
+  "rs1421085": {
+    "gene": "FTO",
+    "category": "METAB",
+    "clinical_sig": "risk factor",
+    "interpretation": "FTO rs1421085 T>C: 'master switch' for thermogenesis and fat browning. C/C genotype associated with reduced beige fat activation and higher obesity susceptibility.",
+    "conditions": "FTO rs1421085 T>C: 'master switch' for thermogenesis and fat browning. C/C genotype associated with reduced beige fat activation and higher obesity susceptibility."
+  },
+  "rs8050136": {
+    "gene": "FTO",
+    "category": "METAB",
+    "clinical_sig": "risk factor",
+    "interpretation": "FTO secondary obesity marker: preference for high-calorie foods and reduced satiety signaling. Caloric density awareness and mindful eating strategies recommended.",
+    "conditions": "FTO secondary obesity marker: preference for high-calorie foods and reduced satiety signaling. Caloric density awareness and mindful eating strategies recommended."
+  },
+  "rs7903146": {
+    "gene": "TCF7L2",
+    "category": "METAB",
+    "clinical_sig": "risk factor",
+    "interpretation": "TCF7L2 T allele: highest-impact common genetic marker for type 2 diabetes risk. Associated with impaired insulin secretion. Prioritize low-glycemic diet, regular exercise, and HbA1c monitoring.",
+    "conditions": "TCF7L2 T allele: highest-impact common genetic marker for type 2 diabetes risk. Associated with impaired insulin secretion. Prioritize low-glycemic diet, regular exercise, and HbA1c monitoring."
+  },
+  "rs12255372": {
+    "gene": "TCF7L2",
+    "category": "METAB",
+    "clinical_sig": "risk factor",
+    "interpretation": "TCF7L2 secondary diabetes marker: correlated with reduced insulin production capacity.",
+    "conditions": "TCF7L2 secondary diabetes marker: correlated with reduced insulin production capacity."
+  },
+  "rs1801282": {
+    "gene": "PPARG",
+    "category": "METAB",
+    "clinical_sig": "risk factor",
+    "interpretation": "PPARG Pro12Ala: the Ala allele is associated with improved insulin sensitivity and reduced T2DM risk. Pro/Pro genotype linked to higher adipose insulin resistance.",
+    "conditions": "PPARG Pro12Ala: the Ala allele is associated with improved insulin sensitivity and reduced T2DM risk. Pro/Pro genotype linked to higher adipose insulin resistance."
+  },
+  "rs10811661": {
+    "gene": "CDKN2A",
+    "category": "METAB",
+    "clinical_sig": "risk factor",
+    "interpretation": "CDKN2A/B variant: reduced pancreatic beta-cell regeneration capacity and insulin production. Associated with T2DM risk.",
+    "conditions": "CDKN2A/B variant: reduced pancreatic beta-cell regeneration capacity and insulin production. Associated with T2DM risk."
+  },
+  "rs13266634": {
+    "gene": "SLC30A8",
+    "category": "METAB",
+    "clinical_sig": "risk factor",
+    "interpretation": "SLC30A8 variant: altered zinc transport in insulin-secreting beta cells. Low zinc intake may amplify risk; zinc supplementation worth discussing with provider.",
+    "conditions": "SLC30A8 variant: altered zinc transport in insulin-secreting beta cells. Low zinc intake may amplify risk; zinc supplementation worth discussing with provider."
+  },
+  "rs17782313": {
+    "gene": "MC4R",
+    "category": "METAB",
+    "clinical_sig": "risk factor",
+    "interpretation": "MC4R variant: reduced melanocortin receptor signaling, impairing energy homeostasis and satiety. Associated with higher BMI and binge-eating tendency.",
+    "conditions": "MC4R variant: reduced melanocortin receptor signaling, impairing energy homeostasis and satiety. Associated with higher BMI and binge-eating tendency."
+  },
+  "rs2943641": {
+    "gene": "IRS1",
+    "category": "METAB",
+    "clinical_sig": "risk factor",
+    "interpretation": "IRS1 variant: reduced insulin receptor substrate signaling, contributing to muscle insulin resistance.",
+    "conditions": "IRS1 variant: reduced insulin receptor substrate signaling, contributing to muscle insulin resistance."
+  },
+  "rs5219": {
+    "gene": "KCNJ11",
+    "category": "METAB",
+    "clinical_sig": "drug response",
+    "interpretation": "KCNJ11 E23K variant: linked to differential response to sulfonylurea diabetes medications and T2DM susceptibility.",
+    "conditions": "KCNJ11 E23K variant: linked to differential response to sulfonylurea diabetes medications and T2DM susceptibility."
+  },
+  "rs1800644": {
+    "gene": "ADRB2",
+    "category": "METAB",
+    "clinical_sig": "drug response",
+    "interpretation": "ADRB2 Arg16Gly: beta-2 receptor variant influencing fat mobilization, asthma medication response, and metabolic rate.",
+    "conditions": "ADRB2 Arg16Gly: beta-2 receptor variant influencing fat mobilization, asthma medication response, and metabolic rate."
+  },
+  "rs1042713": {
+    "gene": "ADRB2",
+    "category": "PHARM",
+    "clinical_sig": "drug response",
+    "interpretation": "ADRB2 variant: influences response to asthma medications (albuterol, salmeterol) and cardiovascular beta-agonists.",
+    "conditions": "ADRB2 variant: influences response to asthma medications (albuterol, salmeterol) and cardiovascular beta-agonists."
+  },
+  "rs1042714": {
+    "gene": "ADRB2",
+    "category": "PHARM",
+    "clinical_sig": "drug response",
+    "interpretation": "ADRB2 Glu27Gln: affects metabolic rate and exercise-induced fat burning. Common in obesity resistance.",
+    "conditions": "ADRB2 Glu27Gln: affects metabolic rate and exercise-induced fat burning. Common in obesity resistance."
+  },
+  "rs1800544": {
+    "gene": "ADRB3",
+    "category": "METAB",
+    "clinical_sig": "risk factor",
+    "interpretation": "ADRB3 Trp64Arg variant: associated with abdominal fat storage and reduced basal metabolic rate in some ethnic groups.",
+    "conditions": "ADRB3 Trp64Arg variant: associated with abdominal fat storage and reduced basal metabolic rate in some ethnic groups."
+  },
+  "rs7501331": {
+    "gene": "BCMO1",
+    "category": "METAB",
+    "clinical_sig": "risk factor",
+    "interpretation": "BCMO1 variant: reduced beta-carotene to vitamin A conversion. Increased dietary preformed vitamin A (retinol) may be needed.",
+    "conditions": "BCMO1 variant: reduced beta-carotene to vitamin A conversion. Increased dietary preformed vitamin A (retinol) may be needed."
+  },
+  "rs601338": {
+    "gene": "FUT2",
+    "category": "METAB",
+    "clinical_sig": "risk factor",
+    "interpretation": "FUT2 secretor status: non-secretors have reduced gut B12 absorption and altered microbiome composition. Monitor B12; consider methylcobalamin supplementation.",
+    "conditions": "FUT2 secretor status: non-secretors have reduced gut B12 absorption and altered microbiome composition. Monitor B12; consider methylcobalamin supplementation."
+  },
+  "rs1799883": {
+    "gene": "FABP2",
+    "category": "METAB",
+    "clinical_sig": "risk factor",
+    "interpretation": "FABP2 Ala54Thr: Thr allele associated with higher postprandial fat absorption and insulin resistance.",
+    "conditions": "FABP2 Ala54Thr: Thr allele associated with higher postprandial fat absorption and insulin resistance."
+  },
+  "rs1800588": {
+    "gene": "LIPC",
+    "category": "METAB",
+    "clinical_sig": "risk factor",
+    "interpretation": "LIPC variant: hepatic lipase activity affecting HDL cholesterol metabolism and cardiovascular risk.",
+    "conditions": "LIPC variant: hepatic lipase activity affecting HDL cholesterol metabolism and cardiovascular risk."
+  },
+  "rs1137101": {
+    "gene": "LEPR",
+    "category": "METAB",
+    "clinical_sig": "risk factor",
+    "interpretation": "Leptin receptor variant: reduced satiety signaling efficiency. Protein-rich diet and resistance training may partially compensate.",
+    "conditions": "Leptin receptor variant: reduced satiety signaling efficiency. Protein-rich diet and resistance training may partially compensate."
+  },
+  "rs1800795": {
+    "gene": "IL6",
+    "category": "INFLAM",
+    "clinical_sig": "risk factor",
+    "interpretation": "IL-6 promoter variant: elevated systemic inflammation and cytokine production. Monitor hsCRP; anti-inflammatory diet (Mediterranean), omega-3 supplementation, and exercise recommended.",
+    "conditions": "IL-6 promoter variant: elevated systemic inflammation and cytokine production. Monitor hsCRP; anti-inflammatory diet (Mediterranean), omega-3 supplementation, and exercise recommended."
+  },
+  "rs1800629": {
+    "gene": "TNFA",
+    "category": "INFLAM",
+    "clinical_sig": "risk factor",
+    "interpretation": "TNF-alpha -308G>A: increased TNF-alpha production, promoting chronic low-grade inflammation. Higher risk of autoimmune and metabolic conditions.",
+    "conditions": "TNF-alpha -308G>A: increased TNF-alpha production, promoting chronic low-grade inflammation. Higher risk of autoimmune and metabolic conditions."
+  },
+  "rs1205": {
+    "gene": "CRP",
+    "category": "INFLAM",
+    "clinical_sig": "risk factor",
+    "interpretation": "CRP genetic variant: influences baseline C-reactive protein levels. Elevated baseline CRP predicts cardiovascular and metabolic risk.",
+    "conditions": "CRP genetic variant: influences baseline C-reactive protein levels. Elevated baseline CRP predicts cardiovascular and metabolic risk."
+  },
+  "rs1143627": {
+    "gene": "IL1B",
+    "category": "INFLAM",
+    "clinical_sig": "risk factor",
+    "interpretation": "IL-1beta variant: pro-inflammatory cytokine production. Associated with joint inflammation, metabolic syndrome, and mood dysregulation.",
+    "conditions": "IL-1beta variant: pro-inflammatory cytokine production. Associated with joint inflammation, metabolic syndrome, and mood dysregulation."
+  },
+  "rs1800871": {
+    "gene": "IL10",
+    "category": "INFLAM",
+    "clinical_sig": "risk factor",
+    "interpretation": "IL-10 -592A>C: variant affecting anti-inflammatory cytokine balance. Lower IL-10 associated with higher inflammatory set-point.",
+    "conditions": "IL-10 -592A>C: variant affecting anti-inflammatory cytokine balance. Lower IL-10 associated with higher inflammatory set-point."
+  },
+  "rs1800896": {
+    "gene": "IL10",
+    "category": "INFLAM",
+    "clinical_sig": "risk factor",
+    "interpretation": "IL-10 -1082A>G: regulatory variant for immune system dampening. Impacts autoimmune susceptibility.",
+    "conditions": "IL-10 -1082A>G: regulatory variant for immune system dampening. Impacts autoimmune susceptibility."
+  },
+  "rs1800627": {
+    "gene": "IL10",
+    "category": "INFLAM",
+    "clinical_sig": "risk factor",
+    "interpretation": "IL-10 variant: promotes balanced inflammatory response; altered alleles linked to chronic inflammatory conditions.",
+    "conditions": "IL-10 variant: promotes balanced inflammatory response; altered alleles linked to chronic inflammatory conditions."
+  },
+  "rs1800872": {
+    "gene": "IL10",
+    "category": "INFLAM",
+    "clinical_sig": "risk factor",
+    "interpretation": "IL-10 secondary variant: genetic predisposition to higher inflammatory set-point.",
+    "conditions": "IL-10 secondary variant: genetic predisposition to higher inflammatory set-point."
+  },
+  "rs231775": {
+    "gene": "CTLA4",
+    "category": "INFLAM",
+    "clinical_sig": "risk factor",
+    "interpretation": "CTLA4 Thr17Ala: T cell activation regulator. Associated with autoimmune susceptibility (thyroid disease, type 1 diabetes, rheumatoid arthritis, Celiac disease).",
+    "conditions": "CTLA4 Thr17Ala: T cell activation regulator. Associated with autoimmune susceptibility (thyroid disease, type 1 diabetes, rheumatoid arthritis, Celiac disease)."
+  },
+  "rs2069762": {
+    "gene": "IL2",
+    "category": "INFLAM",
+    "clinical_sig": "risk factor",
+    "interpretation": "IL-2 variant: T cell growth and immune signaling. Relevant for autoimmune condition risk and immune modulation.",
+    "conditions": "IL-2 variant: T cell growth and immune signaling. Relevant for autoimmune condition risk and immune modulation."
+  },
+  "rs1800450": {
+    "gene": "MBL2",
+    "category": "INFLAM",
+    "clinical_sig": "risk factor",
+    "interpretation": "MBL2 (mannose-binding lectin): innate immune defense variant. Low MBL2 associated with increased infection susceptibility.",
+    "conditions": "MBL2 (mannose-binding lectin): innate immune defense variant. Low MBL2 associated with increased infection susceptibility."
+  },
+  "rs4586": {
+    "gene": "CCL2",
+    "category": "INFLAM",
+    "clinical_sig": "risk factor",
+    "interpretation": "CCL2 (MCP-1) variant: monocyte chemoattractant protein influencing vessel inflammation and atherosclerosis risk.",
+    "conditions": "CCL2 (MCP-1) variant: monocyte chemoattractant protein influencing vessel inflammation and atherosclerosis risk."
+  },
+  "rs2228145": {
+    "gene": "IL6R",
+    "category": "INFLAM",
+    "clinical_sig": "drug response",
+    "interpretation": "IL-6 receptor Asp358Ala: reduced IL-6 receptor shedding. Predictive marker for tocilizumab (IL-6 blocker) response in rheumatoid arthritis.",
+    "conditions": "IL-6 receptor Asp358Ala: reduced IL-6 receptor shedding. Predictive marker for tocilizumab (IL-6 blocker) response in rheumatoid arthritis."
+  },
+  "rs30187": {
+    "gene": "CRP",
+    "category": "INFLAM",
+    "clinical_sig": "risk factor",
+    "interpretation": "CRP variant: baseline systemic inflammation predictor. Elevated values correlate with cardiovascular and metabolic risk.",
+    "conditions": "CRP variant: baseline systemic inflammation predictor. Elevated values correlate with cardiovascular and metabolic risk."
+  },
+  "rs1801133": {
+    "gene": "MTHFR",
+    "category": "NEURO",
+    "clinical_sig": "risk factor",
+    "interpretation": "MTHFR C677T: reduced methylenetetrahydrofolate reductase activity. Impairs folate conversion and homocysteine clearance. Elevated homocysteine raises cardiovascular and neurological risk. Supplementation: methylfolate (5-MTHF), NOT folic acid.",
+    "conditions": "MTHFR C677T: reduced methylenetetrahydrofolate reductase activity. Impairs folate conversion and homocysteine clearance. Elevated homocysteine raises cardiovascular and neurological risk. Supplementation: methylfolate (5-MTHF), NOT folic acid."
+  },
+  "rs1801131": {
+    "gene": "MTHFR",
+    "category": "NEURO",
+    "clinical_sig": "risk factor",
+    "interpretation": "MTHFR A1298C: secondary folate metabolism variant. Combined with C677T creates compound heterozygosity. Check homocysteine level; methylated B-vitamin supplementation recommended.",
+    "conditions": "MTHFR A1298C: secondary folate metabolism variant. Combined with C677T creates compound heterozygosity. Check homocysteine level; methylated B-vitamin supplementation recommended."
+  },
+  "rs4680": {
+    "gene": "COMT",
+    "category": "NEURO",
+    "clinical_sig": "informational",
+    "interpretation": "COMT Val158Met: dictates dopamine and estrogen clearance. Val/Val (fast COMT): lower dopamine in prefrontal cortex, better stress resilience but lower working memory ceiling. Met/Met (slow COMT): higher dopamine, better cognition under low stress, worse under high stress.",
+    "conditions": "COMT Val158Met: dictates dopamine and estrogen clearance. Val/Val (fast COMT): lower dopamine in prefrontal cortex, better stress resilience but lower working memory ceiling. Met/Met (slow COMT): higher dopamine, better cognition under low stress, worse under high stress."
+  },
+  "rs1805087": {
+    "gene": "MTR",
+    "category": "NEURO",
+    "clinical_sig": "risk factor",
+    "interpretation": "MTR (methionine synthase): converts homocysteine to methionine. Variant reduces B12-dependent remethylation; monitor homocysteine and B12.",
+    "conditions": "MTR (methionine synthase): converts homocysteine to methionine. Variant reduces B12-dependent remethylation; monitor homocysteine and B12."
+  },
+  "rs1801394": {
+    "gene": "MTRR",
+    "category": "NEURO",
+    "clinical_sig": "risk factor",
+    "interpretation": "MTRR (methionine synthase reductase): recycles vitamin B12 cofactor. Reduced efficiency compounds MTHFR-related methylation concerns.",
+    "conditions": "MTRR (methionine synthase reductase): recycles vitamin B12 cofactor. Reduced efficiency compounds MTHFR-related methylation concerns."
+  },
+  "rs6265": {
+    "gene": "BDNF",
+    "category": "NEURO",
+    "clinical_sig": "informational",
+    "interpretation": "BDNF Val66Met: brain-derived neurotrophic factor variant. Met carriers show reduced activity-dependent BDNF secretion, linked to lower resilience to stress, depression susceptibility, and impaired fear extinction. Regular aerobic exercise is the most evidence-supported intervention.",
+    "conditions": "BDNF Val66Met: brain-derived neurotrophic factor variant. Met carriers show reduced activity-dependent BDNF secretion, linked to lower resilience to stress, depression susceptibility, and impaired fear extinction. Regular aerobic exercise is the most evidence-supported intervention."
+  },
+  "rs6323": {
+    "gene": "MAOA",
+    "category": "NEURO",
+    "clinical_sig": "informational",
+    "interpretation": "MAOA (monoamine oxidase A): regulates serotonin and norepinephrine clearance. High-activity allele: faster neurotransmitter breakdown; lower-activity: slower clearance with implications for mood regulation.",
+    "conditions": "MAOA (monoamine oxidase A): regulates serotonin and norepinephrine clearance. High-activity allele: faster neurotransmitter breakdown; lower-activity: slower clearance with implications for mood regulation."
+  },
+  "rs1800497": {
+    "gene": "ANKK1",
+    "category": "NEURO",
+    "clinical_sig": "informational",
+    "interpretation": "DRD2/ANKK1 Taq1A: reduces dopamine receptor density in reward pathways. Associated with reward sensitivity, addiction vulnerability, and preference for high-stimulation behaviors.",
+    "conditions": "DRD2/ANKK1 Taq1A: reduces dopamine receptor density in reward pathways. Associated with reward sensitivity, addiction vulnerability, and preference for high-stimulation behaviors."
+  },
+  "rs1611115": {
+    "gene": "DBH",
+    "category": "NEURO",
+    "clinical_sig": "informational",
+    "interpretation": "DBH (dopamine beta-hydroxylase): converts dopamine to norepinephrine. Variant associated with altered dopamine-to-norepinephrine ratio and ADHD-related traits.",
+    "conditions": "DBH (dopamine beta-hydroxylase): converts dopamine to norepinephrine. Variant associated with altered dopamine-to-norepinephrine ratio and ADHD-related traits."
+  },
+  "rs553664": {
+    "gene": "ADORA2A",
+    "category": "NEURO",
+    "clinical_sig": "informational",
+    "interpretation": "ADORA2A (adenosine A2A receptor): caffeine sensitivity and anxiety. C/C genotype: increased caffeine-induced anxiety; consider limiting caffeine to <200mg/day.",
+    "conditions": "ADORA2A (adenosine A2A receptor): caffeine sensitivity and anxiety. C/C genotype: increased caffeine-induced anxiety; consider limiting caffeine to <200mg/day."
+  },
+  "rs25531": {
+    "gene": "SLC6A4",
+    "category": "NEURO",
+    "clinical_sig": "informational",
+    "interpretation": "5-HTTLPR (serotonin transporter): short allele associated with reduced serotonin transporter expression, increased stress reactivity, and depression risk under adverse conditions. Note: SSRI response is NOT reliably predicted by this SNP.",
+    "conditions": "5-HTTLPR (serotonin transporter): short allele associated with reduced serotonin transporter expression, increased stress reactivity, and depression risk under adverse conditions. Note: SSRI response is NOT reliably predicted by this SNP."
+  },
+  "rs6295": {
+    "gene": "HTR1A",
+    "category": "NEURO",
+    "clinical_sig": "informational",
+    "interpretation": "HTR1A (serotonin 1A receptor): G allele associated with altered receptor sensitivity. Impacts emotional regulation and social anxiety.",
+    "conditions": "HTR1A (serotonin 1A receptor): G allele associated with altered receptor sensitivity. Impacts emotional regulation and social anxiety."
+  },
+  "rs1360780": {
+    "gene": "FKBP5",
+    "category": "NEURO",
+    "clinical_sig": "risk factor",
+    "interpretation": "FKBP5 variant: high-impact cortisol regulation marker. Associated with PTSD susceptibility, glucocorticoid resistance, and stress response dysregulation.",
+    "conditions": "FKBP5 variant: high-impact cortisol regulation marker. Associated with PTSD susceptibility, glucocorticoid resistance, and stress response dysregulation."
+  },
+  "rs1800260": {
+    "gene": "CLOCK",
+    "category": "NEURO",
+    "clinical_sig": "informational",
+    "interpretation": "CLOCK gene variant: circadian rhythm and sleep cycle timing. Associated with eveningness (night-owl chronotype) and increased risk of sleep disorders and mood dysregulation.",
+    "conditions": "CLOCK gene variant: circadian rhythm and sleep cycle timing. Associated with eveningness (night-owl chronotype) and increased risk of sleep disorders and mood dysregulation."
+  },
+  "rs1801260": {
+    "gene": "CLOCK",
+    "category": "NEURO",
+    "clinical_sig": "informational",
+    "interpretation": "CLOCK circadian rhythm variant: determines peak performance timing, sleep architecture, and metabolic timing of meals.",
+    "conditions": "CLOCK circadian rhythm variant: determines peak performance timing, sleep architecture, and metabolic timing of meals."
+  },
+  "rs110402": {
+    "gene": "CRHR1",
+    "category": "NEURO",
+    "clinical_sig": "risk factor",
+    "interpretation": "CRHR1 (corticotropin-releasing hormone receptor): influences HPA axis stress response and resilience to trauma.",
+    "conditions": "CRHR1 (corticotropin-releasing hormone receptor): influences HPA axis stress response and resilience to trauma."
+  },
+  "rs3800373": {
+    "gene": "FKBP5",
+    "category": "NEURO",
+    "clinical_sig": "risk factor",
+    "interpretation": "FKBP5 secondary variant: linked to mood stability under chronic stress and glucocorticoid sensitivity.",
+    "conditions": "FKBP5 secondary variant: linked to mood stability under chronic stress and glucocorticoid sensitivity."
+  },
+  "rs13235612": {
+    "gene": "GAD1",
+    "category": "NEURO",
+    "clinical_sig": "risk factor",
+    "interpretation": "GAD1 (glutamate decarboxylase): GABA synthesis enzyme. Variant associated with anxiety vulnerability and panic disorder risk.",
+    "conditions": "GAD1 (glutamate decarboxylase): GABA synthesis enzyme. Variant associated with anxiety vulnerability and panic disorder risk."
+  },
+  "rs1051740": {
+    "gene": "CHRNA5",
+    "category": "NEURO",
+    "clinical_sig": "risk factor",
+    "interpretation": "CHRNA5 (nicotinic acetylcholine receptor): strongly associated with nicotine dependence and lung cancer risk in smokers.",
+    "conditions": "CHRNA5 (nicotinic acetylcholine receptor): strongly associated with nicotine dependence and lung cancer risk in smokers."
+  },
+  "rs1655991": {
+    "gene": "COMT",
+    "category": "NEURO",
+    "clinical_sig": "informational",
+    "interpretation": "COMT secondary variant: influences cognitive processing speed and emotional regulation; modulates primary COMT effect.",
+    "conditions": "COMT secondary variant: influences cognitive processing speed and emotional regulation; modulates primary COMT effect."
+  },
+  "rs1695": {
+    "gene": "GSTP1",
+    "category": "DETOX",
+    "clinical_sig": "risk factor",
+    "interpretation": "GSTP1 Ile105Val: reduced glutathione-S-transferase activity. Decreased detoxification of carcinogens and chemotherapy agents. Increased sensitivity to oxidative stress and environmental pollutants.",
+    "conditions": "GSTP1 Ile105Val: reduced glutathione-S-transferase activity. Decreased detoxification of carcinogens and chemotherapy agents. Increased sensitivity to oxidative stress and environmental pollutants."
+  },
+  "rs4880": {
+    "gene": "SOD2",
+    "category": "DETOX",
+    "clinical_sig": "risk factor",
+    "interpretation": "SOD2 Ala16Val: mitochondrial superoxide dismutase. Val/Val (homozygous T on forward strand): reduced mitochondrial import and antioxidant capacity. Consider CoQ10 and mitochondrial antioxidant support.",
+    "conditions": "SOD2 Ala16Val: mitochondrial superoxide dismutase. Val/Val (homozygous T on forward strand): reduced mitochondrial import and antioxidant capacity. Consider CoQ10 and mitochondrial antioxidant support."
+  },
+  "rs1800566": {
+    "gene": "NQO1",
+    "category": "DETOX",
+    "clinical_sig": "risk factor",
+    "interpretation": "NQO1 Pro187Ser: near-zero enzyme activity for homozygous Ser/Ser. Impaired quinone reduction and CoQ10 recycling. Avoid benzene exposure; may increase sensitivity to certain chemotherapy drugs.",
+    "conditions": "NQO1 Pro187Ser: near-zero enzyme activity for homozygous Ser/Ser. Impaired quinone reduction and CoQ10 recycling. Avoid benzene exposure; may increase sensitivity to certain chemotherapy drugs."
+  },
+  "rs1799807": {
+    "gene": "ADH1B",
+    "category": "DETOX",
+    "clinical_sig": "informational",
+    "interpretation": "ADH1B (alcohol dehydrogenase): determines speed of alcohol-to-acetaldehyde conversion. Fast convertors accumulate acetaldehyde more rapidly.",
+    "conditions": "ADH1B (alcohol dehydrogenase): determines speed of alcohol-to-acetaldehyde conversion. Fast convertors accumulate acetaldehyde more rapidly."
+  },
+  "rs671": {
+    "gene": "ALDH2",
+    "category": "DETOX",
+    "clinical_sig": "risk factor",
+    "interpretation": "ALDH2 *2 allele: severely impaired acetaldehyde clearance. Alcohol causes rapid acetaldehyde buildup (flushing, nausea). Significantly elevated esophageal cancer risk with alcohol use. Alcohol avoidance is the evidence-based recommendation.",
+    "conditions": "ALDH2 *2 allele: severely impaired acetaldehyde clearance. Alcohol causes rapid acetaldehyde buildup (flushing, nausea). Significantly elevated esophageal cancer risk with alcohol use. Alcohol avoidance is the evidence-based recommendation."
+  },
+  "rs2228001": {
+    "gene": "XPC",
+    "category": "DETOX",
+    "clinical_sig": "risk factor",
+    "interpretation": "XPC (DNA repair): nucleotide excision repair capacity. Variant associated with reduced UV-induced DNA repair and elevated skin cancer risk.",
+    "conditions": "XPC (DNA repair): nucleotide excision repair capacity. Variant associated with reduced UV-induced DNA repair and elevated skin cancer risk."
+  }
+}
