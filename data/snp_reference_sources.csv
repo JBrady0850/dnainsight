@@ -1,0 +1,123 @@
+rsid,gene,category,clinical_sig,cpic_level,pharmgkb_url,clinvar_url,gwas_catalog_url,dbsnp_url
+rs429358,APOE,PHARM,risk factor,,,https://www.ncbi.nlm.nih.gov/clinvar/?term=rs429358,,https://www.ncbi.nlm.nih.gov/snp/rs429358
+rs7412,APOE,PHARM,risk factor,,,https://www.ncbi.nlm.nih.gov/clinvar/?term=rs7412,,https://www.ncbi.nlm.nih.gov/snp/rs7412
+rs1799971,CYP2D6,PHARM,drug response,A,https://www.pharmgkb.org/gene/CYP2D6,,,https://www.ncbi.nlm.nih.gov/snp/rs1799971
+rs1065852,CYP2D6,PHARM,drug response,A,https://www.pharmgkb.org/gene/CYP2D6,,,https://www.ncbi.nlm.nih.gov/snp/rs1065852
+rs3892097,CYP2D6,PHARM,drug response,A,https://www.pharmgkb.org/gene/CYP2D6,,,https://www.ncbi.nlm.nih.gov/snp/rs3892097
+rs5030658,CYP2D6,PHARM,drug response,A,https://www.pharmgkb.org/gene/CYP2D6,,,https://www.ncbi.nlm.nih.gov/snp/rs5030658
+rs1057910,CYP2C9,PHARM,drug response,A,https://www.pharmgkb.org/gene/CYP2C9,,,https://www.ncbi.nlm.nih.gov/snp/rs1057910
+rs1799853,CYP2C9,PHARM,drug response,A,https://www.pharmgkb.org/gene/CYP2C9,,,https://www.ncbi.nlm.nih.gov/snp/rs1799853
+rs1057911,CYP2C9,PHARM,drug response,A,https://www.pharmgkb.org/gene/CYP2C9,,,https://www.ncbi.nlm.nih.gov/snp/rs1057911
+rs4244285,CYP2C19,PHARM,drug response,A,https://www.pharmgkb.org/gene/CYP2C19,,,https://www.ncbi.nlm.nih.gov/snp/rs4244285
+rs12248560,CYP2C19,PHARM,drug response,A,https://www.pharmgkb.org/gene/CYP2C19,,,https://www.ncbi.nlm.nih.gov/snp/rs12248560
+rs1058204,CYP2C19,PHARM,drug response,A,https://www.pharmgkb.org/gene/CYP2C19,,,https://www.ncbi.nlm.nih.gov/snp/rs1058204
+rs28399504,CYP2C19,PHARM,drug response,A,https://www.pharmgkb.org/gene/CYP2C19,,,https://www.ncbi.nlm.nih.gov/snp/rs28399504
+rs41291556,CYP2C19,PHARM,drug response,A,https://www.pharmgkb.org/gene/CYP2C19,,,https://www.ncbi.nlm.nih.gov/snp/rs41291556
+rs72549354,TPMT,PHARM,drug response,A,https://www.pharmgkb.org/gene/TPMT,,,https://www.ncbi.nlm.nih.gov/snp/rs72549354
+rs1142345,TPMT,PHARM,drug response,A,https://www.pharmgkb.org/gene/TPMT,,,https://www.ncbi.nlm.nih.gov/snp/rs1142345
+rs2108622,CYP4F2,PHARM,drug response,A,https://www.pharmgkb.org/gene/CYP4F2,,,https://www.ncbi.nlm.nih.gov/snp/rs2108622
+rs9923231,VKORC1,PHARM,drug response,A,https://www.pharmgkb.org/gene/VKORC1,,,https://www.ncbi.nlm.nih.gov/snp/rs9923231
+rs4149056,SLCO1B1,PHARM,drug response,A,https://www.pharmgkb.org/gene/SLCO1B1,,,https://www.ncbi.nlm.nih.gov/snp/rs4149056
+rs2241766,CYP3A4,PHARM,drug response,B,https://www.pharmgkb.org/gene/CYP3A4,,,https://www.ncbi.nlm.nih.gov/snp/rs2241766
+rs2740574,CYP3A4,PHARM,drug response,B,https://www.pharmgkb.org/gene/CYP3A4,,,https://www.ncbi.nlm.nih.gov/snp/rs2740574
+rs776746,CYP3A5,PHARM,drug response,A,https://www.pharmgkb.org/gene/CYP3A5,,,https://www.ncbi.nlm.nih.gov/snp/rs776746
+rs1045642,ABCB1,PHARM,drug response,B,https://www.pharmgkb.org/gene/ABCB1,,,https://www.ncbi.nlm.nih.gov/snp/rs1045642
+rs2032582,ABCB1,PHARM,drug response,B,https://www.pharmgkb.org/gene/ABCB1,,,https://www.ncbi.nlm.nih.gov/snp/rs2032582
+rs1128503,ABCB1,PHARM,drug response,B,https://www.pharmgkb.org/gene/ABCB1,,,https://www.ncbi.nlm.nih.gov/snp/rs1128503
+rs762551,CYP1A2,DETOX,drug response,B,https://www.pharmgkb.org/gene/CYP1A2,,,https://www.ncbi.nlm.nih.gov/snp/rs762551
+rs10455872,LPA,CARDIO,risk factor,,,,https://www.ebi.ac.uk/gwas/variants/rs10455872,https://www.ncbi.nlm.nih.gov/snp/rs10455872
+rs1799983,NOS3,CARDIO,drug response,,,,https://www.ebi.ac.uk/gwas/variants/rs1799983,https://www.ncbi.nlm.nih.gov/snp/rs1799983
+rs1050102,ACE,PHARM,drug response,,,,,https://www.ncbi.nlm.nih.gov/snp/rs1050102
+rs4343,ACE,PHARM,drug response,,,,,https://www.ncbi.nlm.nih.gov/snp/rs4343
+rs1801275,GNB3,PHARM,drug response,,,,,https://www.ncbi.nlm.nih.gov/snp/rs1801275
+rs20455,KIF6,PHARM,drug response,,,,,https://www.ncbi.nlm.nih.gov/snp/rs20455
+rs3918290,DPYD,PHARM,drug response,A,https://www.pharmgkb.org/gene/DPYD,,,https://www.ncbi.nlm.nih.gov/snp/rs3918290
+rs55886062,DPYD,PHARM,drug response,A,https://www.pharmgkb.org/gene/DPYD,,,https://www.ncbi.nlm.nih.gov/snp/rs55886062
+rs67376798,DPYD,PHARM,drug response,A,https://www.pharmgkb.org/gene/DPYD,,,https://www.ncbi.nlm.nih.gov/snp/rs67376798
+rs887829,UGT1A1,PHARM,drug response,A,https://www.pharmgkb.org/gene/UGT1A1,,,https://www.ncbi.nlm.nih.gov/snp/rs887829
+rs4148323,UGT1A1,PHARM,drug response,A,https://www.pharmgkb.org/gene/UGT1A1,,,https://www.ncbi.nlm.nih.gov/snp/rs4148323
+rs116855232,NUDT15,PHARM,drug response,A,https://www.pharmgkb.org/gene/NUDT15,,,https://www.ncbi.nlm.nih.gov/snp/rs116855232
+rs1050828,G6PD,PHARM,drug response,A,https://www.pharmgkb.org/gene/G6PD,,,https://www.ncbi.nlm.nih.gov/snp/rs1050828
+rs4986893,CYP2C19,PHARM,drug response,A,https://www.pharmgkb.org/gene/CYP2C19,,,https://www.ncbi.nlm.nih.gov/snp/rs4986893
+rs28371706,CYP2C9,PHARM,drug response,A,https://www.pharmgkb.org/gene/CYP2C9,,,https://www.ncbi.nlm.nih.gov/snp/rs28371706
+rs12979860,IFNL3,PHARM,drug response,B,https://www.pharmgkb.org/gene/IFNL3,,,https://www.ncbi.nlm.nih.gov/snp/rs12979860
+rs6025,F5,CARDIO,risk factor,,,https://www.ncbi.nlm.nih.gov/clinvar/?term=rs6025,https://www.ebi.ac.uk/gwas/variants/rs6025,https://www.ncbi.nlm.nih.gov/snp/rs6025
+rs1799963,F2,CARDIO,risk factor,,,https://www.ncbi.nlm.nih.gov/clinvar/?term=rs1799963,https://www.ebi.ac.uk/gwas/variants/rs1799963,https://www.ncbi.nlm.nih.gov/snp/rs1799963
+rs1056836,CYP1B1,PHARM,drug response,,,,,https://www.ncbi.nlm.nih.gov/snp/rs1056836
+rs2228570,VDR,METAB,drug response,,,,https://www.ebi.ac.uk/gwas/variants/rs2228570,https://www.ncbi.nlm.nih.gov/snp/rs2228570
+rs11568818,VDR,METAB,drug response,,,,https://www.ebi.ac.uk/gwas/variants/rs11568818,https://www.ncbi.nlm.nih.gov/snp/rs11568818
+rs9939609,FTO,METAB,risk factor,,,,https://www.ebi.ac.uk/gwas/variants/rs9939609,https://www.ncbi.nlm.nih.gov/snp/rs9939609
+rs1421085,FTO,METAB,risk factor,,,,https://www.ebi.ac.uk/gwas/variants/rs1421085,https://www.ncbi.nlm.nih.gov/snp/rs1421085
+rs8050136,FTO,METAB,risk factor,,,,https://www.ebi.ac.uk/gwas/variants/rs8050136,https://www.ncbi.nlm.nih.gov/snp/rs8050136
+rs7903146,TCF7L2,METAB,risk factor,,,,https://www.ebi.ac.uk/gwas/variants/rs7903146,https://www.ncbi.nlm.nih.gov/snp/rs7903146
+rs12255372,TCF7L2,METAB,risk factor,,,,https://www.ebi.ac.uk/gwas/variants/rs12255372,https://www.ncbi.nlm.nih.gov/snp/rs12255372
+rs1801282,PPARG,METAB,risk factor,,,,https://www.ebi.ac.uk/gwas/variants/rs1801282,https://www.ncbi.nlm.nih.gov/snp/rs1801282
+rs10811661,CDKN2A,METAB,risk factor,,,,https://www.ebi.ac.uk/gwas/variants/rs10811661,https://www.ncbi.nlm.nih.gov/snp/rs10811661
+rs13266634,SLC30A8,METAB,risk factor,,,,https://www.ebi.ac.uk/gwas/variants/rs13266634,https://www.ncbi.nlm.nih.gov/snp/rs13266634
+rs17782313,MC4R,METAB,risk factor,,,,https://www.ebi.ac.uk/gwas/variants/rs17782313,https://www.ncbi.nlm.nih.gov/snp/rs17782313
+rs2943641,IRS1,METAB,risk factor,,,,https://www.ebi.ac.uk/gwas/variants/rs2943641,https://www.ncbi.nlm.nih.gov/snp/rs2943641
+rs5219,KCNJ11,METAB,drug response,,,,https://www.ebi.ac.uk/gwas/variants/rs5219,https://www.ncbi.nlm.nih.gov/snp/rs5219
+rs1800644,ADRB2,METAB,drug response,B,https://www.pharmgkb.org/gene/ADRB2,,,https://www.ncbi.nlm.nih.gov/snp/rs1800644
+rs1042713,ADRB2,PHARM,drug response,B,https://www.pharmgkb.org/gene/ADRB2,,,https://www.ncbi.nlm.nih.gov/snp/rs1042713
+rs1042714,ADRB2,PHARM,drug response,B,https://www.pharmgkb.org/gene/ADRB2,,,https://www.ncbi.nlm.nih.gov/snp/rs1042714
+rs1800544,ADRB3,METAB,risk factor,,,,https://www.ebi.ac.uk/gwas/variants/rs1800544,https://www.ncbi.nlm.nih.gov/snp/rs1800544
+rs7501331,BCMO1,METAB,risk factor,,,,https://www.ebi.ac.uk/gwas/variants/rs7501331,https://www.ncbi.nlm.nih.gov/snp/rs7501331
+rs601338,FUT2,METAB,risk factor,,,,https://www.ebi.ac.uk/gwas/variants/rs601338,https://www.ncbi.nlm.nih.gov/snp/rs601338
+rs1799883,FABP2,METAB,risk factor,,,,https://www.ebi.ac.uk/gwas/variants/rs1799883,https://www.ncbi.nlm.nih.gov/snp/rs1799883
+rs1800588,LIPC,METAB,risk factor,,,,https://www.ebi.ac.uk/gwas/variants/rs1800588,https://www.ncbi.nlm.nih.gov/snp/rs1800588
+rs1137101,LEPR,METAB,risk factor,,,,https://www.ebi.ac.uk/gwas/variants/rs1137101,https://www.ncbi.nlm.nih.gov/snp/rs1137101
+rs1800562,HFE,METAB,risk factor,,,https://www.ncbi.nlm.nih.gov/clinvar/?term=rs1800562,https://www.ebi.ac.uk/gwas/variants/rs1800562,https://www.ncbi.nlm.nih.gov/snp/rs1800562
+rs1799945,HFE,METAB,risk factor,,,https://www.ncbi.nlm.nih.gov/clinvar/?term=rs1799945,https://www.ebi.ac.uk/gwas/variants/rs1799945,https://www.ncbi.nlm.nih.gov/snp/rs1799945
+rs10830963,MTNR1B,METAB,risk factor,,,,https://www.ebi.ac.uk/gwas/variants/rs10830963,https://www.ncbi.nlm.nih.gov/snp/rs10830963
+rs780094,GCKR,METAB,risk factor,,,,https://www.ebi.ac.uk/gwas/variants/rs780094,https://www.ncbi.nlm.nih.gov/snp/rs780094
+rs174546,FADS1,METAB,risk factor,,,,https://www.ebi.ac.uk/gwas/variants/rs174546,https://www.ncbi.nlm.nih.gov/snp/rs174546
+rs3135506,APOA5,METAB,risk factor,,,,https://www.ebi.ac.uk/gwas/variants/rs3135506,https://www.ncbi.nlm.nih.gov/snp/rs3135506
+rs1333049,CDKN2B,CARDIO,risk factor,,,,https://www.ebi.ac.uk/gwas/variants/rs1333049,https://www.ncbi.nlm.nih.gov/snp/rs1333049
+rs5186,AGTR1,CARDIO,drug response,,,,https://www.ebi.ac.uk/gwas/variants/rs5186,https://www.ncbi.nlm.nih.gov/snp/rs5186
+rs4988235,LCT,METAB,informational,,,,https://www.ebi.ac.uk/gwas/variants/rs4988235,https://www.ncbi.nlm.nih.gov/snp/rs4988235
+rs1800795,IL6,INFLAM,risk factor,,,,https://www.ebi.ac.uk/gwas/variants/rs1800795,https://www.ncbi.nlm.nih.gov/snp/rs1800795
+rs1800629,TNFA,INFLAM,risk factor,,,,https://www.ebi.ac.uk/gwas/variants/rs1800629,https://www.ncbi.nlm.nih.gov/snp/rs1800629
+rs1205,CRP,INFLAM,risk factor,,,,https://www.ebi.ac.uk/gwas/variants/rs1205,https://www.ncbi.nlm.nih.gov/snp/rs1205
+rs1143627,IL1B,INFLAM,risk factor,,,,https://www.ebi.ac.uk/gwas/variants/rs1143627,https://www.ncbi.nlm.nih.gov/snp/rs1143627
+rs1800871,IL10,INFLAM,risk factor,,,,https://www.ebi.ac.uk/gwas/variants/rs1800871,https://www.ncbi.nlm.nih.gov/snp/rs1800871
+rs1800896,IL10,INFLAM,risk factor,,,,https://www.ebi.ac.uk/gwas/variants/rs1800896,https://www.ncbi.nlm.nih.gov/snp/rs1800896
+rs1800627,IL10,INFLAM,risk factor,,,,https://www.ebi.ac.uk/gwas/variants/rs1800627,https://www.ncbi.nlm.nih.gov/snp/rs1800627
+rs1800872,IL10,INFLAM,risk factor,,,,https://www.ebi.ac.uk/gwas/variants/rs1800872,https://www.ncbi.nlm.nih.gov/snp/rs1800872
+rs231775,CTLA4,INFLAM,risk factor,,,,https://www.ebi.ac.uk/gwas/variants/rs231775,https://www.ncbi.nlm.nih.gov/snp/rs231775
+rs2069762,IL2,INFLAM,risk factor,,,,https://www.ebi.ac.uk/gwas/variants/rs2069762,https://www.ncbi.nlm.nih.gov/snp/rs2069762
+rs1800450,MBL2,INFLAM,risk factor,,,,https://www.ebi.ac.uk/gwas/variants/rs1800450,https://www.ncbi.nlm.nih.gov/snp/rs1800450
+rs4586,CCL2,INFLAM,risk factor,,,,https://www.ebi.ac.uk/gwas/variants/rs4586,https://www.ncbi.nlm.nih.gov/snp/rs4586
+rs2228145,IL6R,INFLAM,drug response,,,,https://www.ebi.ac.uk/gwas/variants/rs2228145,https://www.ncbi.nlm.nih.gov/snp/rs2228145
+rs30187,CRP,INFLAM,risk factor,,,,https://www.ebi.ac.uk/gwas/variants/rs30187,https://www.ncbi.nlm.nih.gov/snp/rs30187
+rs2187668,HLA-DQA1,INFLAM,risk factor,,,,https://www.ebi.ac.uk/gwas/variants/rs2187668,https://www.ncbi.nlm.nih.gov/snp/rs2187668
+rs1801133,MTHFR,NEURO,risk factor,,,https://www.ncbi.nlm.nih.gov/clinvar/?term=rs1801133,https://www.ebi.ac.uk/gwas/variants/rs1801133,https://www.ncbi.nlm.nih.gov/snp/rs1801133
+rs1801131,MTHFR,NEURO,risk factor,,,https://www.ncbi.nlm.nih.gov/clinvar/?term=rs1801131,https://www.ebi.ac.uk/gwas/variants/rs1801131,https://www.ncbi.nlm.nih.gov/snp/rs1801131
+rs4680,COMT,NEURO,informational,,,,https://www.ebi.ac.uk/gwas/variants/rs4680,https://www.ncbi.nlm.nih.gov/snp/rs4680
+rs1805087,MTR,NEURO,risk factor,,,,https://www.ebi.ac.uk/gwas/variants/rs1805087,https://www.ncbi.nlm.nih.gov/snp/rs1805087
+rs1801394,MTRR,NEURO,risk factor,,,,https://www.ebi.ac.uk/gwas/variants/rs1801394,https://www.ncbi.nlm.nih.gov/snp/rs1801394
+rs6265,BDNF,NEURO,informational,,,,https://www.ebi.ac.uk/gwas/variants/rs6265,https://www.ncbi.nlm.nih.gov/snp/rs6265
+rs6323,MAOA,NEURO,informational,,,,https://www.ebi.ac.uk/gwas/variants/rs6323,https://www.ncbi.nlm.nih.gov/snp/rs6323
+rs1800497,ANKK1,NEURO,informational,,,,https://www.ebi.ac.uk/gwas/variants/rs1800497,https://www.ncbi.nlm.nih.gov/snp/rs1800497
+rs1611115,DBH,NEURO,informational,,,,https://www.ebi.ac.uk/gwas/variants/rs1611115,https://www.ncbi.nlm.nih.gov/snp/rs1611115
+rs553664,ADORA2A,NEURO,informational,,,,https://www.ebi.ac.uk/gwas/variants/rs553664,https://www.ncbi.nlm.nih.gov/snp/rs553664
+rs25531,SLC6A4,NEURO,informational,,,,https://www.ebi.ac.uk/gwas/variants/rs25531,https://www.ncbi.nlm.nih.gov/snp/rs25531
+rs6295,HTR1A,NEURO,informational,,,,https://www.ebi.ac.uk/gwas/variants/rs6295,https://www.ncbi.nlm.nih.gov/snp/rs6295
+rs1360780,FKBP5,NEURO,risk factor,,,,https://www.ebi.ac.uk/gwas/variants/rs1360780,https://www.ncbi.nlm.nih.gov/snp/rs1360780
+rs1800260,CLOCK,NEURO,informational,,,,https://www.ebi.ac.uk/gwas/variants/rs1800260,https://www.ncbi.nlm.nih.gov/snp/rs1800260
+rs1801260,CLOCK,NEURO,informational,,,,https://www.ebi.ac.uk/gwas/variants/rs1801260,https://www.ncbi.nlm.nih.gov/snp/rs1801260
+rs110402,CRHR1,NEURO,risk factor,,,,https://www.ebi.ac.uk/gwas/variants/rs110402,https://www.ncbi.nlm.nih.gov/snp/rs110402
+rs3800373,FKBP5,NEURO,risk factor,,,,https://www.ebi.ac.uk/gwas/variants/rs3800373,https://www.ncbi.nlm.nih.gov/snp/rs3800373
+rs13235612,GAD1,NEURO,risk factor,,,,https://www.ebi.ac.uk/gwas/variants/rs13235612,https://www.ncbi.nlm.nih.gov/snp/rs13235612
+rs1051740,CHRNA5,NEURO,risk factor,,,,https://www.ebi.ac.uk/gwas/variants/rs1051740,https://www.ncbi.nlm.nih.gov/snp/rs1051740
+rs1655991,COMT,NEURO,informational,,,,https://www.ebi.ac.uk/gwas/variants/rs1655991,https://www.ncbi.nlm.nih.gov/snp/rs1655991
+rs53576,OXTR,NEURO,informational,,,,https://www.ebi.ac.uk/gwas/variants/rs53576,https://www.ncbi.nlm.nih.gov/snp/rs53576
+rs324420,FAAH,NEURO,informational,,,,https://www.ebi.ac.uk/gwas/variants/rs324420,https://www.ncbi.nlm.nih.gov/snp/rs324420
+rs6277,DRD2,NEURO,informational,,,,https://www.ebi.ac.uk/gwas/variants/rs6277,https://www.ncbi.nlm.nih.gov/snp/rs6277
+rs1761667,CD36,NEURO,informational,,,,https://www.ebi.ac.uk/gwas/variants/rs1761667,https://www.ncbi.nlm.nih.gov/snp/rs1761667
+rs1695,GSTP1,DETOX,risk factor,,,,,https://www.ncbi.nlm.nih.gov/snp/rs1695
+rs4880,SOD2,DETOX,risk factor,,,,,https://www.ncbi.nlm.nih.gov/snp/rs4880
+rs1800566,NQO1,DETOX,risk factor,,,,,https://www.ncbi.nlm.nih.gov/snp/rs1800566
+rs1799807,ADH1B,DETOX,informational,,,,,https://www.ncbi.nlm.nih.gov/snp/rs1799807
+rs671,ALDH2,DETOX,risk factor,,,https://www.ncbi.nlm.nih.gov/clinvar/?term=rs671,,https://www.ncbi.nlm.nih.gov/snp/rs671
+rs2228001,XPC,DETOX,risk factor,,,,,https://www.ncbi.nlm.nih.gov/snp/rs2228001
+rs1051730,CHRNA3,DETOX,risk factor,,,,,https://www.ncbi.nlm.nih.gov/snp/rs1051730

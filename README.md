@@ -2,7 +2,7 @@ DNAInsight v1.0
 
 ![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
-![SNPs](https://img.shields.io/badge/Bundled_SNPs-101-orange)
+![SNPs](https://img.shields.io/badge/Bundled_SNPs-122-orange)
 
 Personal DNA Analysis Tool — Process your raw DNA file from any major provider, annotate SNPs against ClinVar and PharmGKB, generate a Genetic Health Report and a Doctor Discussion Report, and analyze results with Grok or any AI assistant.
 
@@ -217,7 +217,7 @@ Criteria for inclusion:
 
 Bundled SNP Reference (101 High-Priority SNPs)
 
-The file data/snp_reference.json contains 101 carefully curated SNPs focused on maximum actionability for consumer DNA arrays. These are prioritized for clear lifestyle, supplement, or physician discussion implications.
+The file data/snp_reference.json contains 122 carefully curated SNPs focused on maximum actionability for consumer DNA arrays. These are prioritized for clear lifestyle, supplement, or physician discussion implications.
 
 | Category | Focus | Key Genes |
 |----------|-------|-----------|
@@ -315,7 +315,7 @@ Roadmap
 
 | Version | Planned Features |
 |---------|-----------------|
-| v1.1 | Expanded reference (120+ SNPs), PDF export, multi-profile comparison charts |
+| v1.1 ✅ | Expanded reference (122 SNPs), JSON/CSV export, Chart.js category chart, CI/CD, unit tests, versioned reference, CONTRIBUTING.md |
 | v1.2 | Basic polygenic risk score (PRS) support for T2D and CAD using public weight files |
 | v1.3 | CYP2D6 star allele calling, Docker support, improved risk visualizations (Chart.js heatmaps) |
 | Future | Community-curated reference updates, auto-update mechanism for new app versions |

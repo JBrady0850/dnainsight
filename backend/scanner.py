@@ -110,14 +110,28 @@ def classify_silo(interp: str) -> str:
 # ---------------------------------------------------------------------------
 _bundled_cache: dict = {}
 
+_bundled_meta: dict = {}
+
 def _load_bundled() -> dict:
-    global _bundled_cache
+    global _bundled_cache, _bundled_meta
     if _bundled_cache:
         return _bundled_cache
     if BUNDLED_REF.exists():
         with open(BUNDLED_REF, "r", encoding="utf-8") as f:
-            _bundled_cache = json.load(f)
+            raw = json.load(f)
+        # Support both old flat format and new versioned format
+        if "snps" in raw and "_meta" in raw:
+            _bundled_meta = raw["_meta"]
+            _bundled_cache = raw["snps"]
+        else:
+            _bundled_cache = raw
     return _bundled_cache
+
+
+def get_reference_metadata() -> dict:
+    """Return _meta block from snp_reference.json (version, snp_count, built_at)."""
+    _load_bundled()
+    return _bundled_meta
 
 
 def lookup_bundled(rsid: str) -> dict | None:

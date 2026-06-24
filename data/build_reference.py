@@ -13,7 +13,11 @@ Usage:
 """
 
 import json
+import datetime
+from datetime import timezone
 from pathlib import Path
+
+REFERENCE_VERSION = "1.1.0"
 
 # ---------------------------------------------------------------------------
 # Master SNP reference table
@@ -58,6 +62,19 @@ REFERENCE = [
     ("rs4343",     "ACE",     "PHARM",  "drug response",  "ACE D/I polymorphism: linked to ACE inhibitor drug response and hypertension management. DD genotype associated with higher ACE activity."),
     ("rs1801275",  "GNB3",    "PHARM",  "drug response",  "GNB3 C825T variant: influences blood pressure response to thiazide diuretics and other antihypertensives."),
     ("rs20455",    "KIF6",    "PHARM",  "drug response",  "KIF6 variant: associated with differential statin benefit for coronary heart disease risk reduction."),
+
+    # PHARMACOGENOMICS -- CPIC Level A: Chemotherapy & Specialty Drugs
+    ("rs3918290",  "DPYD",    "PHARM",  "drug response",  "DPYD *2A (IVS14+1G>A): complete loss of dihydropyrimidine dehydrogenase function. Fluoropyrimidine chemotherapy (5-fluorouracil, capecitabine) is contraindicated or requires 50%+ dose reduction. CPIC Level A: preemptive genotyping mandatory before treatment."),
+    ("rs55886062", "DPYD",    "PHARM",  "drug response",  "DPYD *13 (c.1679T>G): severely reduced DPD activity. Fluoropyrimidine-induced life-threatening toxicity (mucositis, myelosuppression, neurotoxicity) risk. CPIC Level A: alternative therapy or 50% dose reduction required."),
+    ("rs67376798", "DPYD",    "PHARM",  "drug response",  "DPYD c.2846A>T: reduced DPD enzyme activity. Increases risk of severe 5-FU and capecitabine toxicity. CPIC Level A: 25% starting dose reduction recommended for heterozygous carriers."),
+    ("rs887829",   "UGT1A1",  "PHARM",  "drug response",  "UGT1A1 *80 (*28 tag SNP): reduced bilirubin and irinotecan glucuronidation. Homozygotes at elevated risk for irinotecan-induced severe neutropenia and diarrhea. CPIC Level A: dose reduction warranted in *28/*28 patients on FOLFIRI regimens."),
+    ("rs4148323",  "UGT1A1",  "PHARM",  "drug response",  "UGT1A1 *6 (G71R): loss-of-function variant predominant in East Asian populations (~13%). Causes unconjugated hyperbilirubinemia and increases irinotecan toxicity risk. CPIC Level A: dose reduction recommended."),
+    ("rs116855232","NUDT15",  "PHARM",  "drug response",  "NUDT15 *3 (Arg139Cys): dramatically reduced nucleoside diphosphate enzyme activity. Thiopurine drugs (azathioprine, 6-mercaptopurine) cause severe myelosuppression in heterozygotes and are contraindicated in homozygotes. CPIC Level A; especially prevalent in East Asian and Hispanic populations."),
+    ("rs1050828",  "G6PD",    "PHARM",  "drug response",  "G6PD A- variant: glucose-6-phosphate dehydrogenase deficiency. Oxidant drugs (rasburicase, dapsone, primaquine, high-dose aspirin) and fava beans can trigger acute hemolytic anemia. CPIC Level A: these agents are contraindicated; inform all prescribers of G6PD status."),
+    ("rs4986893",  "CYP2C19", "PHARM",  "drug response",  "CYP2C19 *3 null allele: premature stop codon, zero enzyme activity. Common in East Asian populations (~5%). Contributes to poor metabolizer phenotype for clopidogrel, PPIs, and SSRIs when combined with other loss-of-function alleles."),
+    ("rs28371706", "CYP2C9",  "PHARM",  "drug response",  "CYP2C9 *5 allele: reduced-function variant more prevalent in individuals of African ancestry. Reduces clearance of warfarin, NSAIDs, and sulfonylureas; requires dose reduction and close INR monitoring when initiating anticoagulation therapy."),
+    ("rs12979860", "IFNL3",   "PHARM",  "drug response",  "IFNL3 (IL28B) CC genotype: favorable interferon-lambda response for hepatitis C treatment. CC carriers achieve significantly higher sustained virologic response rates with pegIFN/ribavirin; also influences COVID-19 severity outcomes per replicated GWAS data."),
+
     ("rs6025",     "F5",      "CARDIO", "risk factor",    "Factor V Leiden (rs6025, c.1691G>A): most common inherited thrombophilia. Heterozygotes: 4-8x elevated venous thrombosis risk; homozygotes: 50-80x risk. Clinically significant with estrogen use, pregnancy, or surgery. Discuss anticoagulation strategy with physician."),
     ("rs1799963",  "F2",      "CARDIO", "risk factor",    "Prothrombin G20210A: elevated prothrombin levels and venous clotting risk. Heterozygotes: 2-3x increased thrombosis risk. Risk compounds when co-present with Factor V Leiden (rs6025). Review contraceptive options and surgical anticoagulation prophylaxis with a physician."),
 
@@ -89,6 +106,13 @@ REFERENCE = [
     ("rs1137101",  "LEPR",    "METAB",  "risk factor",    "Leptin receptor variant: reduced satiety signaling efficiency. Protein-rich diet and resistance training may partially compensate."),
     ("rs1800562",  "HFE",     "METAB",  "risk factor",    "HFE C282Y: primary hereditary hemochromatosis mutation. Homozygotes face high risk of iron overload, liver cirrhosis, and cardiomyopathy if untreated. Obtain serum ferritin and transferrin saturation testing; therapeutic phlebotomy is indicated if iron is elevated."),
     ("rs1799945",  "HFE",     "METAB",  "risk factor",    "HFE H63D: milder hemochromatosis variant. Compound heterozygotes (H63D + C282Y) carry elevated iron overload risk. Monitor ferritin and iron studies annually; avoid vitamin C supplements taken with iron-rich meals."),
+    ("rs10830963", "MTNR1B",  "METAB",  "risk factor",    "MTNR1B (melatonin receptor 1B) risk allele: impairs glucose-stimulated insulin secretion and elevates fasting glucose. Carriers show higher T2D risk, especially with late eating patterns. Aligning meal timing with circadian rhythms (earlier dinner, consistent sleep schedule) reduces the phenotypic impact."),
+    ("rs780094",   "GCKR",    "METAB",  "risk factor",    "GCKR (glucokinase regulatory protein) variant: increases hepatic glucose uptake but raises fasting triglycerides. Carriers show elevated plasma triglycerides and modestly increased NAFLD risk. Reduce refined carbohydrate and fructose intake; monitor fasting lipid panel."),
+    ("rs174546",   "FADS1",   "METAB",  "risk factor",    "FADS1 (fatty acid desaturase 1) variant: reduced delta-5-desaturase efficiency, impairing conversion of ALA to EPA/DHA. Carriers may benefit from preformed omega-3 supplementation (fish oil) rather than flaxseed ALA sources alone."),
+    ("rs3135506",  "APOA5",   "METAB",  "risk factor",    "APOA5 variant: associated with elevated fasting triglycerides and reduced lipoprotein lipase activity. Carriers are at higher risk for hypertriglyceridemia and pancreatitis with high-fat or high-carbohydrate diets. Omega-3 supplementation and alcohol limitation are evidence-based interventions."),
+    ("rs1333049",  "CDKN2B",  "CARDIO", "risk factor",    "9p21 locus (CDKN2B-AS1 region): the strongest and most replicated common genetic risk locus for coronary artery disease (CAD) in genome-wide association studies. Risk allele approximately doubles lifetime CAD risk independent of traditional risk factors. Prioritize aggressive primary prevention: statin therapy discussion, blood pressure control, smoking cessation."),
+    ("rs5186",     "AGTR1",   "CARDIO", "drug response",  "AGTR1 A1166C (angiotensin II receptor type 1): C allele associated with higher vascular reactivity, hypertension susceptibility, and enhanced response to ARB medications (losartan, valsartan). CC homozygotes may achieve greater blood pressure reduction with ARBs versus ACE inhibitors."),
+    ("rs4988235",  "LCT",     "METAB",  "informational",  "LCT -13910C>T (lactase persistence): T allele confers continued lactase expression into adulthood. C/C homozygotes are genetically lactose intolerant and may benefit from lactase enzyme supplements or lactose-reduced dietary substitutions to avoid GI symptoms."),
 
     # INFLAMMATION
     ("rs1800795",  "IL6",     "INFLAM", "risk factor",    "IL-6 promoter variant: elevated systemic inflammation and cytokine production. Monitor hsCRP; anti-inflammatory diet (Mediterranean), omega-3 supplementation, and exercise recommended."),
@@ -105,6 +129,7 @@ REFERENCE = [
     ("rs4586",     "CCL2",    "INFLAM", "risk factor",    "CCL2 (MCP-1) variant: monocyte chemoattractant protein influencing vessel inflammation and atherosclerosis risk."),
     ("rs2228145",  "IL6R",    "INFLAM", "drug response",  "IL-6 receptor Asp358Ala: reduced IL-6 receptor shedding. Predictive marker for tocilizumab (IL-6 blocker) response in rheumatoid arthritis."),
     ("rs30187",    "CRP",     "INFLAM", "risk factor",    "CRP variant: baseline systemic inflammation predictor. Elevated values correlate with cardiovascular and metabolic risk."),
+    ("rs2187668",  "HLA-DQA1","INFLAM", "risk factor",    "HLA-DQA1 rs2187668 (DQ2.5 haplotype marker): associated with celiac disease susceptibility. HLA-DQ2 haplotype carriers have ~3-5% lifetime celiac risk; risk rises with first-degree relatives affected. Negative result substantially reduces celiac likelihood. If symptomatic: serum tTG-IgA testing and gastroenterology referral recommended."),
 
     # NEUROLOGICAL
     ("rs1801133",  "MTHFR",   "NEURO",  "risk factor",    "MTHFR C677T: reduced methylenetetrahydrofolate reductase activity. Impairs folate conversion and homocysteine clearance. Elevated homocysteine raises cardiovascular and neurological risk. Supplementation: methylfolate (5-MTHF), NOT folic acid."),
@@ -128,6 +153,9 @@ REFERENCE = [
     ("rs1051740",  "CHRNA5",  "NEURO",  "risk factor",    "CHRNA5 (nicotinic acetylcholine receptor): strongly associated with nicotine dependence and lung cancer risk in smokers."),
     ("rs1655991",  "COMT",    "NEURO",  "informational",  "COMT secondary variant: influences cognitive processing speed and emotional regulation; modulates primary COMT effect."),
     ("rs53576",    "OXTR",    "NEURO",  "informational",  "Oxytocin receptor (OXTR) rs53576: GG homozygotes demonstrate higher empathy, social sensitivity, and prosocial behavior. AA carriers show lower social bonding and modestly elevated risk for autism spectrum traits. Context-dependent; not diagnostic."),
+    ("rs324420",   "FAAH",    "NEURO",  "informational",  "FAAH (fatty acid amide hydrolase) C385A: the A allele reduces FAAH enzyme activity, increasing endocannabinoid tone (anandamide levels). Associated with lower anxiety, pain sensitivity, and stress reactivity. May influence response to cannabinoid-based therapies and analgesics."),
+    ("rs6277",     "DRD2",    "NEURO",  "informational",  "DRD2 C957T (rs6277): synonymous variant affecting dopamine D2 receptor mRNA stability and translation. T allele associated with lower striatal D2 receptor density, reduced reward sensitivity, and altered response to antipsychotic medications and dopaminergic therapies for Parkinson disease."),
+    ("rs1761667",  "CD36",    "NEURO",  "informational",  "CD36 rs1761667: fatty acid translocase variant affecting oral fat taste perception. AA genotype reduces sensitivity to dietary fat; associated with higher fat intake and preference for fatty foods. Awareness of this preference may support personalized dietary counseling."),
 
     # DETOX / OXIDATIVE STRESS
     ("rs1695",     "GSTP1",   "DETOX",  "risk factor",    "GSTP1 Ile105Val: reduced glutathione-S-transferase activity. Decreased detoxification of carcinogens and chemotherapy agents. Increased sensitivity to oxidative stress and environmental pollutants."),
@@ -160,6 +188,20 @@ def build_reference() -> dict:
 if __name__ == "__main__":
     out = Path(__file__).parent / "snp_reference.json"
     ref = build_reference()
+    payload = {
+        "_meta": {
+            "version":    REFERENCE_VERSION,
+            "snp_count":  len(ref),
+            "built_at":   datetime.datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "sources": [
+                "CPIC guidelines — https://cpicpgx.org/guidelines/",
+                "PharmGKB — https://www.pharmgkb.org/",
+                "ClinVar — https://www.ncbi.nlm.nih.gov/clinvar/",
+                "GWAS Catalog — https://www.ebi.ac.uk/gwas/",
+            ],
+        },
+        "snps": ref,
+    }
     with open(out, "w", encoding="utf-8") as f:
-        json.dump(ref, f, indent=2)
-    print(f"Built bundled reference: {len(ref)} SNPs -> {out}")
+        json.dump(payload, f, indent=2)
+    print(f"Built bundled reference v{REFERENCE_VERSION}: {len(ref)} SNPs -> {out}")

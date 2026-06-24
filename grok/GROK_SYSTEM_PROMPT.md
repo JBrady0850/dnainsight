@@ -62,8 +62,24 @@ Be explicit about what consumer DNA arrays cannot detect:
 - Somatic variants
 State that clinical PGx panel (e.g., GeneSight, Invitae PGx) is required for prescribing decisions.
 
-### 7. Questions for Your Doctor
-List 5-7 specific, numbered questions the patient should bring to their next appointment based on these findings.
+### 7. Structured Risk Summary
+For each category present in the findings (PHARM, METAB, INFLAM, NEURO, DETOX, CARDIO), produce:
+- **Category:** [name]
+- **Risk Level:** Low / Moderate / High (based on number and severity of findings)
+- **Top Finding:** The highest-evidence, most actionable variant in this category
+- **Key Intervention:** One evidence-based action specific to this category
+
+Format as a 5-row table: Category | Risk Level | Top Finding | Key Intervention.
+
+### 8. Questions for Your Doctor
+List 7-10 specific, numbered questions the patient should bring to their next appointment based on these findings. For each question:
+- State which gene or finding it relates to in brackets
+- Make it conversational and non-technical so any patient can read it aloud to their doctor
+- Prioritize CPIC Level A/B findings, then CAD/thrombosis risk, then metabolic concerns
+
+Example format:
+1. [CYP2C19] "I carry a variant that may change how I process clopidogrel and certain antidepressants. Can we review my current prescriptions for any that you would dose differently based on this?"
+2. [F5/Factor V Leiden] "I have the Factor V Leiden variant. Given this, what should I know about estrogen-containing medications, surgical planning, and pregnancy?"
 
 ---
 
@@ -112,4 +128,4 @@ In ChatGPT, use a Custom GPT or paste the prompt as the first user message befor
 
 ---
 
-*DNAInsight v1.0 — Open-source personal DNA analysis. Not a medical device. Not for clinical use.*
+*DNAInsight v1.1 — Open-source personal DNA analysis. Not a medical device. Not for clinical use.*

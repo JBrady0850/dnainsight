@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DNAInsight — Personal DNA Analysis</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 <style>
   :root {
     --blue-dark: #1a3a6b;
@@ -488,6 +489,13 @@ function renderFindings(el) {
         <button class="tab-btn" onclick="switchTab(this,'tab-act')">Actionable</button>
         <button class="tab-btn" onclick="switchTab(this,'tab-inf')">Informational</button>
       </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+        <button class="btn btn-outline" onclick="exportFindings('json')" title="Download findings as JSON">&#x2B07; Export JSON</button>
+        <button class="btn btn-outline" onclick="exportFindings('csv')" title="Download findings as CSV (Excel-compatible)">&#x2B07; Export CSV</button>
+      </div>
+      <div id="findings-category-chart" style="margin-bottom:24px;display:none;">
+        <canvas id="categoryChart" height="90"></canvas>
+      </div>
       <div id="tab-all" class="tab-panel active">
         <div class="filter-bar">
           <input type="text" id="search-findings" placeholder="Search rsID, gene, keyword..." oninput="filterFindings()">
@@ -518,6 +526,7 @@ async function loadFindings() {
     gf.innerHTML = '<option value="">All Genes</option>' + genes.map(g=>`<option value="${g}">${g}</option>`).join('');
   }
 
+  renderCategoryChart(state.findings);
   renderFindingsTable(state.findings, 'findings-table-wrap');
   renderFindingsTab('pre_prescription', 'tab-pre');
   renderFindingsTab('actionable', 'tab-act');
@@ -533,6 +542,53 @@ function filterFindings() {
     return match_q && match_g;
   });
   renderFindingsTable(filtered, 'findings-table-wrap');
+}
+
+function exportFindings(fmt) {
+  if (!state.activeProfile) return;
+  const url = `/api/profiles/${state.activeProfile.id}/export/${fmt}`;
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = '';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+function renderCategoryChart(findings) {
+  const wrap = document.getElementById('findings-category-chart');
+  if (!wrap || !findings.length) return;
+
+  // Count by category
+  const counts = {};
+  findings.forEach(f => {
+    const cat = f.category || 'OTHER';
+    counts[cat] = (counts[cat] || 0) + 1;
+  });
+  const labels = Object.keys(counts);
+  const data   = labels.map(l => counts[l]);
+  const COLORS  = ['#2980b9','#27ae60','#e67e22','#c0392b','#8e44ad','#16a085','#f39c12'];
+
+  wrap.style.display = 'block';
+  const existing = Chart.getChart('categoryChart');
+  if (existing) existing.destroy();
+
+  new Chart(document.getElementById('categoryChart'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Findings by Category',
+        data,
+        backgroundColor: labels.map((_,i) => COLORS[i % COLORS.length]),
+        borderRadius: 4,
+      }],
+    },
+    options: {
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } },
+    },
+  });
 }
 
 function renderFindingsTable(findings, containerId) {

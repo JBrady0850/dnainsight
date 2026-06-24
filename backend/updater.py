@@ -49,13 +49,26 @@ KEEP_SIG = {
 # ---------------------------------------------------------------------------
 
 def _load_reference() -> dict:
+    """Load snp_reference.json. Returns the full raw dict (may include _meta + snps)."""
     with open(REFERENCE_PATH, "r", encoding="utf-8") as f:
         return json.load(f)
 
 
-def _save_reference(ref: dict):
+def _get_snps_dict(ref: dict) -> dict:
+    """Return the flat rsID->entry dict regardless of file format (old flat or new nested)."""
+    if "snps" in ref and "_meta" in ref:
+        return ref["snps"]
+    return {k: v for k, v in ref.items() if k.startswith("rs")}
+
+
+def _save_reference(snps: dict, meta: dict):
+    """Write snp_reference.json in the current versioned format."""
+    payload = {
+        "_meta": meta,
+        "snps":  snps,
+    }
     with open(REFERENCE_PATH, "w", encoding="utf-8") as f:
-        json.dump(ref, f, indent=2)
+        json.dump(payload, f, indent=2)
 
 
 def _extract_clinical_sig(hit: dict) -> str | None:
@@ -167,10 +180,9 @@ def update_bundled_reference(progress_cb=None) -> dict:
     Returns:
         {success, updated, skipped, errors, timestamp, snp_count}
     """
-    ref = _load_reference()
-
-    # Separate rsID entries from meta/non-rsid keys
-    rsids = [k for k in ref.keys() if k.startswith("rs")]
+    raw   = _load_reference()
+    ref   = _get_snps_dict(raw)
+    rsids = list(ref.keys())
     total = len(rsids)
 
     if total == 0:
@@ -230,19 +242,19 @@ def update_bundled_reference(progress_cb=None) -> dict:
 
         ref[rsid] = entry
 
-    # Write updated _meta block
-    now = datetime.now(timezone.utc).isoformat()
-    ref["_meta"] = {
+    # Build updated _meta block, preserving any existing fields
+    now  = datetime.now(timezone.utc).isoformat()
+    meta = raw.get("_meta", {})
+    meta.update({
         "updated_at": now,
-        "version":    "1.0",
         "snp_count":  len(rsids),
         "source":     "MyVariant.info (ClinVar + PharmGKB)",
         "updated":    updated,
         "skipped":    skipped,
         "errors":     errors,
-    }
+    })
 
-    _save_reference(ref)
+    _save_reference(ref, meta)
 
     return {
         "success":   True,
@@ -260,13 +272,14 @@ def get_reference_metadata() -> dict:
     Falls back gracefully if the file has no _meta yet (pre-first-update).
     """
     try:
-        ref   = _load_reference()
-        meta  = ref.get("_meta", {})
-        rsids = [k for k in ref.keys() if k.startswith("rs")]
+        raw   = _load_reference()
+        meta  = raw.get("_meta", {})
+        snps  = _get_snps_dict(raw)
         return {
-            "updated_at": meta.get("updated_at"),          # None if never updated
-            "version":    meta.get("version", "1.0"),
-            "snp_count":  meta.get("snp_count", len(rsids)),
+            "updated_at": meta.get("updated_at"),
+            "built_at":   meta.get("built_at"),
+            "version":    meta.get("version", "1.1.0"),
+            "snp_count":  meta.get("snp_count", len(snps)),
             "source":     meta.get("source", "Bundled (offline)"),
             "updated":    meta.get("updated", 0),
             "skipped":    meta.get("skipped", 0),

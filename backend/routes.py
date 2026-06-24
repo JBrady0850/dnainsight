@@ -15,9 +15,12 @@ Endpoints:
 """
 
 import os
+import io
+import csv
 import json
 import threading
 from pathlib import Path
+from datetime import datetime
 from flask import Blueprint, request, jsonify, send_file, current_app
 
 from . import database as db
@@ -26,6 +29,9 @@ from .scanner import run_scan
 from .genetic_report import generate_genetic_report
 from .doctor_report import generate_doctor_report
 from .updater import update_bundled_reference, get_reference_metadata
+
+# App version
+APP_VERSION = "1.1.0"
 
 api = Blueprint("api", __name__)
 
@@ -49,7 +55,7 @@ _update_lock = threading.Lock()
 
 @api.route("/api/status")
 def status():
-    return jsonify({"status": "ok", "version": "1.0.0"})
+    return jsonify({"status": "ok", "version": APP_VERSION})
 
 
 # ---------------------------------------------------------------------------
@@ -348,3 +354,90 @@ def db_update_status():
     """Poll the status of a running database update."""
     with _update_lock:
         return jsonify(dict(_update_progress))
+
+
+# ---------------------------------------------------------------------------
+# Export endpoints
+# ---------------------------------------------------------------------------
+
+@api.route("/api/profiles/<int:pid>/export/json", methods=["GET"])
+def export_findings_json(pid: int):
+    """Export all findings for a profile as a downloadable JSON file."""
+    profile = db.get_profile(pid)
+    if not profile:
+        return jsonify({"error": "Profile not found."}), 404
+
+    findings = db.get_findings(pid)
+    payload = {
+        "exported_at": datetime.utcnow().isoformat() + "Z",
+        "app_version": APP_VERSION,
+        "patient": {
+            "name": profile["name"],
+            "dob":  profile.get("dob", ""),
+            "sex":  profile.get("sex", ""),
+            "provider": profile.get("provider", ""),
+        },
+        "findings_count": len(findings),
+        "findings": findings,
+    }
+
+    buf = io.BytesIO(json.dumps(payload, indent=2).encode("utf-8"))
+    safe = profile["name"].replace(" ", "_")
+    ts   = datetime.utcnow().strftime("%Y%m%d")
+    return send_file(
+        buf,
+        mimetype="application/json",
+        as_attachment=True,
+        download_name=f"{safe}_findings_{ts}.json",
+    )
+
+
+@api.route("/api/profiles/<int:pid>/export/csv", methods=["GET"])
+def export_findings_csv(pid: int):
+    """Export all findings for a profile as a downloadable CSV file."""
+    profile = db.get_profile(pid)
+    if not profile:
+        return jsonify({"error": "Profile not found."}), 404
+
+    findings = db.get_findings(pid)
+
+    buf = io.StringIO()
+    writer = csv.writer(buf)
+    writer.writerow([
+        "rsid", "gene", "genotype", "category", "silo",
+        "clinical_sig", "interpretation", "discovered_at",
+    ])
+    for f in findings:
+        writer.writerow([
+            f.get("rsid", ""),
+            f.get("gene", ""),
+            f.get("genotype") or f"{f.get('allele1','')}{f.get('allele2','')}",
+            f.get("category", ""),
+            f.get("silo", ""),
+            f.get("clinical_sig", ""),
+            f.get("interpretation", ""),
+            f.get("discovered_at", ""),
+        ])
+
+    bytes_buf = io.BytesIO(buf.getvalue().encode("utf-8-sig"))  # utf-8-sig for Excel BOM
+    safe = profile["name"].replace(" ", "_")
+    ts   = datetime.utcnow().strftime("%Y%m%d")
+    return send_file(
+        bytes_buf,
+        mimetype="text/csv",
+        as_attachment=True,
+        download_name=f"{safe}_findings_{ts}.csv",
+    )
+
+
+# ---------------------------------------------------------------------------
+# Version check endpoint
+# ---------------------------------------------------------------------------
+
+@api.route("/api/version", methods=["GET"])
+def version_info():
+    """Return current app version. Frontend uses this for update-available banners."""
+    return jsonify({
+        "version": APP_VERSION,
+        "snp_count": get_reference_metadata().get("snp_count", 0),
+    })
