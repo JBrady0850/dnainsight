@@ -255,7 +255,7 @@ The information provided is for personal educational use only.
 
 File Structure
 
-
+```
 DNAInsight/
 ├── app.py                    Entry point (Flask server)
 ├── requirements.txt          Python dependencies
@@ -263,6 +263,7 @@ DNAInsight/
 ├── install.sh                macOS/Linux installer
 ├── launch.bat                Windows launcher (created by installer)
 ├── README.md                 This file
+├── LICENSE                   MIT License
 ├── dnainsight.db             SQLite database (created on first run)
 ├── backend/
 │   ├── __init__.py
@@ -274,14 +275,14 @@ DNAInsight/
 │   └── routes.py             Flask API endpoints
 ├── data/
 │   ├── build_reference.py    Script to regenerate bundled SNP reference
-│   └── snp_reference.json    Bundled SNP reference (91 SNPs)
+│   └── snp_reference.json    Bundled SNP reference (101 SNPs)
 ├── frontend/
 │   └── index.html            Single-page web application
 ├── grok/
 │   └── GROK_SYSTEM_PROMPT.md  AI analysis prompt for Grok/Claude/ChatGPT
 ├── uploads/                  Uploaded DNA files (created on first run)
 └── reports_output/           Generated HTML reports (created on first run)
-
+```
 
 ---
 
