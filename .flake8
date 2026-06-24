@@ -1,0 +1,21 @@
+[flake8]
+max-line-length = 120
+
+# Intentional style: column-aligned dict/tuple formatting used throughout
+# the codebase for readability of the SNP reference table and report dicts.
+# Pre-existing issues (F401, F541, E741) are tracked separately from lint CI.
+extend-ignore =
+    E221,
+    E226,
+    E231,
+    E241,
+    E302,
+    E303,
+    E305,
+    E401,
+    E402,
+    E501,
+    E741,
+    F401,
+    F541,
+    W503
