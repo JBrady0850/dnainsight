@@ -13,7 +13,7 @@ What This Tool Does
 DNAInsight reads your raw DNA file (the uncompressed text file you downloaded from your DNA testing company) and:
 
 1. Parses your 600,000+ SNPs into a local database.
-2. Annotates each SNP against a bundled clinical reference (101 high-priority medical SNPs, offline, instant) and optionally the MyVariant.info API (ClinVar + PharmGKB, requires internet, no personal data transmitted).
+2. Annotates each SNP against a bundled clinical reference (122 high-priority medical SNPs, offline, instant) and optionally the MyVariant.info API (ClinVar + PharmGKB, requires internet, no personal data transmitted).
 3. Classifies findings into three tiers: Prescription-Critical, Actionable, and Informational.
 4. Generates two HTML reports: a Genetic Health Report and a Doctor Discussion Report.
 5. Provides a Grok-compatible AI prompt for AI-assisted clinical interpretation.
@@ -183,7 +183,7 @@ In-app update (recommended, monthly):
 3. Click Update Databases Now.
 
 DNAInsight re-fetches the latest ClinVar clinical significance ratings and associated
-condition names for all 101 bundled SNPs from MyVariant.info. The update takes 1-3 minutes
+condition names for all 122 bundled SNPs from MyVariant.info. The update takes 1-3 minutes
 and requires internet access. Only rsIDs are transmitted -- no genotype data leaves your
 computer.
 
@@ -215,7 +215,7 @@ Criteria for inclusion:
 
 ---
 
-Bundled SNP Reference (101 High-Priority SNPs)
+Bundled SNP Reference (122 High-Priority SNPs)
 
 The file data/snp_reference.json contains 122 carefully curated SNPs focused on maximum actionability for consumer DNA arrays. These are prioritized for clear lifestyle, supplement, or physician discussion implications.
 
@@ -227,7 +227,7 @@ The file data/snp_reference.json contains 122 carefully curated SNPs focused on 
 | Neurological (NEURO) | Mood, folate cycle, stress response, neurotransmitters, social behavior | MTHFR, COMT, BDNF, MAOA, SLC6A4, FKBP5, CLOCK, OXTR |
 | Detox & Cardio (DETOX/CARDIO) | Oxidative stress, clotting risk, alcohol metabolism, nicotine dependence | GSTP1, SOD2, NQO1, ALDH2, F5, F2, CYP1A2, CHRNA3 |
 
-**Why only 101?** Consumer arrays have limited SNP coverage compared to clinical sequencing. This reference focuses on well-covered, high-evidence SNPs with CPIC Level A/B support or strong replicated GWAS associations.
+**Why 122 and not more?** Consumer arrays have limited SNP coverage compared to clinical sequencing. This reference focuses on well-covered, high-evidence SNPs with CPIC Level A/B support or strong replicated GWAS associations. Quantity without evidence quality creates false confidence.
 
 To view or extend the full curated list, open data/build_reference.py.
 To rebuild the reference after edits: python data/build_reference.py
@@ -275,7 +275,7 @@ DNAInsight/
 │   └── routes.py             Flask API endpoints
 ├── data/
 │   ├── build_reference.py    Script to regenerate bundled SNP reference
-│   └── snp_reference.json    Bundled SNP reference (101 SNPs)
+│   └── snp_reference.json    Bundled SNP reference (122 SNPs, versioned)
 ├── frontend/
 │   └── index.html            Single-page web application
 ├── grok/
