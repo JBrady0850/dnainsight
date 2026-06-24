@@ -1,7 +1,9 @@
 uploads/
 reports_output/
 dnainsight.db
+dnainsight.db-journal
 *.db
+*.db-journal
 __pycache__/
 *.pyc
 *.pyo

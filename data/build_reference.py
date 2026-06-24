@@ -38,6 +38,10 @@ REFERENCE = [
     ("rs4244285",  "CYP2C19", "PHARM",  "drug response",  "CYP2C19 *2 loss-of-function allele: poor metabolism of clopidogrel (antiplatelet), PPIs, SSRIs, and TCAs. Clopidogrel may be ineffective -- consider alternative antiplatelet agent."),
     ("rs12248560", "CYP2C19", "PHARM",  "drug response",  "CYP2C19 *17 ultrarapid metabolizer allele: accelerated clearance of PPIs, SSRIs, and clopidogrel. PPIs may fail at standard dose; dose increase or switch to rabeprazole warranted."),
     ("rs1058204",  "CYP2C19", "PHARM",  "drug response",  "CYP2C19 variant: influences proton pump inhibitor effectiveness and psychiatric medication response."),
+    ("rs28399504", "CYP2C19", "PHARM",  "drug response",  "CYP2C19 *4 loss-of-function allele: poor metabolizer for clopidogrel, PPIs, SSRIs, and TCAs. CPIC Level A: consider alternative antiplatelet therapy; adjust GI and psychiatric medication dosing accordingly."),
+    ("rs41291556", "CYP2C19", "PHARM",  "drug response",  "CYP2C19 *8 reduced-function allele: partial loss of enzyme activity. Contributes to intermediate or poor metabolizer phenotype when combined with other CYP2C19 loss-of-function alleles."),
+    ("rs72549354", "TPMT",    "PHARM",  "drug response",  "TPMT *3A variant: severely reduced thiopurine methyltransferase activity. Thiopurine drugs (azathioprine, 6-mercaptopurine, thioguanine) carry life-threatening myelosuppression risk. CPIC Level A: 90% dose reduction or switch to alternative therapy is mandatory."),
+    ("rs1142345",  "TPMT",    "PHARM",  "drug response",  "TPMT *3C allele: reduced-function variant for thiopurine metabolism; most common reduced-function allele in East Asian and African populations. CPIC requires preemptive genotyping before thiopurine initiation; dose reduction is warranted."),
     ("rs2108622",  "CYP4F2",  "PHARM",  "drug response",  "CYP4F2 *3 allele: reduced vitamin K metabolism, leading to higher warfarin sensitivity. Requires lower initial warfarin dose."),
     ("rs9923231",  "VKORC1",  "PHARM",  "drug response",  "VKORC1 variant (rs9923231): lower enzyme activity, significantly increased warfarin and anticoagulant sensitivity. Reduce starting dose; use CPIC warfarin dosing algorithm."),
     ("rs4149056",  "SLCO1B1", "PHARM",  "drug response",  "SLCO1B1 *5 allele: reduced statin transport into hepatocytes, leading to higher plasma statin concentrations and myopathy/rhabdomyolysis risk. Use lowest effective statin dose; consider pravastatin."),
@@ -54,6 +58,8 @@ REFERENCE = [
     ("rs4343",     "ACE",     "PHARM",  "drug response",  "ACE D/I polymorphism: linked to ACE inhibitor drug response and hypertension management. DD genotype associated with higher ACE activity."),
     ("rs1801275",  "GNB3",    "PHARM",  "drug response",  "GNB3 C825T variant: influences blood pressure response to thiazide diuretics and other antihypertensives."),
     ("rs20455",    "KIF6",    "PHARM",  "drug response",  "KIF6 variant: associated with differential statin benefit for coronary heart disease risk reduction."),
+    ("rs6025",     "F5",      "CARDIO", "risk factor",    "Factor V Leiden (rs6025, c.1691G>A): most common inherited thrombophilia. Heterozygotes: 4-8x elevated venous thrombosis risk; homozygotes: 50-80x risk. Clinically significant with estrogen use, pregnancy, or surgery. Discuss anticoagulation strategy with physician."),
+    ("rs1799963",  "F2",      "CARDIO", "risk factor",    "Prothrombin G20210A: elevated prothrombin levels and venous clotting risk. Heterozygotes: 2-3x increased thrombosis risk. Risk compounds when co-present with Factor V Leiden (rs6025). Review contraceptive options and surgical anticoagulation prophylaxis with a physician."),
 
     # PHARMACOGENOMICS -- Informational
     ("rs1056836",  "CYP1B1",  "PHARM",  "drug response",  "CYP1B1 variant: phase-1 enzyme for estrogen and environmental toxin activation. Relevant for estrogen-based therapies and cancer risk screening."),
@@ -81,6 +87,8 @@ REFERENCE = [
     ("rs1799883",  "FABP2",   "METAB",  "risk factor",    "FABP2 Ala54Thr: Thr allele associated with higher postprandial fat absorption and insulin resistance."),
     ("rs1800588",  "LIPC",    "METAB",  "risk factor",    "LIPC variant: hepatic lipase activity affecting HDL cholesterol metabolism and cardiovascular risk."),
     ("rs1137101",  "LEPR",    "METAB",  "risk factor",    "Leptin receptor variant: reduced satiety signaling efficiency. Protein-rich diet and resistance training may partially compensate."),
+    ("rs1800562",  "HFE",     "METAB",  "risk factor",    "HFE C282Y: primary hereditary hemochromatosis mutation. Homozygotes face high risk of iron overload, liver cirrhosis, and cardiomyopathy if untreated. Obtain serum ferritin and transferrin saturation testing; therapeutic phlebotomy is indicated if iron is elevated."),
+    ("rs1799945",  "HFE",     "METAB",  "risk factor",    "HFE H63D: milder hemochromatosis variant. Compound heterozygotes (H63D + C282Y) carry elevated iron overload risk. Monitor ferritin and iron studies annually; avoid vitamin C supplements taken with iron-rich meals."),
 
     # INFLAMMATION
     ("rs1800795",  "IL6",     "INFLAM", "risk factor",    "IL-6 promoter variant: elevated systemic inflammation and cytokine production. Monitor hsCRP; anti-inflammatory diet (Mediterranean), omega-3 supplementation, and exercise recommended."),
@@ -119,6 +127,7 @@ REFERENCE = [
     ("rs13235612", "GAD1",    "NEURO",  "risk factor",    "GAD1 (glutamate decarboxylase): GABA synthesis enzyme. Variant associated with anxiety vulnerability and panic disorder risk."),
     ("rs1051740",  "CHRNA5",  "NEURO",  "risk factor",    "CHRNA5 (nicotinic acetylcholine receptor): strongly associated with nicotine dependence and lung cancer risk in smokers."),
     ("rs1655991",  "COMT",    "NEURO",  "informational",  "COMT secondary variant: influences cognitive processing speed and emotional regulation; modulates primary COMT effect."),
+    ("rs53576",    "OXTR",    "NEURO",  "informational",  "Oxytocin receptor (OXTR) rs53576: GG homozygotes demonstrate higher empathy, social sensitivity, and prosocial behavior. AA carriers show lower social bonding and modestly elevated risk for autism spectrum traits. Context-dependent; not diagnostic."),
 
     # DETOX / OXIDATIVE STRESS
     ("rs1695",     "GSTP1",   "DETOX",  "risk factor",    "GSTP1 Ile105Val: reduced glutathione-S-transferase activity. Decreased detoxification of carcinogens and chemotherapy agents. Increased sensitivity to oxidative stress and environmental pollutants."),
@@ -127,6 +136,7 @@ REFERENCE = [
     ("rs1799807",  "ADH1B",   "DETOX",  "informational",  "ADH1B (alcohol dehydrogenase): determines speed of alcohol-to-acetaldehyde conversion. Fast convertors accumulate acetaldehyde more rapidly."),
     ("rs671",      "ALDH2",   "DETOX",  "risk factor",    "ALDH2 *2 allele: severely impaired acetaldehyde clearance. Alcohol causes rapid acetaldehyde buildup (flushing, nausea). Significantly elevated esophageal cancer risk with alcohol use. Alcohol avoidance is the evidence-based recommendation."),
     ("rs2228001",  "XPC",     "DETOX",  "risk factor",    "XPC (DNA repair): nucleotide excision repair capacity. Variant associated with reduced UV-induced DNA repair and elevated skin cancer risk."),
+    ("rs1051730",  "CHRNA3",  "DETOX",  "risk factor",    "CHRNA3 rs1051730: nicotinic acetylcholine receptor subunit alpha-3. Risk allele strongly associated with nicotine dependence, heavier daily smoking, and lung cancer risk. Carriers typically require higher-intensity cessation support; varenicline is the preferred pharmacotherapy per clinical evidence."),
 ]
 
 # ---------------------------------------------------------------------------

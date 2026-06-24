@@ -1,5 +1,9 @@
 DNAInsight v1.0
 
+![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
+![License](https://img.shields.io/badge/License-MIT-green)
+![SNPs](https://img.shields.io/badge/Bundled_SNPs-101-orange)
+
 Personal DNA Analysis Tool — Process your raw DNA file from any major provider, annotate SNPs against ClinVar and PharmGKB, generate a Genetic Health Report and a Doctor Discussion Report, and analyze results with Grok or any AI assistant.
 
 ---
@@ -9,7 +13,7 @@ What This Tool Does
 DNAInsight reads your raw DNA file (the uncompressed text file you downloaded from your DNA testing company) and:
 
 1. Parses your 600,000+ SNPs into a local database.
-2. Annotates each SNP against a bundled clinical reference (91 high-priority medical SNPs, offline, instant) and optionally the MyVariant.info API (ClinVar + PharmGKB, requires internet, no personal data transmitted).
+2. Annotates each SNP against a bundled clinical reference (101 high-priority medical SNPs, offline, instant) and optionally the MyVariant.info API (ClinVar + PharmGKB, requires internet, no personal data transmitted).
 3. Classifies findings into three tiers: Prescription-Critical, Actionable, and Informational.
 4. Generates two HTML reports: a Genetic Health Report and a Doctor Discussion Report.
 5. Provides a Grok-compatible AI prompt for AI-assisted clinical interpretation.
@@ -179,7 +183,7 @@ In-app update (recommended, monthly):
 3. Click Update Databases Now.
 
 DNAInsight re-fetches the latest ClinVar clinical significance ratings and associated
-condition names for all 91 bundled SNPs from MyVariant.info. The update takes 1-3 minutes
+condition names for all 101 bundled SNPs from MyVariant.info. The update takes 1-3 minutes
 and requires internet access. Only rsIDs are transmitted -- no genotype data leaves your
 computer.
 
@@ -194,17 +198,39 @@ This resets clinical significance and interpretation back to the curated static 
 
 ---
 
-Bundled SNP Reference
+Contributing & Extending the SNP Reference
 
-The file data/snp_reference.json contains 91 high-priority medical SNPs covering:
+Evidence-based SNP additions are welcome. To add entries:
 
-- Pharmacogenomics (PHARM): CYP2D6, CYP2C19, CYP2C9, CYP3A4/5, VKORC1, SLCO1B1, ABCB1, APOE, and more.
-- Metabolic Health (METAB): FTO, TCF7L2, PPARG, MTHFR, SLC30A8, KCNJ11, and more.
-- Inflammation (INFLAM): IL6, TNF-alpha, IL-10, CRP, CTLA4, and more.
-- Neurological (NEURO): MTHFR, COMT, BDNF, MAOA, SLC6A4, FKBP5, CLOCK, and more.
-- Detox (DETOX): GSTP1, SOD2, NQO1, ALDH2, CYP1A2, and more.
+1. Edit data/build_reference.py and add a new tuple to the REFERENCE list using the format: (rsID, gene, category, clinical_sig, interpretation)
+2. Run: python data/build_reference.py
+3. Verify by restarting DNAInsight and scanning a test DNA file.
+4. Submit a Pull Request with supporting references (CPIC, PharmGKB, ClinVar, or GWAS catalog).
 
-To update or extend the bundled reference, edit data/build_reference.py and run it.
+Criteria for inclusion:
+- Covered on major consumer arrays (23andMe v4/v5, AncestryDNA v2)
+- CPIC Level A or B evidence, high ClinVar significance, or replicated GWAS hits
+- Actionable (lifestyle, supplement, or physician discussion implication)
+- Plain-English interpretation targeted at non-experts
+
+---
+
+Bundled SNP Reference (101 High-Priority SNPs)
+
+The file data/snp_reference.json contains 101 carefully curated SNPs focused on maximum actionability for consumer DNA arrays. These are prioritized for clear lifestyle, supplement, or physician discussion implications.
+
+| Category | Focus | Key Genes |
+|----------|-------|-----------|
+| Pharmacogenomics (PHARM) | CPIC-level drug response: warfarin, statins, antidepressants, opioids, antiplatelet agents, thiopurines | CYP2D6, CYP2C19, CYP2C9, CYP4F2, VKORC1, SLCO1B1, ABCB1, TPMT, APOE |
+| Metabolic Health (METAB) | Obesity, T2D, nutrient processing, iron overload | FTO, TCF7L2, PPARG, MTHFR, HFE, SLC30A8, KCNJ11 |
+| Inflammation (INFLAM) | Chronic inflammation, autoimmune susceptibility | IL6, TNFA, IL10, CRP, CTLA4, IL6R |
+| Neurological (NEURO) | Mood, folate cycle, stress response, neurotransmitters, social behavior | MTHFR, COMT, BDNF, MAOA, SLC6A4, FKBP5, CLOCK, OXTR |
+| Detox & Cardio (DETOX/CARDIO) | Oxidative stress, clotting risk, alcohol metabolism, nicotine dependence | GSTP1, SOD2, NQO1, ALDH2, F5, F2, CYP1A2, CHRNA3 |
+
+**Why only 101?** Consumer arrays have limited SNP coverage compared to clinical sequencing. This reference focuses on well-covered, high-evidence SNPs with CPIC Level A/B support or strong replicated GWAS associations.
+
+To view or extend the full curated list, open data/build_reference.py.
+To rebuild the reference after edits: python data/build_reference.py
 
 ---
 
@@ -219,7 +245,9 @@ Privacy and Data Security
 
 Disclaimer
 
-DNAInsight is not a medical device and does not provide medical advice. Consumer DNA arrays are not clinical-grade tests. Results must not be used to make prescribing or diagnostic decisions without consultation with a licensed healthcare provider or clinical geneticist. All findings require clinical validation before any medical action.
+DNAInsight is not a medical device and does not provide medical advice. Consumer DNA arrays are not clinical-grade tests and have significantly limited coverage compared to clinical exome or genome sequencing. Negative results do not rule out genetic risks. Results must not be used to make prescribing or diagnostic decisions without consultation with a licensed healthcare provider or clinical geneticist. All findings require clinical validation before any medical action.
+
+For questions about your genetic results, consider consulting a genetic counselor. The American Board of Genetic Counseling maintains a directory at findageneticcounselor.com.
 
 The information provided is for personal educational use only.
 
@@ -273,6 +301,25 @@ Run: python app.py --port 8080 and open http://127.0.0.1:8080
 
 Scan takes a long time
 The API phase processes SNPs in batches of 200 with 4 parallel threads. For a full 650,000-SNP file, a full API scan can take 30-60 minutes. The bundled reference scan (no API) is instant.
+
+---
+
+Screenshots
+
+(Screenshots coming soon -- UI, findings view, and sample report.)
+
+---
+
+Roadmap
+
+| Version | Planned Features |
+|---------|-----------------|
+| v1.1 | Expanded reference (120+ SNPs), PDF export, multi-profile comparison charts |
+| v1.2 | Basic polygenic risk score (PRS) support for T2D and CAD using public weight files |
+| v1.3 | CYP2D6 star allele calling, Docker support, improved risk visualizations (Chart.js heatmaps) |
+| Future | Community-curated reference updates, auto-update mechanism for new app versions |
+
+Contributions and feedback are welcome. Open an issue or submit a pull request.
 
 ---
 

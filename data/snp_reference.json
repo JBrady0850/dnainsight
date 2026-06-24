@@ -83,6 +83,34 @@
     "interpretation": "CYP2C19 variant: influences proton pump inhibitor effectiveness and psychiatric medication response.",
     "conditions": "CYP2C19 variant: influences proton pump inhibitor effectiveness and psychiatric medication response."
   },
+  "rs28399504": {
+    "gene": "CYP2C19",
+    "category": "PHARM",
+    "clinical_sig": "drug response",
+    "interpretation": "CYP2C19 *4 loss-of-function allele: poor metabolizer for clopidogrel, PPIs, SSRIs, and TCAs. CPIC Level A: consider alternative antiplatelet therapy; adjust GI and psychiatric medication dosing accordingly.",
+    "conditions": "CYP2C19 *4 loss-of-function allele: poor metabolizer for clopidogrel, PPIs, SSRIs, and TCAs. CPIC Level A: consider alternative antiplatelet therapy; adjust GI and psychiatric medication dosing accordingly."
+  },
+  "rs41291556": {
+    "gene": "CYP2C19",
+    "category": "PHARM",
+    "clinical_sig": "drug response",
+    "interpretation": "CYP2C19 *8 reduced-function allele: partial loss of enzyme activity. Contributes to intermediate or poor metabolizer phenotype when combined with other CYP2C19 loss-of-function alleles.",
+    "conditions": "CYP2C19 *8 reduced-function allele: partial loss of enzyme activity. Contributes to intermediate or poor metabolizer phenotype when combined with other CYP2C19 loss-of-function alleles."
+  },
+  "rs72549354": {
+    "gene": "TPMT",
+    "category": "PHARM",
+    "clinical_sig": "drug response",
+    "interpretation": "TPMT *3A variant: severely reduced thiopurine methyltransferase activity. Thiopurine drugs (azathioprine, 6-mercaptopurine, thioguanine) carry life-threatening myelosuppression risk. CPIC Level A: 90% dose reduction or switch to alternative therapy is mandatory.",
+    "conditions": "TPMT *3A variant: severely reduced thiopurine methyltransferase activity. Thiopurine drugs (azathioprine, 6-mercaptopurine, thioguanine) carry life-threatening myelosuppression risk. CPIC Level A: 90% dose reduction or switch to alternative therapy is mandatory."
+  },
+  "rs1142345": {
+    "gene": "TPMT",
+    "category": "PHARM",
+    "clinical_sig": "drug response",
+    "interpretation": "TPMT *3C allele: reduced-function variant for thiopurine metabolism; most common reduced-function allele in East Asian and African populations. CPIC requires preemptive genotyping before thiopurine initiation; dose reduction is warranted.",
+    "conditions": "TPMT *3C allele: reduced-function variant for thiopurine metabolism; most common reduced-function allele in East Asian and African populations. CPIC requires preemptive genotyping before thiopurine initiation; dose reduction is warranted."
+  },
   "rs2108622": {
     "gene": "CYP4F2",
     "category": "PHARM",
@@ -194,6 +222,20 @@
     "clinical_sig": "drug response",
     "interpretation": "KIF6 variant: associated with differential statin benefit for coronary heart disease risk reduction.",
     "conditions": "KIF6 variant: associated with differential statin benefit for coronary heart disease risk reduction."
+  },
+  "rs6025": {
+    "gene": "F5",
+    "category": "CARDIO",
+    "clinical_sig": "risk factor",
+    "interpretation": "Factor V Leiden (rs6025, c.1691G>A): most common inherited thrombophilia. Heterozygotes: 4-8x elevated venous thrombosis risk; homozygotes: 50-80x risk. Clinically significant with estrogen use, pregnancy, or surgery. Discuss anticoagulation strategy with physician.",
+    "conditions": "Factor V Leiden (rs6025, c.1691G>A): most common inherited thrombophilia. Heterozygotes: 4-8x elevated venous thrombosis risk; homozygotes: 50-80x risk. Clinically significant with estrogen use, pregnancy, or surgery. Discuss anticoagulation strategy with physician."
+  },
+  "rs1799963": {
+    "gene": "F2",
+    "category": "CARDIO",
+    "clinical_sig": "risk factor",
+    "interpretation": "Prothrombin G20210A: elevated prothrombin levels and venous clotting risk. Heterozygotes: 2-3x increased thrombosis risk. Risk compounds when co-present with Factor V Leiden (rs6025). Review contraceptive options and surgical anticoagulation prophylaxis with a physician.",
+    "conditions": "Prothrombin G20210A: elevated prothrombin levels and venous clotting risk. Heterozygotes: 2-3x increased thrombosis risk. Risk compounds when co-present with Factor V Leiden (rs6025). Review contraceptive options and surgical anticoagulation prophylaxis with a physician."
   },
   "rs1056836": {
     "gene": "CYP1B1",
@@ -355,6 +397,20 @@
     "clinical_sig": "risk factor",
     "interpretation": "Leptin receptor variant: reduced satiety signaling efficiency. Protein-rich diet and resistance training may partially compensate.",
     "conditions": "Leptin receptor variant: reduced satiety signaling efficiency. Protein-rich diet and resistance training may partially compensate."
+  },
+  "rs1800562": {
+    "gene": "HFE",
+    "category": "METAB",
+    "clinical_sig": "risk factor",
+    "interpretation": "HFE C282Y: primary hereditary hemochromatosis mutation. Homozygotes face high risk of iron overload, liver cirrhosis, and cardiomyopathy if untreated. Obtain serum ferritin and transferrin saturation testing; therapeutic phlebotomy is indicated if iron is elevated.",
+    "conditions": "HFE C282Y: primary hereditary hemochromatosis mutation. Homozygotes face high risk of iron overload, liver cirrhosis, and cardiomyopathy if untreated. Obtain serum ferritin and transferrin saturation testing; therapeutic phlebotomy is indicated if iron is elevated."
+  },
+  "rs1799945": {
+    "gene": "HFE",
+    "category": "METAB",
+    "clinical_sig": "risk factor",
+    "interpretation": "HFE H63D: milder hemochromatosis variant. Compound heterozygotes (H63D + C282Y) carry elevated iron overload risk. Monitor ferritin and iron studies annually; avoid vitamin C supplements taken with iron-rich meals.",
+    "conditions": "HFE H63D: milder hemochromatosis variant. Compound heterozygotes (H63D + C282Y) carry elevated iron overload risk. Monitor ferritin and iron studies annually; avoid vitamin C supplements taken with iron-rich meals."
   },
   "rs1800795": {
     "gene": "IL6",
@@ -594,6 +650,13 @@
     "interpretation": "COMT secondary variant: influences cognitive processing speed and emotional regulation; modulates primary COMT effect.",
     "conditions": "COMT secondary variant: influences cognitive processing speed and emotional regulation; modulates primary COMT effect."
   },
+  "rs53576": {
+    "gene": "OXTR",
+    "category": "NEURO",
+    "clinical_sig": "informational",
+    "interpretation": "Oxytocin receptor (OXTR) rs53576: GG homozygotes demonstrate higher empathy, social sensitivity, and prosocial behavior. AA carriers show lower social bonding and modestly elevated risk for autism spectrum traits. Context-dependent; not diagnostic.",
+    "conditions": "Oxytocin receptor (OXTR) rs53576: GG homozygotes demonstrate higher empathy, social sensitivity, and prosocial behavior. AA carriers show lower social bonding and modestly elevated risk for autism spectrum traits. Context-dependent; not diagnostic."
+  },
   "rs1695": {
     "gene": "GSTP1",
     "category": "DETOX",
@@ -635,5 +698,12 @@
     "clinical_sig": "risk factor",
     "interpretation": "XPC (DNA repair): nucleotide excision repair capacity. Variant associated with reduced UV-induced DNA repair and elevated skin cancer risk.",
     "conditions": "XPC (DNA repair): nucleotide excision repair capacity. Variant associated with reduced UV-induced DNA repair and elevated skin cancer risk."
+  },
+  "rs1051730": {
+    "gene": "CHRNA3",
+    "category": "DETOX",
+    "clinical_sig": "risk factor",
+    "interpretation": "CHRNA3 rs1051730: nicotinic acetylcholine receptor subunit alpha-3. Risk allele strongly associated with nicotine dependence, heavier daily smoking, and lung cancer risk. Carriers typically require higher-intensity cessation support; varenicline is the preferred pharmacotherapy per clinical evidence.",
+    "conditions": "CHRNA3 rs1051730: nicotinic acetylcholine receptor subunit alpha-3. Risk allele strongly associated with nicotine dependence, heavier daily smoking, and lung cancer risk. Carriers typically require higher-intensity cessation support; varenicline is the preferred pharmacotherapy per clinical evidence."
   }
 }
