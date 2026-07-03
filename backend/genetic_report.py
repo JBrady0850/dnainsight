@@ -15,6 +15,8 @@ Output: HTML string (saved to disk by caller)
 from datetime import datetime
 from pathlib import Path
 
+from . import APP_VERSION
+
 
 CATEGORY_LABELS = {
     "PHARM":  "Pharmacogenomics & Drug Metabolism",
@@ -71,6 +73,7 @@ def _silo_section(findings: list[dict], silo: str) -> str:
         for f in gfindings:
             rsid    = f.get("rsid", "")
             gt      = f.get("genotype", f.get("allele1","") + f.get("allele2",""))
+            zyg     = (f.get("zygosity") or "").replace("_", " ")
             cond    = f.get("conditions", "")
             interp  = f.get("interpretation", cond)[:400]
             clsig   = f.get("clinical_sig", "").title()
@@ -81,6 +84,7 @@ def _silo_section(findings: list[dict], silo: str) -> str:
             <div>
               <code style="background:#eee;padding:1px 5px;border-radius:3px;font-size:0.85em;">{rsid}</code>
               &nbsp; Genotype: <strong>{gt}</strong>
+              {f'&nbsp; <span style="color:#888;font-size:0.78em;">{zyg}</span>' if zyg else ''}
               &nbsp; <span style="color:#666;font-size:0.85em;">({clsig})</span>
             </div>
             <div style="font-size:0.8em;color:#888;">{sources}</div>
@@ -176,7 +180,7 @@ def generate_genetic_report(profile: dict, findings: list[dict]) -> str:
   {_silo_section(findings, "informational")}
 
   <div class="footer">
-    DNAInsight v1.0 &nbsp;|&nbsp; Open-source personal DNA analysis tool &nbsp;|&nbsp;
+    DNAInsight v{APP_VERSION} &nbsp;|&nbsp; Open-source personal DNA analysis tool &nbsp;|&nbsp;
     Data sourced from ClinVar, PharmGKB, and MyVariant.info<br>
     This report does not constitute medical advice. Not for clinical use.
   </div>

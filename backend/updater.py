@@ -278,7 +278,7 @@ def get_reference_metadata() -> dict:
         return {
             "updated_at": meta.get("updated_at"),
             "built_at":   meta.get("built_at"),
-            "version":    meta.get("version", "1.1.0"),
+            "version":    meta.get("version", "1.2.0"),
             "snp_count":  meta.get("snp_count", len(snps)),
             "source":     meta.get("source", "Bundled (offline)"),
             "updated":    meta.get("updated", 0),

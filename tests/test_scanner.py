@@ -10,6 +10,9 @@ from backend.scanner import (
     _conditions_risk,
     classify_silo,
     lookup_bundled,
+    zygosity_of,
+    carries_allele,
+    _extract_alt,
 )
 
 
@@ -126,3 +129,68 @@ class TestLookupBundled:
         if not ref:
             pytest.skip("snp_reference.json not built")
         assert len(ref) >= 120, f"Expected 120+ SNPs, found {len(ref)}"
+
+
+# ---------------------------------------------------------------------------
+# zygosity_of  (v1.2 -- factual genotype classification)
+# ---------------------------------------------------------------------------
+
+class TestZygosity:
+    def test_homozygous(self):
+        assert zygosity_of("A", "A") == "homozygous"
+
+    def test_heterozygous(self):
+        assert zygosity_of("A", "G") == "heterozygous"
+
+    def test_hemizygous_single_call(self):
+        assert zygosity_of("A", "N") == "hemizygous"
+
+    def test_no_call(self):
+        assert zygosity_of("N", "N") == "no_call"
+        assert zygosity_of("", "") == "no_call"
+
+    def test_case_insensitive(self):
+        assert zygosity_of("c", "C") == "homozygous"
+
+
+# ---------------------------------------------------------------------------
+# carries_allele  (v1.2 -- authoritative carrier status)
+# ---------------------------------------------------------------------------
+
+class TestCarriesAllele:
+    def test_zero_copies_reference_genotype(self):
+        # rs671 GG when the variant/risk allele is A -> not a carrier
+        assert carries_allele("G", "G", "A") == 0
+
+    def test_one_copy_heterozygous(self):
+        assert carries_allele("A", "G", "A") == 1
+
+    def test_two_copies_homozygous(self):
+        assert carries_allele("A", "A", "A") == 2
+
+    def test_empty_variant_allele_returns_zero(self):
+        assert carries_allele("A", "A", "") == 0
+
+    def test_case_insensitive(self):
+        assert carries_allele("a", "g", "A") == 1
+
+
+# ---------------------------------------------------------------------------
+# _extract_alt  (v1.2 -- pull authoritative alt allele from a MyVariant hit)
+# ---------------------------------------------------------------------------
+
+class TestExtractAlt:
+    def test_scalar_alt(self):
+        assert _extract_alt({"dbsnp": {"alt": "A"}}) == "A"
+
+    def test_list_alt_takes_first(self):
+        assert _extract_alt({"dbsnp": {"alt": ["T", "C"]}}) == "T"
+
+    def test_multiallelic_string(self):
+        assert _extract_alt({"dbsnp": {"alt": "G,A"}}) == "G"
+
+    def test_fallback_parses_id(self):
+        assert _extract_alt({"_id": "chr1:g.11856378G>A"}) == "A"
+
+    def test_missing_returns_empty(self):
+        assert _extract_alt({}) == ""

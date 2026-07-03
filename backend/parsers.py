@@ -49,15 +49,23 @@ def detect_provider(header_lines: list[str], column_line: str) -> str:
     return "generic"
 
 
+# No-call / missing-genotype tokens used by consumer arrays.
+_NOCALL_TOKENS = {"", "-", "--", "0", "00", "NN", "DD", "II", "DI", "ID"}
+
+
 def _split_genotype(gt: str) -> tuple[str, str]:
-    """Split a 1-2 char genotype string into (allele1, allele2)."""
+    """Split a 1-2 char genotype string into (allele1, allele2).
+
+    No-call and indel tokens are normalized to ('N', 'N'). This check runs
+    first so that 2-char no-calls like '--' are not mis-split into ('-', '-').
+    """
     gt = gt.strip().upper()
+    if gt in _NOCALL_TOKENS:
+        return "N", "N"
     if len(gt) == 2:
         return gt[0], gt[1]
     if len(gt) == 1:
         return gt, gt
-    if "--" in gt or gt in ("0", "00", "NN", "--"):
-        return "N", "N"
     return gt[:1], gt[1:2] if len(gt) > 1 else "N"
 
 

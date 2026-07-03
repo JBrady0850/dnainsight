@@ -22,16 +22,21 @@ import threading
 from pathlib import Path
 from datetime import datetime
 from flask import Blueprint, request, jsonify, send_file, current_app
+from werkzeug.utils import secure_filename
 
 from . import database as db
+from . import APP_VERSION
 from .parsers import parse_dna_file, ParseError
-from .scanner import run_scan
+from .scanner import run_scan, lookup_bundled, zygosity_of
 from .genetic_report import generate_genetic_report
 from .doctor_report import generate_doctor_report
 from .updater import update_bundled_reference, get_reference_metadata
 
-# App version
-APP_VERSION = "1.1.0"
+# Accepted raw-DNA upload extensions and hard size cap. Consumer exports are
+# typically 15-25 MB uncompressed; 64 MB leaves headroom while preventing
+# memory-exhaustion via oversized uploads.
+ALLOWED_EXTENSIONS = {".txt", ".csv", ".tsv"}
+MAX_UPLOAD_BYTES   = 64 * 1024 * 1024
 
 api = Blueprint("api", __name__)
 
@@ -85,9 +90,30 @@ def create_profile():
     if not file.filename:
         return jsonify({"error": "No file selected."}), 400
 
-    # Save uploaded file
-    safe_name = "".join(c for c in name if c.isalnum() or c in " _-").strip().replace(" ", "_")
-    dest = UPLOAD_DIR / f"{safe_name}_{file.filename}"
+    # Validate extension (defence-in-depth; reject compressed/binary uploads early)
+    orig_name = secure_filename(file.filename) or "dna.txt"
+    ext = Path(orig_name).suffix.lower()
+    if ext not in ALLOWED_EXTENSIONS:
+        return jsonify({
+            "error": f"Unsupported file type '{ext or 'unknown'}'. "
+                     "Upload an uncompressed raw DNA export (.txt, .csv, or .tsv), not a .zip/.gz."
+        }), 400
+
+    # Enforce a hard size cap before writing to disk.
+    file.seek(0, os.SEEK_END)
+    size = file.tell()
+    file.seek(0)
+    if size == 0:
+        return jsonify({"error": "Uploaded file is empty."}), 400
+    if size > MAX_UPLOAD_BYTES:
+        return jsonify({
+            "error": f"File too large ({size // (1024*1024)} MB). Maximum is "
+                     f"{MAX_UPLOAD_BYTES // (1024*1024)} MB."
+        }), 413
+
+    # Save uploaded file using a fully sanitized name (prevents path traversal).
+    safe_name = "".join(c for c in name if c.isalnum() or c in " _-").strip().replace(" ", "_") or "profile"
+    dest = UPLOAD_DIR / f"{safe_name}_{orig_name}"
     file.save(str(dest))
 
     # Parse
@@ -105,7 +131,7 @@ def create_profile():
 
     # Create profile
     pid = db.create_profile(name, dob, sex, provider)
-    uid = db.record_upload(pid, file.filename, snp_count)
+    uid = db.record_upload(pid, orig_name, snp_count)
 
     # Store snps in a temp JSON for scanning
     snp_cache = UPLOAD_DIR / f"snps_{pid}.json"
@@ -404,14 +430,16 @@ def export_findings_csv(pid: int):
     buf = io.StringIO()
     writer = csv.writer(buf)
     writer.writerow([
-        "rsid", "gene", "genotype", "category", "silo",
+        "rsid", "gene", "genotype", "zygosity", "category", "silo",
         "clinical_sig", "interpretation", "discovered_at",
     ])
     for f in findings:
+        gt = f.get("genotype") or f"{f.get('allele1','')}{f.get('allele2','')}"
         writer.writerow([
             f.get("rsid", ""),
             f.get("gene", ""),
-            f.get("genotype") or f"{f.get('allele1','')}{f.get('allele2','')}",
+            gt,
+            f.get("zygosity") or zygosity_of(f.get("allele1", ""), f.get("allele2", "")),
             f.get("category", ""),
             f.get("silo", ""),
             f.get("clinical_sig", ""),
@@ -440,4 +468,57 @@ def version_info():
     return jsonify({
         "version": APP_VERSION,
         "snp_count": get_reference_metadata().get("snp_count", 0),
+    })
+
+
+# ---------------------------------------------------------------------------
+# Single-SNP lookup
+# ---------------------------------------------------------------------------
+
+@api.route("/api/profiles/<int:pid>/lookup/<rsid>", methods=["GET"])
+def lookup_snp(pid: int, rsid: str):
+    """
+    Look up a single rsID for a profile.
+
+    Returns the person's genotype (from their uploaded raw data), the zygosity,
+    and — if present — the bundled reference annotation for that variant. Enables
+    ad-hoc questions like "what's my rs1801133 genotype?" without a full scan.
+    """
+    profile = db.get_profile(pid)
+    if not profile:
+        return jsonify({"error": "Profile not found."}), 404
+
+    rsid = rsid.strip().lower()
+    if not rsid.startswith("rs"):
+        return jsonify({"error": "rsID must start with 'rs' (e.g. rs1801133)."}), 400
+
+    snp_cache = UPLOAD_DIR / f"snps_{pid}.json"
+    if not snp_cache.exists():
+        return jsonify({"error": "DNA data not found. Re-upload the file."}), 400
+
+    with open(snp_cache, "r") as fh:
+        snps = json.load(fh)
+
+    match = next((s for s in snps if s.get("rsid", "").lower() == rsid), None)
+    if not match:
+        return jsonify({
+            "rsid": rsid,
+            "in_your_data": False,
+            "message": "This rsID was not genotyped on your array.",
+        })
+
+    a1, a2 = match.get("allele1", ""), match.get("allele2", "")
+    ref = lookup_bundled(rsid) or {}
+    return jsonify({
+        "rsid":         rsid,
+        "in_your_data": True,
+        "genotype":     f"{a1}{a2}",
+        "zygosity":     zygosity_of(a1, a2),
+        "chromosome":   match.get("chromosome", ""),
+        "position":     match.get("position", 0),
+        "in_reference": bool(ref),
+        "gene":         ref.get("gene", ""),
+        "category":     ref.get("category", ""),
+        "clinical_sig": ref.get("clinical_sig", ""),
+        "interpretation": ref.get("interpretation", ""),
     })

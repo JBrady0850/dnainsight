@@ -114,13 +114,15 @@ def _pre_rx_table(findings: list[dict]) -> str:
         gene   = f.get("gene", "N/A")
         rsid   = f.get("rsid", "")
         gt     = f.get("genotype", "")
+        zyg    = (f.get("zygosity") or "").replace("_", " ")
         clsig  = f.get("clinical_sig", "").title()
         interp = f.get("interpretation", f.get("conditions", ""))[:250]
+        gt_cell = gt + (f"<br><span style='font-size:0.78em;color:#888;'>{zyg}</span>" if zyg else "")
         rows += f"""
       <tr style="border-bottom:1px solid #eee;">
         <td style="padding:8px;"><strong>{gene}</strong></td>
         <td style="padding:8px;"><code>{rsid}</code></td>
-        <td style="padding:8px;font-weight:bold;">{gt}</td>
+        <td style="padding:8px;font-weight:bold;">{gt_cell}</td>
         <td style="padding:8px;color:#c0392b;">{clsig}</td>
         <td style="padding:8px;font-size:0.85em;">{interp}</td>
       </tr>"""
@@ -159,7 +161,8 @@ def generate_doctor_report(profile: dict, findings: list[dict]) -> str:
     for f in (pre_rx + actionable)[:30]:
         ai_findings.append({
             "rsid": f.get("rsid"), "gene": f.get("gene"),
-            "genotype": f.get("genotype"), "silo": f.get("silo"),
+            "genotype": f.get("genotype"), "zygosity": f.get("zygosity"),
+            "silo": f.get("silo"),
             "clinical_sig": f.get("clinical_sig"),
             "interpretation": f.get("interpretation","")[:150],
         })

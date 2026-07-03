@@ -99,6 +99,7 @@ def init_db():
             allele1         TEXT,
             allele2         TEXT,
             genotype        TEXT,
+            zygosity        TEXT,
             clinical_sig    TEXT,
             conditions      TEXT,
             interpretation  TEXT,
@@ -126,8 +127,20 @@ def init_db():
             checkpoint  TEXT NOT NULL DEFAULT '{}'
         );
     """)
+
+    # --- Lightweight migrations for databases created by earlier versions ---
+    _add_column_if_missing(conn, "findings", "zygosity", "TEXT")
+
     conn.commit()
     conn.close()
+
+
+def _add_column_if_missing(conn, table: str, column: str, col_type: str):
+    """Idempotently add a column to an existing table (SQLite has no
+    ``ADD COLUMN IF NOT EXISTS``)."""
+    cols = {r["name"] for r in conn.execute(f"PRAGMA table_info({table})").fetchall()}
+    if column not in cols:
+        conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {col_type}")
 
 
 # ---------------------------------------------------------------------------
@@ -207,6 +220,7 @@ def upsert_finding(profile_id: int, upload_id: int, finding: dict):
         finding.get("allele1", ""),
         finding.get("allele2", ""),
         finding.get("genotype", ""),
+        finding.get("zygosity", ""),
         finding.get("clinical_sig", ""),
         finding.get("conditions", ""),
         finding.get("interpretation", ""),
@@ -219,7 +233,7 @@ def upsert_finding(profile_id: int, upload_id: int, finding: dict):
         conn.execute("""
             UPDATE findings SET
                 gene=?, chromosome=?, position=?, allele1=?, allele2=?,
-                genotype=?, clinical_sig=?, conditions=?, interpretation=?,
+                genotype=?, zygosity=?, clinical_sig=?, conditions=?, interpretation=?,
                 category=?, silo=?, sources=?
             WHERE profile_id=? AND rsid=?
         """, fields + (profile_id, finding["rsid"]))
@@ -227,9 +241,9 @@ def upsert_finding(profile_id: int, upload_id: int, finding: dict):
         conn.execute("""
             INSERT INTO findings
                 (profile_id, upload_id, rsid, gene, chromosome, position,
-                 allele1, allele2, genotype, clinical_sig, conditions,
+                 allele1, allele2, genotype, zygosity, clinical_sig, conditions,
                  interpretation, category, silo, sources, discovered_at)
-            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
         """, (profile_id, upload_id, finding["rsid"]) + fields + (now,))
 
     conn.commit()

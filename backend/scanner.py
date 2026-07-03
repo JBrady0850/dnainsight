@@ -106,6 +106,44 @@ def classify_silo(interp: str) -> str:
 
 
 # ---------------------------------------------------------------------------
+# Zygosity and carrier status (data-driven, no interpretation involved)
+# ---------------------------------------------------------------------------
+_NOCALL = {"", "N", "-", "0", "D", "I"}
+
+
+def zygosity_of(a1: str, a2: str) -> str:
+    """Classify a genotype's zygosity purely from its two alleles.
+
+    Returns one of: 'homozygous', 'heterozygous', 'hemizygous', 'no_call'.
+    This is a factual statement about the genotype, independent of which
+    allele (if any) confers risk.
+    """
+    a1 = (a1 or "").strip().upper()
+    a2 = (a2 or "").strip().upper()
+    a1v = a1 not in _NOCALL
+    a2v = a2 not in _NOCALL
+    if not a1v and not a2v:
+        return "no_call"
+    if a1v != a2v:
+        # Single called allele (e.g. male X/Y hemizygous, or one side no-call)
+        return "hemizygous"
+    return "homozygous" if a1 == a2 else "heterozygous"
+
+
+def carries_allele(a1: str, a2: str, variant_allele: str) -> int:
+    """Return the number of copies (0, 1, or 2) of ``variant_allele`` carried.
+
+    ``variant_allele`` is the authoritative alternate/variant allele (e.g. from
+    dbSNP ``alt``). Comparison is strand-naive and case-insensitive; callers
+    must supply the allele on the same strand the array reports.
+    """
+    va = (variant_allele or "").strip().upper()
+    if not va:
+        return 0
+    return sum(1 for a in ((a1 or "").upper(), (a2 or "").upper()) if a == va)
+
+
+# ---------------------------------------------------------------------------
 # Bundled reference lookup
 # ---------------------------------------------------------------------------
 _bundled_cache: dict = {}
@@ -226,6 +264,31 @@ def _extract_clinvar(hit: dict, genotype: str) -> list[dict]:
     return results
 
 
+def _extract_alt(hit: dict) -> str:
+    """Return the authoritative alternate (variant) allele from a MyVariant hit.
+
+    Prefers dbsnp.alt; falls back to parsing the ``_id`` (chrN:g.POS REF>ALT).
+    Returns '' when unavailable. Multi-allelic alts (comma/list) yield the
+    first allele only.
+    """
+    alt = hit.get("dbsnp", {}).get("alt", "")
+    if isinstance(alt, list):
+        alt = alt[0] if alt else ""
+    if isinstance(alt, str) and "," in alt:
+        alt = alt.split(",")[0]
+    alt = (alt or "").strip().upper()
+    if alt:
+        return alt
+    # Fallback: parse "chr1:g.11856378G>A"
+    _id = hit.get("_id", "")
+    if ">" in _id:
+        try:
+            return _id.split(">")[-1].strip().upper()[:1]
+        except Exception:
+            return ""
+    return ""
+
+
 def _extract_pharmgkb(hit: dict) -> list[dict]:
     results = []
     pgkb = hit.get("pharmgkb", {})
@@ -279,26 +342,52 @@ def annotate_via_api(snps: list[dict], progress_cb=None) -> list[dict]:
                 if not rsid.startswith("rs"):
                     continue
                 snp = snp_index.get(rsid, {})
-                genotype = snp.get("allele1", "") + snp.get("allele2", "")
+                a1, a2   = snp.get("allele1", ""), snp.get("allele2", "")
+                genotype = a1 + a2
+                zyg      = zygosity_of(a1, a2)
                 gene     = _extract_gene(hit)
+                alt      = _extract_alt(hit)
+                copies   = carries_allele(a1, a2, alt) if alt else None
 
                 anns = _extract_clinvar(hit, genotype) + _extract_pharmgkb(hit)
                 for ann in anns:
                     conditions = ann.get("conditions", "")
                     interp     = conditions[:300] if conditions else ann.get("drug", "")
+                    silo       = classify_silo(interp)
+
+                    # Carrier-aware refinement: a ClinVar classification applies
+                    # to the alternate allele. If we have an authoritative alt
+                    # and the person carries zero copies, the pathogenic/risk
+                    # call does not apply to them -- downgrade to informational
+                    # and annotate, rather than raising a false alarm.
+                    non_carrier = (
+                        ann.get("source") == "clinvar"
+                        and copies == 0
+                    )
+                    if non_carrier:
+                        silo = "informational"
+                        interp = (
+                            "Reference genotype at this position -- you do not "
+                            "carry the reported variant allele "
+                            f"({alt}). " + interp
+                        )
+
                     findings.append({
                         "rsid":         rsid,
                         "gene":         gene,
                         "chromosome":   snp.get("chromosome", ""),
                         "position":     snp.get("position", 0),
-                        "allele1":      snp.get("allele1", ""),
-                        "allele2":      snp.get("allele2", ""),
+                        "allele1":      a1,
+                        "allele2":      a2,
                         "genotype":     genotype,
+                        "zygosity":     zyg,
+                        "variant_allele": alt,
+                        "variant_copies": copies,
                         "clinical_sig": ann.get("clinical_sig", ""),
                         "conditions":   conditions,
                         "interpretation": interp,
                         "category":     ann.get("source", ""),
-                        "silo":         classify_silo(interp),
+                        "silo":         silo,
                         "sources":      [ann.get("source", "")],
                     })
 
@@ -340,6 +429,7 @@ def annotate_bundled(snps: list[dict]) -> list[dict]:
             "allele1":      snp["allele1"],
             "allele2":      snp["allele2"],
             "genotype":     genotype,
+            "zygosity":     zygosity_of(snp["allele1"], snp["allele2"]),
             "clinical_sig": entry.get("clinical_sig", "drug response"),
             "conditions":   entry.get("conditions", ""),
             "interpretation": interp,

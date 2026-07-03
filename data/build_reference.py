@@ -17,7 +17,7 @@ import datetime
 from datetime import timezone
 from pathlib import Path
 
-REFERENCE_VERSION = "1.1.0"
+REFERENCE_VERSION = "1.2.0"
 
 # ---------------------------------------------------------------------------
 # Master SNP reference table
@@ -171,6 +171,17 @@ REFERENCE = [
 # Build the reference dict
 # ---------------------------------------------------------------------------
 
+def find_duplicates() -> list[str]:
+    """Return rsIDs that appear more than once in the REFERENCE table."""
+    seen, dupes = set(), []
+    for row in REFERENCE:
+        rsid = row[0]
+        if rsid in seen:
+            dupes.append(rsid)
+        seen.add(rsid)
+    return dupes
+
+
 def build_reference() -> dict:
     ref = {}
     for rsid, gene, category, clinical_sig, interpretation in REFERENCE:
@@ -187,6 +198,12 @@ def build_reference() -> dict:
 
 if __name__ == "__main__":
     out = Path(__file__).parent / "snp_reference.json"
+
+    dupes = find_duplicates()
+    if dupes:
+        print(f"WARNING: {len(dupes)} duplicate rsID(s) in REFERENCE table "
+              f"(first occurrence kept): {', '.join(sorted(set(dupes)))}")
+
     ref = build_reference()
     payload = {
         "_meta": {

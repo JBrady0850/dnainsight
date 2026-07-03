@@ -8,7 +8,32 @@ import pytest
 # Allow importing the backend package from the project root
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from backend.parsers import detect_provider, parse_dna_file, ParseError
+from backend.parsers import detect_provider, parse_dna_file, ParseError, _split_genotype
+
+
+# ---------------------------------------------------------------------------
+# _split_genotype  (v1.2 -- no-call handling fixed to run before length check)
+# ---------------------------------------------------------------------------
+
+class TestSplitGenotype:
+    def test_double_dash_is_nocall(self):
+        assert _split_genotype("--") == ("N", "N")
+
+    def test_double_zero_is_nocall(self):
+        assert _split_genotype("00") == ("N", "N")
+
+    def test_indel_tokens_nocall(self):
+        assert _split_genotype("DI") == ("N", "N")
+        assert _split_genotype("II") == ("N", "N")
+
+    def test_heterozygous_pair(self):
+        assert _split_genotype("AG") == ("A", "G")
+
+    def test_single_allele_doubled(self):
+        assert _split_genotype("G") == ("G", "G")
+
+    def test_empty_is_nocall(self):
+        assert _split_genotype("") == ("N", "N")
 
 
 # ---------------------------------------------------------------------------

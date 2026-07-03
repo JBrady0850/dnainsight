@@ -1,4 +1,4 @@
-DNAInsight v1.0
+DNAInsight v1.2.0
 
 ![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
@@ -126,8 +126,8 @@ Step 3: Run a Scan
 3. Click Start Scan.
 
 The scan has two phases:
-- Bundled reference (instant, offline): Annotates 91 high-priority medical SNPs immediately.
-- API annotation (if enabled): Queries myvariant.info in batches. This may take several minutes for a full file, but DNAInsight will show progress.
+- Bundled reference (instant, offline): Annotates 122 high-priority medical SNPs immediately.
+- API annotation (if enabled): Queries myvariant.info in batches. This may take several minutes for a full file, but DNAInsight will show progress. When the API returns an authoritative variant allele, findings are refined by carrier status (see below).
 
 Step 4: Review Findings
 
@@ -316,9 +316,22 @@ Roadmap
 | Version | Planned Features |
 |---------|-----------------|
 | v1.1 ✅ | Expanded reference (122 SNPs), JSON/CSV export, Chart.js category chart, CI/CD, unit tests, versioned reference, CONTRIBUTING.md |
-| v1.2 | Basic polygenic risk score (PRS) support for T2D and CAD using public weight files |
-| v1.3 | CYP2D6 star allele calling, Docker support, improved risk visualizations (Chart.js heatmaps) |
+| v1.2 ✅ | Zygosity on every finding, carrier-aware API annotation, single-SNP lookup, upload security hardening (path traversal + size/type limits), reference dedup guard, version consistency |
+| v1.3 | Basic polygenic risk score (PRS) support for T2D and CAD using public weight files; genotype-specific risk-allele mapping for the bundled reference |
+| v1.4 | CYP2D6 star allele calling, improved risk visualizations (Chart.js heatmaps) |
 | Future | Community-curated reference updates, auto-update mechanism for new app versions |
+
+### Interpreting findings: allele-general vs carrier-aware
+
+Offline (bundled) findings are **allele-general**: they describe what a variant
+at that position means, and now include your zygosity, but the bundled reference
+does not yet store which allele confers risk. Treat these as "this position was
+genotyped; here is the relevant biology," not as confirmation you carry the risk
+allele. When online API annotation is enabled and MyVariant returns an
+authoritative variant allele, findings become **carrier-aware**: DNAInsight
+counts your copies of that allele and de-emphasizes classifications for variants
+you do not carry. Genotype-specific risk-allele mapping for the full bundled set
+is planned for v1.3.
 
 Contributions and feedback are welcome. Open an issue or submit a pull request.
 

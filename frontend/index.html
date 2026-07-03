@@ -489,10 +489,14 @@ function renderFindings(el) {
         <button class="tab-btn" onclick="switchTab(this,'tab-act')">Actionable</button>
         <button class="tab-btn" onclick="switchTab(this,'tab-inf')">Informational</button>
       </div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center;">
         <button class="btn btn-outline" onclick="exportFindings('json')" title="Download findings as JSON">&#x2B07; Export JSON</button>
         <button class="btn btn-outline" onclick="exportFindings('csv')" title="Download findings as CSV (Excel-compatible)">&#x2B07; Export CSV</button>
+        <span style="flex:1;"></span>
+        <input type="text" id="rsid-lookup" placeholder="Look up any rsID (e.g. rs1801133)" style="padding:7px 10px;min-width:230px;" onkeydown="if(event.key==='Enter')lookupRsid()">
+        <button class="btn btn-outline" onclick="lookupRsid()">&#x1F50E; Look up</button>
       </div>
+      <div id="rsid-lookup-result" style="margin-bottom:16px;"></div>
       <div id="findings-category-chart" style="margin-bottom:24px;display:none;">
         <canvas id="categoryChart" height="90"></canvas>
       </div>
@@ -555,6 +559,34 @@ function exportFindings(fmt) {
   document.body.removeChild(a);
 }
 
+async function lookupRsid() {
+  if (!state.activeProfile) return;
+  const box = document.getElementById('rsid-lookup-result');
+  const inp = document.getElementById('rsid-lookup');
+  const rsid = (inp.value || '').trim().toLowerCase();
+  if (!rsid) return;
+  box.innerHTML = `<div class="alert alert-info">Looking up ${rsid}...</div>`;
+  try {
+    const r = await fetch(`/api/profiles/${state.activeProfile.id}/lookup/${encodeURIComponent(rsid)}`);
+    const d = await r.json();
+    if (d.error) { box.innerHTML = `<div class="alert alert-danger">${d.error}</div>`; return; }
+    if (!d.in_your_data) {
+      box.innerHTML = `<div class="alert alert-warning"><strong>${d.rsid}</strong> was not genotyped on your array.</div>`;
+      return;
+    }
+    const ref = d.in_reference
+      ? `<br><strong>${d.gene||''}</strong> &middot; ${d.category||''} &middot; ${(d.clinical_sig||'')}<br><span style="font-size:0.9em;color:#444;">${d.interpretation||''}</span>`
+      : `<br><span style="color:#888;">Not in the curated reference (no clinical annotation).</span>`;
+    box.innerHTML = `<div class="alert alert-info">
+      <strong>${d.rsid}</strong> &mdash; Genotype <code>${d.genotype}</code>
+      <span style="color:#666;">(${(d.zygosity||'').replace('_',' ')})</span>
+      &nbsp;chr${d.chromosome}:${d.position}${ref}
+    </div>`;
+  } catch(e) {
+    box.innerHTML = `<div class="alert alert-danger">Lookup failed: ${e.message}</div>`;
+  }
+}
+
 function renderCategoryChart(findings) {
   const wrap = document.getElementById('findings-category-chart');
   if (!wrap || !findings.length) return;
@@ -609,7 +641,7 @@ function renderFindingsTable(findings, containerId) {
     <table class="findings-table">
       <thead>
         <tr>
-          <th>rsID</th><th>Gene</th><th>Genotype</th><th>Classification</th><th>Status</th><th>Interpretation</th>
+          <th>rsID</th><th>Gene</th><th>Genotype</th><th>Zygosity</th><th>Classification</th><th>Status</th><th>Interpretation</th>
         </tr>
       </thead>
       <tbody>
@@ -618,6 +650,7 @@ function renderFindingsTable(findings, containerId) {
             <td><code style="font-size:0.85em;">${f.rsid}</code></td>
             <td><strong>${f.gene||'?'}</strong></td>
             <td><code>${f.genotype||f.allele1+f.allele2||'?'}</code></td>
+            <td style="font-size:0.8em;color:#666;">${(f.zygosity||'').replace('_',' ')}</td>
             <td>${(f.clinical_sig||'').replace(/^\w/,c=>c.toUpperCase())}</td>
             <td>${SILO_BADGE[f.silo]||''}</td>
             <td class="interp">${(f.interpretation||f.conditions||'').substring(0,200)}</td>

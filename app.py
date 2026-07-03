@@ -20,13 +20,23 @@ from pathlib import Path
 BASE_DIR = Path(__file__).parent.resolve()
 sys.path.insert(0, str(BASE_DIR))
 
-from flask import Flask, send_from_directory
-from backend.routes import api
+from flask import Flask, send_from_directory, jsonify
+from backend import APP_VERSION
+from backend.routes import api, MAX_UPLOAD_BYTES
 from backend.database import init_db
 
 
 def create_app() -> Flask:
     app = Flask(__name__, static_folder=str(BASE_DIR / "frontend"))
+
+    # Global request-size ceiling: Flask/Werkzeug aborts oversized requests
+    # (413) before they are buffered, as a first line of defence.
+    app.config["MAX_CONTENT_LENGTH"] = MAX_UPLOAD_BYTES
+
+    @app.errorhandler(413)
+    def _too_large(_e):
+        mb = MAX_UPLOAD_BYTES // (1024 * 1024)
+        return jsonify({"error": f"Upload exceeds the {mb} MB limit."}), 413
 
     # Register API blueprint
     app.register_blueprint(api)
@@ -57,7 +67,7 @@ def main():
 
     url = f"http://{args.host}:{args.port}"
     print(f"\n{'='*55}")
-    print(f"  DNAInsight v1.0")
+    print(f"  DNAInsight v{APP_VERSION}")
     print(f"  Running at: {url}")
     print(f"  Press Ctrl+C to stop")
     print(f"{'='*55}\n")
