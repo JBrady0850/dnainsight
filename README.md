@@ -47,11 +47,34 @@ No other software required. All dependencies install automatically.
 
 ---
 
+Downloading DNAInsight
+
+New to GitHub? Here is the simplest way to get the files onto your computer. You only need to do this once.
+
+Option A: Download ZIP (recommended, no extra software needed)
+
+1. Go to https://github.com/JBrady0850/dnainsight in your web browser.
+2. Click the green Code button near the top of the page.
+3. Click Download ZIP.
+4. Find the downloaded file (usually in your Downloads folder) named dnainsight-main.zip.
+5. Right-click the ZIP file and choose Extract All... (Windows) or double-click it (macOS) to unzip it.
+6. Move the extracted dnainsight-main folder wherever you want to keep it (for example, your Documents folder). You can rename it to dnainsight if you like; either name works. This is the project folder the rest of this guide refers to.
+
+Option B: Clone with Git (for users who already have Git installed)
+
+1. Open a terminal (Command Prompt, PowerShell, or Terminal).
+2. Run: git clone https://github.com/JBrady0850/dnainsight.git
+3. This creates a dnainsight folder in your current location containing all project files.
+
+Once you have the folder on your computer, continue to Installation below.
+
+---
+
 Installation
 
 Windows
 
-1. Extract the DNAInsight folder anywhere on your computer.
+1. Extract the dnainsight folder anywhere on your computer.
 2. Double-click install.bat
 
 The installer automatically detects whether Python is installed. If Python is not found:
@@ -63,7 +86,7 @@ All Python packages (Flask, requests) install automatically. No manual steps req
 
 macOS / Linux
 
-1. Open Terminal in the DNAInsight folder.
+1. Open Terminal in the dnainsight folder.
 2. Run: bash install.sh
 
 The installer automatically detects whether Python 3 is installed and uses the appropriate
@@ -256,7 +279,7 @@ The information provided is for personal educational use only.
 File Structure
 
 ```
-DNAInsight/
+dnainsight/
 ├── app.py                    Entry point (Flask server)
 ├── requirements.txt          Python dependencies
 ├── install.bat               Windows installer
