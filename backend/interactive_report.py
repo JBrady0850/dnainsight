@@ -524,13 +524,14 @@ def generate_interactive_report(profile: dict, findings: Iterable[dict],
             'having been checked and found absent.</div>'
             '<table style="font-size:.84em"><tbody>' + rows + '</tbody></table></div>')
 
-    slider = lambda key, label, note: (
-        f'<h3>{label} <span class="muted" style="font-size:.85em">'
-        f'<span id="{key}v"></span></span></h3>'
-        + (f'<div class="muted" style="font-size:.74em;margin-bottom:3px">{note}</div>'
-           if note else '')
-        + f'<input type="range" id="{key}lo" oninput="sync()">'
-        + f'<input type="range" id="{key}hi" oninput="sync()">')
+    def slider(key, label, note):
+        return (
+            f'<h3>{label} <span class="muted" style="font-size:.85em">'
+            f'<span id="{key}v"></span></span></h3>'
+            + (f'<div class="muted" style="font-size:.74em;margin-bottom:3px">{note}</div>'
+               if note else '')
+            + f'<input type="range" id="{key}lo" oninput="sync()">'
+            + f'<input type="range" id="{key}hi" oninput="sync()">')
 
     return f"""<!DOCTYPE html>
 <html lang="en">

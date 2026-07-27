@@ -463,11 +463,11 @@ def present_populations(entries: dict) -> list[str]:
 
 def write_output(path: Path, entries: dict, note_suffix: str = "") -> None:
     """Write the versioned frequencies.json payload to ``path``."""
+    built_at = datetime.datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     payload = {
         "_meta": {
             "version":     VERSION,
-            "built_at":    datetime.datetime.now(timezone.utc)
-                           .strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "built_at":    built_at,
             "source":      SOURCE,
             "license":     LICENSE,
             "rsids":       len(entries),

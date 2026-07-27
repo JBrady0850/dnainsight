@@ -178,9 +178,55 @@ foreclose commercial use of DNAInsight. So:
   replace an existing None, so the coercion never ran at all.
 - **`build_facets` omitted the documented `clinvar_diseases` bucket.**
 
+- **CI ran on the deprecated Node 20 action runtime.** `actions/checkout@v4` and
+  `actions/setup-python@v5` both bundle Node 20, which GitHub deprecated on
+  2025-09-19 and now force-runs on Node 24 while printing a warning on every job.
+  Bumped to `actions/checkout@v5` and `actions/setup-python@v6`, the releases that
+  declare Node 24 natively. `_build/vactions.py` now fails the gate on any Node 20
+  action pin, so this cannot silently return.
+- **The CI lint job would have failed on a clean clone.** The go-live gate ran
+  pytest but never ran flake8, so thirteen findings were invisible locally while
+  they would have turned the `lint` job red. Cleared all thirteen. Two were real
+  defects rather than formatting, and both are listed below. Added
+  `_build/vlint.py`, which runs the lint job's own command, and
+  `_build/vci.py`, which copies exactly the files `git ls-files` would publish
+  into a temp tree and runs the workflow's steps there. A green local run proves
+  nothing about a fresh clone, because the working tree holds gitignored
+  artifacts a clone will not have.
+- **`harvest_genosets` silently ignored its own `rate_limit` argument.** It built
+  a `_RateLimiter` from the caller's value and then never used it, so every
+  request fell back to the module-level 2.0/s default. `harvest` had the same gap
+  for its per-page fetches: it threaded the limiter into target enumeration only.
+  `fetch_subject` and `fetch_wikitext` now accept and forward a limiter, so both
+  harvesters honour the argument. flake8 saw this as an unused local; it was a
+  parameter that lied.
+- **DATA LOSS RISK: the upload destination was unbounded and overwrote silently.**
+  The path was `f"{profile_name}_{filename}"` with no length cap and no collision
+  check. Two consequences, both reproduced. First, re-uploading a file the app had
+  itself named prepended the profile name again, so the component grew about
+  fifteen characters per cycle; at 246 characters the next write crossed the
+  filesystem's 255-byte limit for a single component and Windows raised OSError
+  EINVAL, returning HTTP 500. Second, two profiles sharing a name and a filename
+  resolved to one path, so the second upload replaced the first person's raw
+  export with no error and no warning, and raw DNA cannot be recovered once
+  replaced. `_bounded_upload_path()` in `backend/routes.py` now truncates the stem
+  to 100 characters and appends a counter until the path is free;
+  `backend/routes_v2.py` imports that one implementation rather than keeping a
+  second copy of the rule. Guarded by `tests/test_uploads.py`, 31 tests.
+- **The verification gate was not idempotent.** Four harnesses selected their
+  sample as `sorted(uploads/*.txt)[0]`, the alphabetically first file, which after
+  one run was one of their own artifacts. That is what drove the filename growth
+  above, and it meant the gate's result depended on how many times it had been
+  run: it passed while names were short and failed three stages at once when they
+  were not. Selection now uses `_build/sample.py`, which picks the SHORTEST name.
+  A derived artifact is strictly longer than its source, because derivation only
+  prepends, so the shortest name can never be output derived from itself. No
+  prefix blacklist is used, because a blacklist stops working the moment someone
+  adds a harness and forgets to update it.
+
 ### Testing
 
-- 1885 tests passing, up from 138. New suites for scoring, filters,
+- 1929 tests passing, up from 138. New suites for scoring, filters,
   pipeline, orientation, genosets, frequency, prs, merge, traits, snpedia
   and database path resolution.
 - Verification harnesses under `_build/`: a structural auditor, a Markdown

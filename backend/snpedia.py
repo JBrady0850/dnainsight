@@ -557,7 +557,8 @@ def _clean_dataitem(value: Any) -> str:
     return text.replace("_", " ").strip()
 
 
-def fetch_subject(subject: str, session: Any = None) -> dict:
+def fetch_subject(subject: str, session: Any = None,
+                  limiter: _RateLimiter | None = None) -> dict:
     """Fetch one page's semantic properties as a flat {property: value} dict.
 
     Uses action=browsebysubject, which returns the page's stored properties in
@@ -566,6 +567,7 @@ def fetch_subject(subject: str, session: Any = None) -> dict:
     data = _api_get(
         {"action": "browsebysubject", "subject": str(subject or "").strip()},
         session=session,
+        limiter=limiter,
     )
     properties: dict[str, Any] = {}
     for item in ((data.get("query") or {}).get("data") or []):
@@ -584,12 +586,14 @@ def fetch_subject(subject: str, session: Any = None) -> dict:
     return properties
 
 
-def fetch_wikitext(title: str, session: Any = None) -> str:
+def fetch_wikitext(title: str, session: Any = None,
+                   limiter: _RateLimiter | None = None) -> str:
     """Fetch one page's raw wikitext (action=raw), never its history."""
     return _request(
         INDEX_BASE,
         {"title": str(title or "").strip(), "action": "raw"},
         session=session,
+        limiter=limiter,
     )
 
 
@@ -892,18 +896,18 @@ def harvest(
                     continue
             title = page_title(rsid)
             try:
-                properties = fetch_subject(title, session=session)
+                properties = fetch_subject(title, session=session, limiter=limiter)
                 requests_made += 1
                 conn.execute(_SNP_INSERT, _snp_row(rsid, properties))
                 for token in _geno_tokens(properties):
                     if not budget_left():
                         break
-                    geno_props = fetch_subject(f"{title}{token}", session=session)
+                    geno_props = fetch_subject(f"{title}{token}", session=session, limiter=limiter)
                     requests_made += 1
                     conn.execute(_GENOTYPE_INSERT, _genotype_row(rsid, token, geno_props))
                     genotype_rows += 1
                 if budget_left():
-                    diversity = parse_population_diversity(fetch_wikitext(title, session=session))
+                    diversity = parse_population_diversity(fetch_wikitext(title, session=session, limiter=limiter))
                     requests_made += 1
                     for population, percentages in diversity["populations"].items():
                         conn.execute(_FREQUENCY_INSERT, (
@@ -986,12 +990,12 @@ def harvest_genosets(
                     skipped += 1
                     continue
             try:
-                properties = fetch_subject(name, session=session)
+                properties = fetch_subject(name, session=session, limiter=limiter)
                 requests_made += 1
                 criteria = ""
                 if max_requests is None or requests_made < max_requests:
                     try:
-                        criteria = fetch_wikitext(f"{name}/criteria", session=session)
+                        criteria = fetch_wikitext(f"{name}/criteria", session=session, limiter=limiter)
                     except Exception:
                         criteria = ""
                     requests_made += 1

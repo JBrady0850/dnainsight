@@ -45,6 +45,43 @@ REPORTS_DIR = Path(__file__).parent.parent / "reports_output"
 UPLOAD_DIR.mkdir(exist_ok=True)
 REPORTS_DIR.mkdir(exist_ok=True)
 
+
+# Longest filename component this project will ever create. Every mainstream
+# filesystem caps one path component at 255 bytes, and Windows raises OSError
+# EINVAL rather than truncating when that is exceeded. Upload names are built
+# from a user-supplied profile name plus a user-supplied filename, so the result
+# has to be bounded rather than trusted. 100 leaves room for a collision counter
+# and an extension inside any 255-byte budget, including UTF-8 names where a
+# single character can cost four bytes.
+MAX_UPLOAD_STEM = 100
+
+
+def _bounded_upload_path(directory: Path, stem: str, ext: str) -> Path:
+    """Return a bounded, collision-free path inside ``directory``.
+
+    Two distinct faults are prevented here, both observed in this repository:
+
+    1. An over-long component. Re-uploading a file this app itself named grows
+       the component every time, because the profile name is prepended again.
+       Observed growth was about fifteen characters per cycle, reaching 246
+       characters before the write failed with OSError EINVAL and returned 500.
+    2. A silent overwrite. Two profiles sharing a name and a filename resolved
+       to the same path, so the second upload replaced the first person's raw
+       export with no error and no warning. Raw DNA is not recoverable once
+       replaced, which makes a silent overwrite worse than a rejected upload.
+    """
+    safe_stem = "".join(c for c in stem if c.isalnum() or c in "._- ").strip()
+    safe_stem = safe_stem.replace(" ", "_").strip("._") or "upload"
+    safe_ext = ext if ext.startswith(".") else (("." + ext) if ext else ".txt")
+    base = safe_stem[:MAX_UPLOAD_STEM].rstrip("._-") or "upload"
+    candidate = directory / f"{base}{safe_ext}"
+    counter = 2
+    while candidate.exists():
+        tag = f"_{counter}"
+        candidate = directory / f"{base[:MAX_UPLOAD_STEM - len(tag)]}{tag}{safe_ext}"
+        counter += 1
+    return candidate
+
 # Progress tracker for long-running scans
 _scan_progress: dict = {}
 _scan_lock = threading.Lock()
@@ -113,7 +150,8 @@ def create_profile():
 
     # Save uploaded file using a fully sanitized name (prevents path traversal).
     safe_name = "".join(c for c in name if c.isalnum() or c in " _-").strip().replace(" ", "_") or "profile"
-    dest = UPLOAD_DIR / f"{safe_name}_{orig_name}"
+    dest = _bounded_upload_path(
+        UPLOAD_DIR, f"{safe_name}_{Path(orig_name).stem}", Path(orig_name).suffix)
     file.save(str(dest))
 
     # Parse

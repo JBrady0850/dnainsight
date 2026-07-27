@@ -1,7 +1,7 @@
 {
   "_meta": {
     "version": "2.0.0",
-    "built_at": "2026-07-27T11:49:44Z",
+    "built_at": "2026-07-27T20:01:10Z",
     "model_count": 7,
     "license": "MIT (DNAInsight-authored weights from published effect sizes)",
     "note": "Additive scores only. Weights are natural-log odds ratios from published per-allele effect sizes, restricted to rsIDs bundled in data/build_reference.py. Reference mean and sd are analytic under Hardy-Weinberg from European effect allele frequencies, so they assume the variants of a model are independent. Percentiles are meaningful only for European-ancestry users."

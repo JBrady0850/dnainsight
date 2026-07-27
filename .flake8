@@ -3,12 +3,15 @@ max-line-length = 120
 
 # Intentional style: column-aligned dict/tuple formatting used throughout
 # the codebase for readability of the SNP reference table and report dicts.
+# E272 is the keyword form of E221 and fires on the aligned lambda column
+# in filters.SORT_KEYS, so it is exempt for the same reason.
 # Pre-existing issues (F401, F541, E741) are tracked separately from lint CI.
 extend-ignore =
     E221,
     E226,
     E231,
     E241,
+    E272,
     E302,
     E303,
     E305,

@@ -18,7 +18,8 @@ def _resolve_db_path() -> Path:
       2. User home directory ~/.dnainsight/ -- if the app folder is read-only.
       3. System temp directory -- last resort for FUSE/container environments.
     """
-    import os, tempfile, sqlite3 as _sqlite3
+    import tempfile
+    import sqlite3 as _sqlite3
 
     def _test_sqlite(path: Path) -> bool:
         """Can we use SQLite with WAL at this location?

@@ -28,6 +28,7 @@ from . import pipeline
 from . import frequency as freq_mod
 from . import scoring as scoring_mod
 from .parsers import parse_dna_file, ParseError
+from .routes import _bounded_upload_path
 
 api_v2 = Blueprint("api_v2", __name__)
 
@@ -197,7 +198,10 @@ def add_source(pid: int):
     if Path(name).suffix.lower() not in ALLOWED_EXTENSIONS:
         return _err("Upload an uncompressed .txt, .csv or .tsv export, not a .zip or .gz.")
 
-    dest = UPLOAD_DIR / f"p{pid}_{len(_load_sources(pid)) + 1}_{name}"
+    dest = _bounded_upload_path(
+        UPLOAD_DIR,
+        f"p{pid}_{len(_load_sources(pid)) + 1}_{Path(name).stem}",
+        Path(name).suffix)
     upload.save(str(dest))
     try:
         parsed = parse_dna_file(str(dest))
