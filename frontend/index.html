@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DNAInsight — Personal DNA Analysis</title>
+<title>DNAInsight v2, Personal DNA Analysis</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 <style>
   :root {
@@ -20,1184 +20,2400 @@
     --white:     #ffffff;
     --shadow:    0 2px 8px rgba(0,0,0,0.12);
     --radius:    8px;
+
+    /* Repute palette. These exact values are the contract (API_V2 section 5.1). */
+    --repute-good:   #60B060;
+    --repute-bad:    #FF9090;
+    --repute-unset:  #C0C0C0;
+    --repute-good-bg: #f2fbf2;
+    --repute-bad-bg:  #fff5f5;
+
+    /* Rarity ramp, mirrored from backend/frequency.py RARITY_RAMP so the
+       client and server never disagree about what "rare" looks like. */
+    --rarity-unknown: #EFEFEF;
+  }
+  /* Colourblind mode swaps the two hues that matter for a red/green deficit.
+     A real toggle, not a media query, because deficits are not detectable. */
+  body.colorblind {
+    --repute-good: #998EC3;
+    --repute-bad:  #F1A340;
+    --repute-good-bg: #f6f4fb;
+    --repute-bad-bg:  #fef7ef;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--gray-bg); color: var(--text); min-height: 100vh; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: var(--gray-bg); color: var(--text);
+    min-height: 100vh; font-size: var(--base-size, 15px);
+  }
+  a { color: var(--blue-mid); }
 
   /* NAV */
-  nav { background: var(--blue-dark); color: #fff; padding: 0 24px; display: flex; align-items: center; height: 56px; box-shadow: var(--shadow); }
-  nav .logo { font-size: 1.2em; font-weight: 700; letter-spacing: 1px; flex: 1; }
-  nav .nav-links a { color: #cce; text-decoration: none; margin-left: 20px; font-size: 0.9em; cursor: pointer; }
+  nav { background: var(--blue-dark); color: #fff; padding: 0 16px; display: flex;
+        align-items: center; height: 56px; box-shadow: var(--shadow); gap: 12px; }
+  nav .logo { font-size: 1.1em; font-weight: 700; letter-spacing: 1px; white-space: nowrap; }
+  nav .logo small { font-weight: 400; opacity: .7; font-size: .72em; letter-spacing: 0; }
+  nav .nav-links { margin-left: auto; display: flex; align-items: center; gap: 4px; }
+  nav .nav-links a { color: #cce; text-decoration: none; margin-left: 14px;
+                     font-size: 0.87em; cursor: pointer; }
   nav .nav-links a:hover { color: #fff; }
+  nav .navsearch { flex: 1; max-width: 420px; display: flex; align-items: center; gap: 6px; }
+  nav .navsearch input {
+    width: 100%; padding: 7px 10px; border: none; border-radius: 6px;
+    font-size: 0.9em; font-family: inherit;
+  }
+  #nav-pie-wrap { width: 34px; height: 34px; flex-shrink: 0; }
 
   /* LAYOUT */
   .app { display: flex; min-height: calc(100vh - 56px); }
-  .sidebar { width: 240px; background: var(--white); border-right: 1px solid #dde; padding: 20px 0; flex-shrink: 0; }
-  .sidebar h3 { font-size: 0.72em; text-transform: uppercase; letter-spacing: 1px; color: var(--gray-text); padding: 0 16px 8px; }
+  .sidebar { width: 228px; background: var(--white); border-right: 1px solid #dde;
+             padding: 18px 0; flex-shrink: 0; }
+  .sidebar h3 { font-size: 0.7em; text-transform: uppercase; letter-spacing: 1px;
+                color: var(--gray-text); padding: 0 16px 8px; }
   .sidebar ul { list-style: none; }
-  .sidebar ul li { padding: 0; }
-  .sidebar ul li a { display: block; padding: 9px 16px; color: var(--text); text-decoration: none; font-size: 0.9em; border-left: 3px solid transparent; cursor: pointer; }
+  .sidebar ul li a { display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 16px; color: var(--text); text-decoration: none; font-size: 0.88em;
+    border-left: 3px solid transparent; cursor: pointer; }
   .sidebar ul li a:hover { background: var(--blue-light); color: var(--blue-mid); }
-  .sidebar ul li a.active { background: var(--blue-light); color: var(--blue-dark); border-left-color: var(--blue-dark); font-weight: 600; }
-  .sidebar .profile-item { display: flex; align-items: center; gap: 8px; }
-  .sidebar .profile-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
-  .sidebar .add-profile-btn { margin: 12px 16px 0; width: calc(100% - 32px); padding: 8px; background: var(--blue-dark); color: #fff; border: none; border-radius: var(--radius); cursor: pointer; font-size: 0.85em; }
-  .sidebar .add-profile-btn:hover { background: var(--blue-mid); }
+  .sidebar ul li a.active { background: var(--blue-light); color: var(--blue-dark);
+    border-left-color: var(--blue-mid); font-weight: 600; }
+  .sidebar .pill { background: var(--gray-mid); color: var(--gray-text);
+    border-radius: 10px; padding: 1px 7px; font-size: 0.78em; }
+  main { flex: 1; padding: 22px 26px; max-width: 100%; overflow-x: hidden; }
 
-  /* MAIN CONTENT */
-  main { flex: 1; padding: 28px; overflow-y: auto; }
+  h1 { font-size: 1.4em; margin-bottom: 4px; }
+  h2 { font-size: 1.1em; margin: 22px 0 10px; }
+  .sub { color: var(--gray-text); font-size: 0.88em; margin-bottom: 16px; }
 
-  /* CARDS */
-  .card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 24px; margin-bottom: 20px; }
-  .card h2 { font-size: 1.15em; color: var(--blue-dark); margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid var(--blue-light); }
+  .card { background: var(--white); border-radius: var(--radius); padding: 16px 18px;
+          box-shadow: var(--shadow); margin-bottom: 16px; }
 
-  /* HERO */
-  .hero { background: linear-gradient(135deg, var(--blue-dark), var(--blue-mid)); color: #fff; border-radius: var(--radius); padding: 36px; margin-bottom: 24px; }
-  .hero h1 { font-size: 1.8em; margin-bottom: 8px; }
-  .hero p { opacity: 0.85; line-height: 1.6; max-width: 600px; }
-
-  /* SUMMARY GRID */
-  .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px; margin-bottom: 24px; }
-  .summary-card { background: var(--white); border-radius: var(--radius); padding: 18px; text-align: center; box-shadow: var(--shadow); }
-  .summary-card .num { font-size: 2em; font-weight: 700; }
-  .summary-card .label { font-size: 0.78em; color: var(--gray-text); margin-top: 4px; }
-
-  /* FORMS */
-  .form-group { margin-bottom: 16px; }
-  .form-group label { display: block; font-size: 0.85em; font-weight: 600; margin-bottom: 5px; color: #555; }
-  .form-group input, .form-group select { width: 100%; padding: 9px 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.9em; transition: border-color 0.2s; }
-  .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--blue-mid); box-shadow: 0 0 0 3px rgba(41,128,185,0.15); }
-  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-
-  /* DROP ZONE */
-  .drop-zone { border: 2px dashed #bbb; border-radius: var(--radius); padding: 36px; text-align: center; cursor: pointer; transition: all 0.2s; background: var(--gray-bg); }
-  .drop-zone:hover, .drop-zone.dragover { border-color: var(--blue-mid); background: var(--blue-light); }
-  .drop-zone .dz-icon { font-size: 2.5em; margin-bottom: 10px; color: var(--blue-mid); }
-  .drop-zone p { color: #666; font-size: 0.9em; margin: 4px 0; }
-  .drop-zone .file-name { font-weight: 600; color: var(--blue-dark); margin-top: 8px; }
-  .drop-zone input[type="file"] { display: none; }
-
-  /* BUTTONS */
-  .btn { display: inline-block; padding: 9px 20px; border-radius: 6px; border: none; cursor: pointer; font-size: 0.9em; font-weight: 600; transition: all 0.15s; }
-  .btn-primary { background: var(--blue-dark); color: #fff; }
-  .btn-primary:hover { background: var(--blue-mid); }
-  .btn-success { background: var(--green); color: #fff; }
-  .btn-success:hover { opacity: 0.9; }
-  .btn-danger { background: var(--red); color: #fff; }
-  .btn-danger:hover { opacity: 0.9; }
-  .btn-sm { padding: 5px 12px; font-size: 0.8em; }
-  .btn-outline { background: transparent; border: 1px solid var(--blue-dark); color: var(--blue-dark); }
+  .btn { display: inline-block; padding: 7px 14px; border-radius: 6px; border: none;
+    cursor: pointer; font-size: 0.87em; font-family: inherit; text-decoration: none; }
+  .btn-primary { background: var(--blue-mid); color: #fff; }
+  .btn-primary:hover { background: var(--blue-dark); }
+  .btn-outline { background: var(--white); color: var(--blue-mid);
+                 border: 1px solid var(--blue-mid); }
   .btn-outline:hover { background: var(--blue-light); }
-  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-sm { padding: 4px 9px; font-size: 0.8em; }
+  .btn-danger { background: var(--red); color: #fff; }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
 
-  /* BADGES */
-  .badge { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 0.75em; font-weight: 600; }
-  .badge-red { background: #fde; color: var(--red); }
-  .badge-orange { background: #fef0e6; color: var(--orange); }
-  .badge-blue { background: var(--blue-light); color: var(--blue-dark); }
-  .badge-green { background: #e8f8ef; color: var(--green); }
+  table { width: 100%; border-collapse: collapse; font-size: 0.87em; }
+  th, td { text-align: left; padding: 7px 9px; border-bottom: 1px solid var(--gray-mid); }
+  th { background: var(--gray-mid); font-weight: 600; font-size: 0.92em; }
+  tbody tr:hover { background: var(--blue-light); }
 
-  /* FINDINGS TABLE */
-  .findings-table { width: 100%; border-collapse: collapse; font-size: 0.88em; }
-  .findings-table th { background: var(--blue-dark); color: #fff; padding: 8px 10px; text-align: left; position: sticky; top: 0; }
-  .findings-table td { padding: 8px 10px; border-bottom: 1px solid #eee; vertical-align: top; }
-  .findings-table tr:hover td { background: var(--blue-light); }
-  .findings-table .interp { color: #555; font-size: 0.9em; max-width: 380px; }
+  input, select, textarea { font-family: inherit; font-size: 0.9em; }
+  input[type=text], input[type=date], input[type=number], select {
+    padding: 6px 9px; border: 1px solid #ccd; border-radius: 5px; background: #fff; }
+  label { font-size: 0.86em; }
 
-  /* PROGRESS */
-  .progress-bar-wrap { background: #e0e0e0; border-radius: 99px; height: 10px; overflow: hidden; margin: 8px 0; }
-  .progress-bar { height: 100%; background: linear-gradient(90deg, var(--blue-mid), var(--blue-dark)); border-radius: 99px; transition: width 0.4s; }
+  .banner { padding: 10px 14px; border-radius: 6px; font-size: 0.87em;
+            margin-bottom: 14px; display: flex; gap: 10px; align-items: flex-start; }
+  .banner-warn { background: #fff8e1; color: #7d5900; border: 1px solid #ffc107; }
+  .banner-info { background: var(--blue-light); color: var(--blue-dark);
+                 border: 1px solid #b8daf5; }
+  .banner-err  { background: #fdecea; color: #8b1c13; border: 1px solid #f5c6c2; }
+  .banner .x { margin-left: auto; cursor: pointer; font-weight: 700; opacity: .6; }
 
-  /* ALERTS */
-  .alert { padding: 12px 16px; border-radius: 6px; margin-bottom: 14px; font-size: 0.9em; }
-  .alert-info { background: var(--blue-light); color: var(--blue-dark); border-left: 4px solid var(--blue-mid); }
-  .alert-warning { background: #fff8e1; color: #7d5900; border-left: 4px solid #ffc107; }
-  .alert-danger { background: #fde; color: var(--red); border-left: 4px solid var(--red); }
-  .alert-success { background: #e8f8ef; color: var(--green); border-left: 4px solid var(--green); }
-
-  /* TABS */
-  .tabs { display: flex; gap: 0; border-bottom: 2px solid var(--blue-light); margin-bottom: 20px; }
-  .tab-btn { padding: 9px 18px; border: none; background: none; cursor: pointer; font-size: 0.9em; color: var(--gray-text); border-bottom: 2px solid transparent; margin-bottom: -2px; }
-  .tab-btn.active { color: var(--blue-dark); font-weight: 600; border-bottom-color: var(--blue-dark); }
-  .tab-btn:hover { color: var(--blue-mid); }
-  .tab-panel { display: none; }
-  .tab-panel.active { display: block; }
-
-  /* FILTER BAR */
-  .filter-bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
-  .filter-bar select, .filter-bar input { padding: 7px 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.85em; }
-  .filter-bar input { flex: 1; min-width: 160px; }
-
-  /* EMPTY STATE */
-  .empty-state { text-align: center; padding: 60px 20px; color: var(--gray-text); }
-  .empty-state .icon { font-size: 3em; margin-bottom: 14px; }
-  .empty-state h3 { margin-bottom: 8px; color: var(--text); }
-
-  /* MODAL */
-  .modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
-  .modal-backdrop.open { display: flex; }
-  .modal { background: var(--white); border-radius: var(--radius); padding: 28px; width: 520px; max-width: 95vw; max-height: 90vh; overflow-y: auto; box-shadow: 0 8px 32px rgba(0,0,0,0.25); }
-  .modal h2 { margin-bottom: 20px; color: var(--blue-dark); }
-  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
-
-  /* STEP WIZARD */
-  .step-indicator { display: flex; gap: 0; margin-bottom: 28px; }
-  .step { flex: 1; text-align: center; padding: 8px; font-size: 0.78em; color: var(--gray-text); border-bottom: 3px solid #ddd; }
-  .step.done { border-bottom-color: var(--green); color: var(--green); }
-  .step.active { border-bottom-color: var(--blue-mid); color: var(--blue-dark); font-weight: 600; }
-
-  /* PROVIDER CHIPS */
-  .provider-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
-  .provider-chip { border: 2px solid #ddd; border-radius: 8px; padding: 12px; text-align: center; cursor: default; font-size: 0.85em; }
-  .provider-chip.detected { border-color: var(--green); background: #e8f8ef; color: var(--green); font-weight: 600; }
-
-  /* SCAN STATUS */
-  .scan-status { background: var(--gray-mid); border-radius: var(--radius); padding: 16px; margin-bottom: 16px; }
-  .scan-status .scan-stats { display: flex; gap: 20px; margin-top: 10px; flex-wrap: wrap; }
-  .scan-stats .stat { font-size: 0.85em; }
-  .stat .stat-num { font-weight: 700; font-size: 1.2em; color: var(--blue-dark); }
-
-  /* REPORT CARD */
-  .report-list { display: grid; gap: 10px; }
-  .report-card { border: 1px solid #ddd; border-radius: var(--radius); padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; }
-  .report-card .report-info { font-size: 0.88em; }
-  .report-card .report-type { font-weight: 700; color: var(--blue-dark); margin-bottom: 2px; }
-  .report-card .report-meta { color: var(--gray-text); font-size: 0.82em; }
-
-  /* RESPONSIVE */
-  @media (max-width: 700px) {
-    .sidebar { display: none; }
-    .form-row { grid-template-columns: 1fr; }
-    .provider-grid { grid-template-columns: repeat(2,1fr); }
+  /* ---------------- GENO CARDS ---------------- */
+  #genos-list { display: flex; flex-direction: column; gap: 10px; }
+  .geno {
+    background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow);
+    border-left: 4px solid var(--repute-unset); padding: 12px 14px;
+    display: grid; grid-template-columns: minmax(0,1fr) 260px; gap: 14px;
   }
+  .geno.goodRepute { border-left-color: var(--repute-good); background: var(--repute-good-bg); }
+  .geno.badRepute  { border-left-color: var(--repute-bad);  background: var(--repute-bad-bg); }
+  .geno.noRepute   { border-left-color: var(--repute-unset); }
+  .geno.is-dubious { border-left-style: dashed; }
+  @media (max-width: 980px) { .geno { grid-template-columns: 1fr; } }
+
+  .geno-head { display: flex; align-items: center; gap: 9px; flex-wrap: wrap;
+               margin-bottom: 6px; }
+  .geno-id { font-family: 'Consolas','Courier New',monospace; font-weight: 700;
+             font-size: 1em; }
+  .geno-token { font-family: 'Consolas','Courier New',monospace; color: var(--blue-mid); }
+  .mag-pill { background: var(--blue-dark); color: #fff; border-radius: 11px;
+              padding: 1px 9px; font-size: 0.8em; font-weight: 700; }
+  .mag-pill.mag-0 { background: #b9c1c9; }
+  .mag-pill.mag-low { background: #8fa6bd; }
+  .mag-pill.mag-mid { background: var(--blue-mid); }
+  .mag-pill.mag-high { background: #b5341f; }
+
+  .badge { font-size: 0.72em; padding: 2px 7px; border-radius: 9px;
+           background: var(--gray-mid); color: #556; white-space: nowrap; }
+  .badge-rx    { background: #fdecea; color: #8b1c13; }
+  .badge-act   { background: #fff4e5; color: #8a4b08; }
+  .badge-info  { background: var(--gray-mid); color: #556; }
+  .badge-warn  { background: #fff8e1; color: #7d5900; }
+  .badge-cpic  { background: #e8f0fe; color: #17408b; font-weight: 600; }
+  .badge-star  { background: #fef6d8; color: #7a5c00; }
+  .badge-nocarrier { background: #eef3f7; color: #4a6b86; }
+
+  .geno-summary { font-weight: 600; margin-bottom: 4px; }
+  .geno-body { font-size: 0.88em; color: #445; line-height: 1.45; }
+  .geno-crit { font-family: 'Consolas','Courier New',monospace; font-size: 0.8em;
+    background: #f7f9fb; border: 1px solid #e3e9ef; border-radius: 5px;
+    padding: 7px 9px; margin-top: 8px; white-space: pre-wrap; word-break: break-word; }
+
+  .kv { width: 100%; font-size: 0.79em; }
+  .kv td { padding: 2px 4px; border: none; }
+  .kv td:first-child { color: var(--gray-text); width: 46%; cursor: help; }
+  .kv td:last-child { font-weight: 600; text-align: right; }
+
+  .popbars { margin-top: 8px; display: flex; gap: 2px; align-items: flex-end; height: 34px; }
+  .popbar { flex: 1; background: var(--rarity-unknown); position: relative;
+            border-radius: 2px 2px 0 0; min-height: 2px; cursor: help; }
+  .popbar.is-you { outline: 2px solid var(--blue-dark); outline-offset: 0; }
+  .popbar-label { font-size: 0.6em; text-align: center; color: var(--gray-text);
+                  margin-top: 2px; }
+
+  .tagrow { margin-top: 8px; font-size: 0.78em; display: flex; flex-wrap: wrap;
+            gap: 5px; align-items: center; }
+  .tagrow .tl { color: var(--gray-text); }
+  .tag { background: var(--blue-light); color: var(--blue-dark); border: none;
+    border-radius: 9px; padding: 2px 8px; cursor: pointer; font-size: 1em;
+    font-family: inherit; }
+  .tag:hover { background: #d3e9fb; }
+
+  .conflictbox { margin-top: 9px; background: #fff8e1; border: 1px solid #ffc107;
+    border-radius: 5px; padding: 8px 10px; font-size: 0.82em; }
+  .caveatbox { margin-top: 9px; background: #f7f9fb; border-left: 3px solid var(--gray-text);
+    padding: 7px 10px; font-size: 0.82em; color: #445; }
+  .caveatbox ul { margin: 4px 0 0 16px; }
+
+  /* ---------------- CONTROL PANEL ---------------- */
+  #panel {
+    position: fixed; top: 0; right: 0; width: 340px; height: 100vh;
+    background: var(--white); box-shadow: -4px 0 18px rgba(0,0,0,.18);
+    transform: translateX(100%); transition: transform .18s ease;
+    z-index: 60; overflow-y: auto; padding: 14px 16px 40px;
+  }
+  #panel.open { transform: translateX(0); }
+  #panel h4 { font-size: 0.72em; text-transform: uppercase; letter-spacing: 1px;
+    color: var(--gray-text); margin: 16px 0 7px; border-top: 1px solid var(--gray-mid);
+    padding-top: 12px; }
+  #panel h4:first-of-type { border-top: none; margin-top: 8px; }
+  .panel-head { display: flex; align-items: center; gap: 8px; }
+  .panel-head strong { flex: 1; }
+  .btnrow { display: flex; flex-wrap: wrap; gap: 5px; }
+  .checkrow { display: flex; flex-wrap: wrap; gap: 4px 12px; }
+  .checkrow label { display: flex; align-items: center; gap: 4px; cursor: pointer; }
+
+  .slider { margin-bottom: 6px; }
+  .slider-head { display: flex; align-items: center; font-size: 0.82em;
+                 margin-bottom: 3px; gap: 6px; }
+  .slider-head .val { margin-left: auto; font-family: 'Consolas',monospace;
+                      font-weight: 700; font-size: 0.95em; }
+  .dual { position: relative; height: 26px; }
+  .dual input[type=range] {
+    position: absolute; left: 0; top: 6px; width: 100%; margin: 0;
+    -webkit-appearance: none; appearance: none; background: none;
+    pointer-events: none; height: 14px;
+  }
+  .dual input[type=range]::-webkit-slider-runnable-track {
+    height: 4px; background: var(--gray-mid); border-radius: 2px; }
+  .dual input[type=range]::-moz-range-track {
+    height: 4px; background: var(--gray-mid); border-radius: 2px; }
+  .dual input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; pointer-events: auto; width: 14px; height: 14px;
+    border-radius: 50%; background: var(--blue-mid); border: 2px solid #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,.3); margin-top: -5px; cursor: pointer; }
+  .dual input[type=range]::-moz-range-thumb {
+    pointer-events: auto; width: 14px; height: 14px; border-radius: 50%;
+    background: var(--blue-mid); border: 2px solid #fff; cursor: pointer; }
+  .nudge { display: flex; gap: 3px; margin-top: 2px; }
+  .nudge button { flex: 1; padding: 1px 0; font-size: 0.72em; border: 1px solid #ccd;
+    background: #fbfcfd; border-radius: 3px; cursor: pointer; font-family: inherit; }
+  .nudge button:hover { background: var(--blue-light); }
+  .exempt-note { font-size: 0.7em; color: var(--gray-text); font-style: normal; }
+
+  /* Searchable multi-select, hand rolled to avoid a dependency. */
+  .ms { position: relative; margin-bottom: 8px; }
+  .ms > input { width: 100%; }
+  .ms-list { max-height: 150px; overflow-y: auto; border: 1px solid #ccd;
+    border-top: none; border-radius: 0 0 5px 5px; background: #fff; }
+  .ms-list label { display: flex; gap: 6px; padding: 3px 7px; cursor: pointer;
+                   font-size: 0.82em; align-items: center; }
+  .ms-list label:hover { background: var(--blue-light); }
+  .ms-list .cnt { margin-left: auto; color: var(--gray-text); font-size: 0.9em; }
+  .ms-chips { display: flex; flex-wrap: wrap; gap: 4px; margin: 4px 0; }
+  .ms-chip { background: var(--blue-dark); color: #fff; border-radius: 9px;
+    padding: 1px 7px; font-size: 0.74em; cursor: pointer; }
+
+  .counters { display: flex; gap: 8px; font-size: 0.8em; }
+  .counters div { flex: 1; background: var(--gray-bg); border-radius: 5px;
+                  padding: 5px 7px; text-align: center; }
+  .counters strong { display: block; font-size: 1.25em; }
+
+  #panel-scrim { position: fixed; inset: 0; background: rgba(0,0,0,.28);
+    z-index: 55; display: none; }
+  #panel-scrim.open { display: block; }
+
+  /* MODALS */
+  .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.5);
+    display: none; align-items: center; justify-content: center; z-index: 80; }
+  .modal-backdrop.open { display: flex; }
+  .modal { background: #fff; border-radius: var(--radius); width: min(560px, 94vw);
+    max-height: 90vh; overflow-y: auto; padding: 20px 22px; }
+  .modal h3 { margin-bottom: 4px; }
+  .modal .close { float: right; cursor: pointer; font-size: 1.3em; color: var(--gray-text); }
+
+  .step-indicator { display: flex; gap: 6px; margin: 14px 0; font-size: 0.78em; }
+  .step { flex: 1; padding: 5px; text-align: center; background: var(--gray-mid);
+          border-radius: 4px; color: var(--gray-text); }
+  .step.active { background: var(--blue-mid); color: #fff; }
+  .form-group { margin-bottom: 12px; }
+  .form-group label { display: block; margin-bottom: 4px; font-weight: 600; }
+  .form-group input, .form-group select { width: 100%; }
+  .drop-zone { border: 2px dashed #ccd; border-radius: var(--radius); padding: 26px;
+    text-align: center; cursor: pointer; color: var(--gray-text); }
+  .drop-zone.over { border-color: var(--blue-mid); background: var(--blue-light); }
+  .file-name { margin-top: 8px; font-weight: 600; color: var(--blue-dark); }
+  .provider-grid { display: flex; flex-wrap: wrap; gap: 5px; font-size: 0.76em; }
+  .provider-grid span { background: var(--gray-mid); border-radius: 4px; padding: 2px 7px; }
+
+  .progress-bar-wrap { background: var(--gray-mid); border-radius: 5px; height: 9px;
+                       overflow: hidden; }
+  .progress-bar { background: var(--blue-mid); height: 100%; width: 5%;
+                  transition: width .25s; }
+  .stat { text-align: center; }
+  .stat-num { font-size: 1.5em; font-weight: 700; color: var(--blue-dark); }
+
+  .empty { text-align: center; padding: 40px 20px; color: var(--gray-text); }
+  .spinner { display: inline-block; width: 15px; height: 15px; border: 2px solid #ccd;
+    border-top-color: var(--blue-mid); border-radius: 50%;
+    animation: spin .7s linear infinite; vertical-align: -2px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .mono { font-family: 'Consolas','Courier New',monospace; }
+  .muted { color: var(--gray-text); }
+  .nowrap { white-space: nowrap; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden;
+             clip: rect(0 0 0 0); }
 </style>
 </head>
 <body>
 
 <nav>
-  <span class="logo">&#x1F9EC; DNAInsight</span>
+  <div class="logo">DNAInsight <small id="ver-badge">v2</small></div>
+  <button class="btn btn-outline btn-sm" id="panel-toggle" onclick="togglePanel()"
+          aria-label="Open filters and controls" title="Filters and controls">
+    &#9776; Filters
+  </button>
+  <div class="navsearch">
+    <label class="sr-only" for="q">Search findings</label>
+    <input type="text" id="q" placeholder="Search, or chr7:1000-2000, /MAG&gt;=3, /flipped"
+           oninput="onSearchInput()" autocomplete="off">
+  </div>
+  <div id="nav-pie-wrap" title="Repute distribution: good, not set, bad">
+    <canvas id="nav-pie" width="34" height="34"></canvas>
+  </div>
   <div class="nav-links">
     <a onclick="showView('home')">Home</a>
     <a onclick="showView('profiles')">Profiles</a>
     <a onclick="showView('database')">Database</a>
+    <a onclick="openHelp()" title="Help (Ctrl+H)">Help</a>
   </div>
 </nav>
 
-<!-- DB staleness banner (hidden until needed) -->
-<div id="db-staleness-banner" style="display:none; background:#fff8e1; color:#7d5900; border-bottom:2px solid #ffc107; padding:10px 24px; font-size:0.87em; display:flex; align-items:center; gap:12px;">
-  <span>&#9888;</span>
-  <span id="db-banner-text"></span>
-  <button onclick="showView('database')" style="margin-left:auto; padding:4px 12px; background:#ffc107; border:none; border-radius:4px; cursor:pointer; font-size:0.85em; font-weight:600; color:#000;">Update Now</button>
-  <button onclick="document.getElementById('db-staleness-banner').style.display='none'" style="background:none; border:none; cursor:pointer; font-size:1.1em; color:#7d5900;">&#x2715;</button>
+<div id="err-strip"></div>
+
+<div id="db-staleness-banner" class="banner banner-warn" style="display:none; margin:10px 26px 0;">
+  <span>&#9888;</span><span id="db-banner-text"></span>
+  <button class="btn btn-sm" style="background:#ffc107;margin-left:auto"
+          onclick="showView('database')">Update now</button>
 </div>
 
 <div class="app">
   <aside class="sidebar">
-    <h3>Profiles</h3>
+    <h3>Profile</h3>
     <ul id="profile-list-sidebar"></ul>
-    <button class="add-profile-btn" onclick="openAddModal()">+ Add Profile</button>
-    <br><br>
-    <h3>Navigation</h3>
+    <div style="padding:8px 16px;">
+      <button class="btn btn-outline btn-sm" style="width:100%" onclick="openAddModal()">
+        + Add profile
+      </button>
+    </div>
+    <h3 style="margin-top:16px;">Analysis</h3>
     <ul>
       <li><a onclick="showView('home')" data-view="home">Dashboard</a></li>
-      <li><a onclick="showView('findings')" data-view="findings">Findings</a></li>
+      <li><a onclick="showView('findings')" data-view="findings">
+        Findings <span class="pill" id="pill-findings"></span></a></li>
+      <li><a onclick="showView('genosets')" data-view="genosets">
+        Genosets <span class="pill" id="pill-genosets"></span></a></li>
+      <li><a onclick="showView('pgx')" data-view="pgx">
+        Medicines <span class="pill" id="pill-pgx"></span></a></li>
+      <li><a onclick="showView('traits')" data-view="traits">
+        Traits <span class="pill" id="pill-traits"></span></a></li>
+      <li><a onclick="showView('prs')" data-view="prs">
+        Risk scores <span class="pill" id="pill-prs"></span></a></li>
+      <li><a onclick="showView('qc')" data-view="qc">
+        Data quality <span class="pill" id="pill-qc"></span></a></li>
+    </ul>
+    <h3 style="margin-top:16px;">Manage</h3>
+    <ul>
+      <li><a onclick="showView('scan')" data-view="scan">Run scan</a></li>
+      <li><a onclick="showView('sources')" data-view="sources">
+        DNA files <span class="pill" id="pill-sources"></span></a></li>
       <li><a onclick="showView('reports')" data-view="reports">Reports</a></li>
-      <li><a onclick="showView('scan')" data-view="scan">Run Scan</a></li>
-      <li><a onclick="showView('database')" data-view="database">&#x1F4E6; Database</a></li>
+      <li><a onclick="showView('database')" data-view="database">Database</a></li>
     </ul>
   </aside>
-
-  <main id="main-content">
-    <!-- Views are injected here -->
-  </main>
+  <main id="main-content"><div class="empty"><span class="spinner"></span> Loading</div></main>
 </div>
 
-<!-- ADD PROFILE MODAL -->
+<!-- ------------------------------------------------------------------ -->
+<!-- CONTROL PANEL. Every filter lives here. Bounds come from the       -->
+<!-- server's `ranges` object, never hard coded, so Reset restores      -->
+<!-- data derived limits (API_V2 section 3.4).                          -->
+<!-- ------------------------------------------------------------------ -->
+<div id="panel-scrim" onclick="togglePanel(false)"></div>
+<aside id="panel" role="dialog" aria-label="Findings filters">
+  <div class="panel-head">
+    <strong>Filters</strong>
+    <button class="btn btn-outline btn-sm" onclick="resetFilters()"
+            title="Clear all filters and show everything (Escape)">Reset</button>
+    <button class="btn btn-outline btn-sm" onclick="togglePanel(false)"
+            aria-label="Close filters">&times;</button>
+  </div>
+
+  <h4>Views and export</h4>
+  <div class="btnrow">
+    <button class="btn btn-outline btn-sm" onclick="openTable()"
+            title="Plain table of all matching rows, in a new window">Table</button>
+    <button class="btn btn-outline btn-sm" onclick="openCharts()"
+            title="Category charts for the current selection">Charts</button>
+    <button class="btn btn-outline btn-sm" onclick="exportFiltered('csv')"
+            title="Download matching rows as CSV">CSV</button>
+    <button class="btn btn-outline btn-sm" onclick="exportFiltered('tsv')"
+            title="Download matching rows as TSV">TSV</button>
+    <button class="btn btn-outline btn-sm" onclick="exportFiltered('json')"
+            title="Download matching rows as JSON">JSON</button>
+  </div>
+
+  <h4>ClinVar</h4>
+  <div class="btnrow" style="margin-bottom:6px;">
+    <button class="btn btn-outline btn-sm" id="cv-all" onclick="setClinvarMode(false)"
+            title="Remove ClinVar filtering">All</button>
+    <button class="btn btn-outline btn-sm" id="cv-only" onclick="setClinvarMode(true)"
+            title="Only variants with a ClinVar record. Defaults to pathogenic and likely pathogenic.">ClinVar only</button>
+  </div>
+  <div id="cv-codes" class="checkrow" style="display:none;"></div>
+  <div style="margin-top:6px;">
+    <label for="min-stars">Minimum review stars
+      <select id="min-stars" onchange="applyFilters()"
+              title="ClinVar review status as stars. Higher means more submitter agreement.">
+        <option value="">any</option>
+        <option value="1">1 or more</option>
+        <option value="2">2 or more</option>
+        <option value="3">3 or more</option>
+        <option value="4">4 only</option>
+      </select>
+    </label>
+  </div>
+
+  <h4>Ranges</h4>
+  <div id="sliders"></div>
+
+  <h4>Repute</h4>
+  <div class="checkrow" id="repute-row">
+    <label><input type="checkbox" value="good" checked onchange="applyFilters()"> Good</label>
+    <label><input type="checkbox" value="unset" checked onchange="applyFilters()"> Not set</label>
+    <label><input type="checkbox" value="bad" checked onchange="applyFilters()"> Bad</label>
+  </div>
+
+  <h4>Show</h4>
+  <div class="checkrow" id="show-row">
+    <label><input type="checkbox" id="show-snp" checked onchange="applyFilters()"> SNPs</label>
+    <label><input type="checkbox" id="show-genoset" checked onchange="applyFilters()"> Genosets</label>
+    <label><input type="checkbox" id="show-trait" checked onchange="applyFilters()"> Traits</label>
+    <label><input type="checkbox" id="show-prs" checked onchange="applyFilters()"> Scores</label>
+  </div>
+  <div class="checkrow" style="margin-top:5px;">
+    <label><input type="checkbox" id="z-hom" checked onchange="applyFilters()"> Homozygous</label>
+    <label><input type="checkbox" id="z-het" checked onchange="applyFilters()"> Heterozygous</label>
+    <label><input type="checkbox" id="z-nocall" checked onchange="applyFilters()"> No calls</label>
+  </div>
+  <div class="checkrow" style="margin-top:5px;">
+    <label title="Only positions where two of your own files disagree">
+      <input type="checkbox" id="only-conflicts" onchange="applyFilters()"> Conflicts only</label>
+    <label title="Only strand flipped or palindromic calls, for quality review">
+      <input type="checkbox" id="only-ambiguous" onchange="applyFilters()"> Ambiguous only</label>
+    <label title="Drop variants you do not actually carry">
+      <input type="checkbox" id="only-carriers" onchange="applyFilters()"> Carriers only</label>
+  </div>
+
+  <h4>Require</h4>
+  <div class="checkrow">
+    <label title="Hide genotypes with no reported frequency in the chosen population">
+      <input type="checkbox" id="require-freq" onchange="applyFilters()"> A reported frequency</label>
+  </div>
+
+  <h4>Categories</h4>
+  <div id="facet-genes"></div>
+  <div id="facet-topics"></div>
+  <div id="facet-medicines"></div>
+  <div id="facet-conditions"></div>
+
+  <h4>Sorting</h4>
+  <label class="sr-only" for="sort-order">Sort order</label>
+  <select id="sort-order" style="width:100%" onchange="applyFilters()"></select>
+
+  <h4>Reference population</h4>
+  <label class="sr-only" for="pop-select">Reference population</label>
+  <select id="pop-select" style="width:100%" onchange="onPopulationChange()"></select>
+  <div class="muted" style="font-size:0.74em;margin-top:5px;">
+    This changes the frequency denominator only. It does not infer your ancestry
+    and does not change which variants you carry.
+  </div>
+
+  <h4>Rows</h4>
+  <div class="counters">
+    <div title="How many rows you allow on screen">
+      <strong><input type="number" id="allowed" value="50" min="1" max="20000"
+        style="width:64px;text-align:center;padding:1px" onchange="renderGenos()"></strong>Allowed</div>
+    <div title="How many rows are actually shown"><strong id="cnt-visible">0</strong>Visible</div>
+    <div title="How many matching rows are hidden below the cut"><strong id="cnt-off">0</strong>Offscreen</div>
+  </div>
+  <button class="btn btn-outline btn-sm" style="width:100%;margin-top:6px;"
+          onclick="doubleAllowed()" title="Fast way to allow twice as many visible rows">
+    Show twice as many
+  </button>
+
+  <h4>Display</h4>
+  <div class="checkrow">
+    <label><input type="checkbox" id="opt-tooltips" checked> Tooltips</label>
+  </div>
+  <div style="margin-top:6px;">
+    <label for="vision">Vision
+      <select id="vision" onchange="setVision(this.value)">
+        <option value="normal">Normal</option>
+        <option value="colorblind">Colourblind</option>
+      </select>
+    </label>
+  </div>
+  <div style="margin-top:6px;">
+    Font size
+    <button class="btn btn-outline btn-sm" onclick="bumpFont(-1)" aria-label="Smaller text">A-</button>
+    <button class="btn btn-outline btn-sm" onclick="bumpFont(1)" aria-label="Larger text">A+</button>
+  </div>
+</aside>
+
+<!-- ADD PROFILE WIZARD -->
 <div class="modal-backdrop" id="add-modal">
   <div class="modal">
-    <h2>Add DNA Profile</h2>
-
-    <div class="step-indicator" id="wizard-steps">
-      <div class="step active" id="step-1">1. Your Info</div>
-      <div class="step" id="step-2">2. Upload File</div>
+    <span class="close" onclick="closeAddModal()">&times;</span>
+    <h3>Add a profile</h3>
+    <div class="sub">Everything stays on this computer.</div>
+    <div class="step-indicator">
+      <div class="step active" id="step-1">1. Your info</div>
+      <div class="step" id="step-2">2. Upload file</div>
       <div class="step" id="step-3">3. Confirm</div>
     </div>
 
-    <!-- Step 1: Info -->
     <div id="wizard-step-1">
       <div class="form-group">
-        <label>Full Name *</label>
+        <label for="inp-name">Name</label>
         <input type="text" id="inp-name" placeholder="e.g. Jane Smith">
       </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Date of Birth</label>
-          <input type="date" id="inp-dob">
-        </div>
-        <div class="form-group">
-          <label>Biological Sex</label>
-          <select id="inp-sex">
-            <option value="unknown">Prefer not to say</option>
-            <option value="male">Male</option>
-            <option value="female">Female</option>
-          </select>
-        </div>
+      <div class="form-group">
+        <label for="inp-dob">Date of birth</label>
+        <input type="date" id="inp-dob">
       </div>
-      <div class="modal-actions">
-        <button class="btn btn-outline" onclick="closeAddModal()">Cancel</button>
-        <button class="btn btn-primary" onclick="wizardNext(1)">Next &rarr;</button>
+      <div class="form-group">
+        <label for="inp-sex">Biological sex</label>
+        <select id="inp-sex">
+          <option value="unknown">Prefer not to say</option>
+          <option value="female">Female</option>
+          <option value="male">Male</option>
+        </select>
       </div>
+      <button class="btn btn-primary" onclick="wizardNext(1)">Next &rarr;</button>
     </div>
 
-    <!-- Step 2: Upload -->
     <div id="wizard-step-2" style="display:none;">
-      <div class="alert alert-info" style="margin-bottom:16px;">
-        Upload your raw DNA file. Supported formats: <strong>AncestryDNA, 23andMe, MyHeritage, FamilyTreeDNA, LivingDNA</strong>.
-        The file must be the uncompressed .txt export from your DNA provider.
-      </div>
-      <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
-        <div class="dz-icon">&#x1F4C1;</div>
-        <p><strong>Click or drag your DNA file here</strong></p>
-        <p>Accepted: AncestryDNA.txt, genome_*.txt, FTDNA_*.csv, MyHeritage_*.csv</p>
+      <div class="drop-zone" id="drop-zone"
+           onclick="document.getElementById('file-input').click()">
+        <div style="font-size:1.6em;">&#128193;</div>
+        <div>Click or drag your raw DNA file here</div>
+        <div class="muted" style="font-size:0.82em;margin-top:4px;">
+          Uncompressed .txt, .csv or .tsv. Extract the zip from your provider first.
+        </div>
         <div class="file-name" id="chosen-file-name"></div>
-        <input type="file" id="file-input" accept=".txt,.csv" onchange="fileSelected(this)">
+        <input type="file" id="file-input" accept=".txt,.csv,.tsv"
+               style="display:none" onchange="fileSelected(this)">
       </div>
-      <div class="provider-grid" style="margin-top:14px;" id="provider-grid">
-        <div class="provider-chip">AncestryDNA</div>
-        <div class="provider-chip">23andMe</div>
-        <div class="provider-chip">MyHeritage</div>
-        <div class="provider-chip">FamilyTreeDNA</div>
-        <div class="provider-chip">LivingDNA</div>
-        <div class="provider-chip">Generic</div>
+      <div class="provider-grid" style="margin-top:12px;">
+        <span>23andMe</span><span>AncestryDNA</span><span>MyHeritage</span>
+        <span>FamilyTreeDNA</span><span>LivingDNA</span><span>Generic TSV</span>
       </div>
-      <div class="modal-actions">
-        <button class="btn btn-outline" onclick="wizardBack(2)">&#8592; Back</button>
-        <button class="btn btn-primary" onclick="wizardNext(2)" id="btn-wizard-upload" disabled>Next &rarr;</button>
+      <div style="margin-top:14px;">
+        <button class="btn btn-outline" onclick="wizardBack(2)">&larr; Back</button>
+        <button class="btn btn-primary" onclick="wizardNext(2)" id="btn-wizard-upload" disabled>
+          Next &rarr;</button>
       </div>
     </div>
 
-    <!-- Step 3: Confirm / Uploading -->
     <div id="wizard-step-3" style="display:none;">
       <div id="upload-confirm">
-        <div class="alert alert-info">Review your information before uploading.</div>
-        <table style="width:100%;font-size:0.9em;border-collapse:collapse;">
-          <tr><td style="padding:6px;color:#666;width:120px;">Name</td><td id="confirm-name" style="padding:6px;font-weight:600;"></td></tr>
-          <tr><td style="padding:6px;color:#666;">Date of Birth</td><td id="confirm-dob" style="padding:6px;"></td></tr>
-          <tr><td style="padding:6px;color:#666;">Sex</td><td id="confirm-sex" style="padding:6px;"></td></tr>
-          <tr><td style="padding:6px;color:#666;">File</td><td id="confirm-file" style="padding:6px;"></td></tr>
+        <table style="font-size:0.9em;">
+          <tr><td class="muted" style="width:130px;">Name</td><td id="confirm-name"></td></tr>
+          <tr><td class="muted">Date of birth</td><td id="confirm-dob"></td></tr>
+          <tr><td class="muted">Sex</td><td id="confirm-sex"></td></tr>
+          <tr><td class="muted">File</td><td id="confirm-file"></td></tr>
         </table>
-        <div class="modal-actions">
-          <button class="btn btn-outline" onclick="wizardBack(3)">&#8592; Back</button>
-          <button class="btn btn-success" onclick="submitProfile()">&#x2713; Upload &amp; Create Profile</button>
+        <div style="margin-top:14px;">
+          <button class="btn btn-outline" onclick="wizardBack(3)">&larr; Back</button>
+          <button class="btn btn-primary" onclick="submitProfile()">Upload and create</button>
         </div>
       </div>
       <div id="upload-progress" style="display:none;">
-        <div style="text-align:center;padding:20px;">
-          <div style="font-size:1.1em;margin-bottom:12px;" id="upload-status-text">Uploading...</div>
-          <div class="progress-bar-wrap"><div class="progress-bar" id="upload-pbar" style="width:30%;"></div></div>
+        <div style="text-align:center;padding:18px 0;">
+          <div style="margin-bottom:12px;" id="upload-status-text">Uploading</div>
+          <div class="progress-bar-wrap"><div class="progress-bar" id="upload-pbar"></div></div>
         </div>
       </div>
     </div>
   </div>
 </div>
 
+<!-- ADD SOURCE MODAL -->
+<div class="modal-backdrop" id="source-modal">
+  <div class="modal">
+    <span class="close" onclick="closeSourceModal()">&times;</span>
+    <h3>Add another DNA file</h3>
+    <div class="banner banner-info" style="margin-top:10px;">
+      <div>
+        <strong>This does not create a second person.</strong> A file added as
+        <em>Yourself</em> is pooled with your existing data, and any position where
+        the two files disagree is kept and shown rather than quietly resolved.
+        A file added with any other relationship is used for comparison only and
+        never changes your own calls.
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="src-role">Whose file is this</label>
+      <select id="src-role">
+        <option value="self">Yourself, pool it with my data</option>
+        <option value="mother">Mother</option>
+        <option value="father">Father</option>
+        <option value="mate">Partner</option>
+        <option value="child">Child</option>
+        <option value="sibling">Sibling</option>
+        <option value="other" selected>Someone else, comparison only</option>
+        <option value="ignore">Ignore for now</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="src-label">Label (optional)</label>
+      <input type="text" id="src-label" placeholder="e.g. AncestryDNA 2019">
+    </div>
+    <div class="form-group">
+      <label for="src-file">File</label>
+      <input type="file" id="src-file" accept=".txt,.csv,.tsv">
+    </div>
+    <button class="btn btn-primary" onclick="submitSource()">Add file</button>
+    <span id="src-status" class="muted" style="margin-left:8px;"></span>
+  </div>
+</div>
+
+<!-- HELP MODAL -->
+<div class="modal-backdrop" id="help-modal">
+  <div class="modal">
+    <span class="close" onclick="closeHelp()">&times;</span>
+    <h3>How to read this</h3>
+    <h2>The card border</h2>
+    <p style="font-size:0.9em">
+      Green means the genotype is generally favourable, red means generally
+      unfavourable, grey means nobody has classified it or it is genuinely mixed.
+      Traits and risk scores are always grey on purpose: a trait is not good or bad.
+    </p>
+    <h2>Magnitude</h2>
+    <p style="font-size:0.9em">
+      A 0 to 10 interest score computed on your machine from CPIC guideline level,
+      ClinVar review stars, how many papers exist, how rare your genotype is, and
+      whether you actually carry the variant. Every card can show the exact steps
+      that produced its number. A blank magnitude means unscored and sorts as 1.
+      <strong>This is not the SNPedia magnitude</strong>, which is hand written by
+      wiki editors and cannot be redistributed here.
+    </p>
+    <h2>Why some things say "not testable"</h2>
+    <p style="font-size:0.9em">
+      A genoset is a rule over several positions. If your array did not genotype
+      one of them the rule cannot be evaluated at all. That is different from
+      having been checked and found absent, so it is reported separately.
+    </p>
+    <h2>Flipped and ambiguous</h2>
+    <p style="font-size:0.9em">
+      Testing companies report the plus strand; the reference databases sometimes
+      store the other one. A <em>flipped</em> badge means the alleles were
+      complemented to match, which is routine. An <em>ambiguous</em> badge means
+      the genotype is A/T or C/G, where flipping gives the other observed allele,
+      so the strand cannot be settled from the data at all. Treat those with
+      caution and confirm with a clinical test before acting.
+    </p>
+    <h2>Search shortcuts</h2>
+    <p style="font-size:0.9em" class="mono">
+      chr7 &nbsp; chr7:1234 &nbsp; chr7:1000-2000 &nbsp; chr7:1000+500<br>
+      /MAG&gt;=3 &nbsp; /STARS&gt;=2 &nbsp; /CLNSIG=5,4 &nbsp; /COUNT&gt;=2<br>
+      /flipped &nbsp; /ambiguous &nbsp; /dubious &nbsp; /conflict &nbsp; /carrier
+    </p>
+    <h2>Keys</h2>
+    <p style="font-size:0.9em">
+      <span class="mono">Ctrl+H</span> help, <span class="mono">Escape</span> reset
+      all filters, <span class="mono">F</span> open the filter panel.
+    </p>
+    <div class="banner banner-warn" style="margin-top:14px;">
+      <div>Nothing here is medical advice, and a consumer array is not a clinical
+      test. Negative results do not rule anything out. Talk to a clinician or a
+      genetic counsellor before acting on any of it.</div>
+    </div>
+  </div>
+</div>
 <script>
-// ============================================================
-// STATE
-// ============================================================
-const API = '';
-let state = {
+/* ==========================================================================
+   DNAInsight v2 single page app.
+
+   Built to docs/API_V2.md. That document is authoritative; if this file
+   disagrees with it, this file is wrong.
+
+   Two hard rules, both deliberate:
+
+   1. NO localStorage, sessionStorage or any browser storage API. All UI state
+      lives in the plain `S` object below. This is a project constraint.
+   2. All filtering is SERVER side. A full scan can produce tens of thousands of
+      findings, so we send a query string and let backend/filters.py do the work
+      rather than shipping the whole set to the browser and filtering it here.
+   ========================================================================== */
+
+const S = {
   profiles: [],
-  activeProfile: null,
+  pid: null,
+  view: 'home',
+  caps: {},
+  populations: [],
+  population: 'CEU',
+  aggregateModes: [],
+
+  // Last /findings response.
   findings: [],
-  findingsTotal: 0,
-  findingsSummary: {},
-  scanPolling: null,
-  dbUpdatePolling: null,
-  reports: [],
-  currentView: 'home',
-  dbMeta: null,
+  total: 0,
+  summary: {},
+  ranges: { magnitude: [0, 10], publications: [0, 0], frequency: [0, 100] },
+  qc: {},
+  facets: {},
+
+  // Filter state.
+  q: '',
+  clinvarOnly: false,
+  clinvarCodes: new Set(),
+  sort: 'magnitude',
+  order: 'desc',
+  sliders: {},              // key -> {min, max, lo, hi}
+  selected: { gene: new Set(), topic: new Set(), medicine: new Set(), condition: new Set() },
+
+  allowed: 50,
+  fontStep: 0,
+  charts: {},
+  searchTimer: null,
+  scanTimer: null,
+  loading: false,
+  dbMeta: {},
+  sources: [],
 };
-let selectedFile = null;
 
-// ============================================================
-// INIT
-// ============================================================
-document.addEventListener('DOMContentLoaded', () => {
-  loadProfiles().then(() => showView('home'));
-  setupDropZone();
-  checkDatabaseStatus();
-});
+/* ClinVar significance codes. Exactly the set the reference product exposed. */
+const CLINVAR_CODES = [
+  { code: 5,   label: 'Pathogenic' },
+  { code: 4,   label: 'Likely pathogenic' },
+  { code: 3,   label: 'Likely benign' },
+  { code: 2,   label: 'Benign' },
+  { code: 1,   label: 'Uncertain significance' },
+  { code: 6,   label: 'Drug response' },
+  { code: 7,   label: 'Histocompatibility' },
+  { code: 255, label: 'Other' },
+];
 
-async function loadProfiles() {
+/* Sort options. Every key in both directions, which is how the reference
+   product presented 14 separate choices. */
+const SORT_OPTIONS = [
+  ['magnitude', 'desc', 'Magnitude, high to low'],
+  ['magnitude', 'asc',  'Magnitude, low to high'],
+  ['frequency', 'desc', 'Frequency, common first'],
+  ['frequency', 'asc',  'Frequency, rare first'],
+  ['publications', 'desc', 'Publications, most first'],
+  ['publications', 'asc',  'Publications, fewest first'],
+  ['stars', 'desc', 'Review stars, most first'],
+  ['stars', 'asc',  'Review stars, fewest first'],
+  ['location', 'asc',  'Chromosome position, ascending'],
+  ['location', 'desc', 'Chromosome position, descending'],
+  ['gmaf', 'desc', 'Global minor allele frequency, high to low'],
+  ['gmaf', 'asc',  'Global minor allele frequency, low to high'],
+  ['gene', 'asc',  'Gene, A to Z'],
+  ['gene', 'desc', 'Gene, Z to A'],
+  ['rsid', 'asc',  'rsID, ascending'],
+  ['rsid', 'desc', 'rsID, descending'],
+  ['coverage', 'desc', 'Coverage, most complete first'],
+  ['coverage', 'asc',  'Coverage, least complete first'],
+];
+
+/* Rarity ramp, mirrored from backend/frequency.py so client and server agree. */
+const RARITY_RAMP = [[50,'#FFFFFF'],[20,'#FFF3EE'],[10,'#FFE0D4'],
+                     [5,'#FFC5B2'],[1,'#FA9A80'],[0.1,'#EF6A4C'],[0,'#D8351B']];
+const UNKNOWN_COLOR = '#EFEFEF';
+
+function rarityColor(freq) {
+  if (freq === null || freq === undefined || isNaN(freq)) return UNKNOWN_COLOR;
+  for (const [lower, color] of RARITY_RAMP) if (freq >= lower) return color;
+  return RARITY_RAMP[RARITY_RAMP.length - 1][1];
+}
+
+/* -------------------------------------------------------------------------
+   Utilities
+   ------------------------------------------------------------------------- */
+
+function esc(v) {
+  if (v === null || v === undefined) return '';
+  return String(v).replace(/[&<>"']/g, c =>
+    ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[c]);
+}
+function el(id) { return document.getElementById(id); }
+function num(v, dp) {
+  if (v === null || v === undefined || v === '' || isNaN(v)) return null;
+  const n = Number(v);
+  return dp === undefined ? n : Math.round(n * 10 ** dp) / 10 ** dp;
+}
+function pct(v) { const n = num(v, 2); return n === null ? null : n; }
+
+function showError(msg) {
+  const strip = el('err-strip');
+  const div = document.createElement('div');
+  div.className = 'banner banner-err';
+  div.style.margin = '10px 26px 0';
+  div.innerHTML = '<span>&#9888;</span><span>' + esc(msg) +
+    '</span><span class="x" title="Dismiss">&times;</span>';
+  div.querySelector('.x').onclick = () => div.remove();
+  strip.appendChild(div);
+}
+
+/* Every fetch goes through here so nothing can leave the UI stuck on Loading
+   and no error is ever swallowed silently. */
+async function api(path, options) {
   try {
-    const r = await fetch(`${API}/api/profiles`);
-    state.profiles = await r.json();
-    renderSidebar();
-    if (state.profiles.length > 0 && !state.activeProfile) {
-      selectProfile(state.profiles[0].id);
+    const resp = await fetch(path, options);
+    const ct = resp.headers.get('content-type') || '';
+    if (!ct.includes('application/json')) {
+      if (!resp.ok) throw new Error('HTTP ' + resp.status + ' from ' + path);
+      return await resp.text();
     }
-  } catch(e) {
-    console.error(e);
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.error || ('HTTP ' + resp.status));
+    return data;
+  } catch (e) {
+    showError(e.message || String(e));
+    throw e;
   }
 }
 
-// ============================================================
-// SIDEBAR
-// ============================================================
-function renderSidebar() {
-  const ul = document.getElementById('profile-list-sidebar');
-  if (!state.profiles.length) {
-    ul.innerHTML = '<li style="padding:8px 16px;font-size:0.82em;color:#aaa;">No profiles yet</li>';
+/* -------------------------------------------------------------------------
+   Boot
+   ------------------------------------------------------------------------- */
+
+window.addEventListener('DOMContentLoaded', boot);
+
+async function boot() {
+  buildClinvarCheckboxes();
+  buildSortOptions();
+  setupDropZone();
+  setupKeys();
+  try { await loadCapabilities(); } catch (e) {}
+  try { await loadPopulations(); } catch (e) {}
+  try { await loadProfiles(); } catch (e) {}
+  checkDatabaseStatus();
+  showView('home');
+}
+
+async function loadCapabilities() {
+  S.caps = await api('/api/capabilities');
+  const v = await api('/api/version').catch(() => null);
+  if (v && v.version) el('ver-badge').textContent = 'v' + v.version;
+  // Hide controls whose data does not exist rather than showing dead sliders.
+  applyCapabilityGating();
+}
+
+function applyCapabilityGating() {
+  const map = { genoset: 'genosets', trait: 'traits', prs: 'prs' };
+  for (const [key, cap] of Object.entries(map)) {
+    const box = el('show-' + key);
+    if (box && S.caps[cap] === false) {
+      box.checked = false;
+      box.disabled = true;
+      if (box.parentElement) {
+        box.parentElement.title = 'No data built for this yet';
+        box.parentElement.style.opacity = '.5';
+      }
+    }
+  }
+  for (const [cap, viewName] of [['genosets','genosets'],['traits','traits'],['prs','prs']]) {
+    if (S.caps[cap] === false) {
+      const link = document.querySelector('[data-view="' + viewName + '"]');
+      if (link) link.style.opacity = '.45';
+    }
+  }
+}
+
+async function loadPopulations() {
+  const data = await api('/api/populations');
+  S.populations = data.populations || [];
+  S.population = data.default || 'CEU';
+  S.aggregateModes = data.aggregate_modes || [];
+  const sel = el('pop-select');
+  sel.innerHTML = '';
+  const gAgg = document.createElement('optgroup');
+  gAgg.label = 'Across all populations';
+  for (const mode of S.aggregateModes) {
+    const o = document.createElement('option');
+    o.value = mode;
+    o.textContent = mode === 'MAX' ? 'Highest of any population'
+      : mode === 'MIN' ? 'Lowest of any population'
+      : mode === 'AVG' ? 'Average of all populations'
+      : 'Global, from GMAF';
+    gAgg.appendChild(o);
+  }
+  sel.appendChild(gAgg);
+  const gPop = document.createElement('optgroup');
+  gPop.label = 'Single population';
+  for (const p of S.populations) {
+    if (!p.available) continue;
+    const o = document.createElement('option');
+    o.value = p.code;
+    o.textContent = p.code + ' - ' + p.brief;
+    if (p.code === S.population) o.selected = true;
+    gPop.appendChild(o);
+  }
+  sel.appendChild(gPop);
+}
+
+async function loadProfiles() {
+  S.profiles = await api('/api/profiles');
+  if (!S.pid && S.profiles.length) S.pid = S.profiles[0].id;
+  renderSidebarProfiles();
+}
+
+function renderSidebarProfiles() {
+  const ul = el('profile-list-sidebar');
+  if (!S.profiles.length) {
+    ul.innerHTML = '<li style="padding:6px 16px" class="muted">No profiles yet</li>';
     return;
   }
-  ul.innerHTML = state.profiles.map(p => `
-    <li>
-      <a class="profile-item ${state.activeProfile?.id === p.id ? 'active' : ''}"
-         onclick="selectProfile(${p.id})">
-        <span class="profile-dot"></span>
-        <span>${p.name}</span>
-      </a>
-    </li>
-  `).join('');
+  ul.innerHTML = S.profiles.map(p => {
+    const n = Object.values(p.findings_summary || {}).reduce((a, b) => a + b, 0);
+    return '<li><a onclick="selectProfile(' + p.id + ')"' +
+      (p.id === S.pid ? ' class="active"' : '') + '>' + esc(p.name) +
+      (n ? ' <span class="pill">' + n + '</span>' : '') + '</a></li>';
+  }).join('');
 }
 
 function selectProfile(id) {
-  state.activeProfile = state.profiles.find(p => p.id === id) || null;
-  renderSidebar();
-  if (state.currentView === 'home') showView('home');
-  else if (state.currentView === 'findings') loadFindings();
-  else if (state.currentView === 'reports') loadReports();
+  S.pid = id;
+  renderSidebarProfiles();
+  showView(S.view === 'home' ? 'home' : S.view);
 }
 
-// ============================================================
-// NAVIGATION
-// ============================================================
+/* -------------------------------------------------------------------------
+   Router
+   ------------------------------------------------------------------------- */
+
+const VIEWS = {
+  home: renderHome, findings: renderFindings, genosets: renderGenosets,
+  pgx: renderPgx, traits: renderTraits, prs: renderPrs, qc: renderQc,
+  scan: renderScan, sources: renderSources, reports: renderReports,
+  profiles: renderProfilesList, database: renderDatabase,
+};
+
 function showView(name) {
-  state.currentView = name;
-  document.querySelectorAll('[data-view]').forEach(el => {
-    el.classList.toggle('active', el.dataset.view === name);
+  S.view = name;
+  document.querySelectorAll('[data-view]').forEach(a =>
+    a.classList.toggle('active', a.dataset.view === name));
+  const main = el('main-content');
+  const fn = VIEWS[name];
+  if (!fn) { main.innerHTML = '<div class="empty">Unknown view</div>'; return; }
+  main.innerHTML = '<div class="empty"><span class="spinner"></span> Loading</div>';
+  try { fn(main); } catch (e) {
+    main.innerHTML = '<div class="banner banner-err">Could not render this view: ' +
+      esc(e.message) + '</div>';
+  }
+}
+
+function needProfile(main) {
+  if (S.pid) return false;
+  main.innerHTML = '<div class="empty"><h2>No profile selected</h2>' +
+    '<p class="muted">Add a profile with your raw DNA file to begin.</p>' +
+    '<button class="btn btn-primary" style="margin-top:12px" onclick="openAddModal()">' +
+    '+ Add profile</button></div>';
+  return true;
+}
+
+function needScan(main, what) {
+  main.innerHTML = '<div class="empty"><h2>Nothing to show yet</h2>' +
+    '<p class="muted">Run a scan to populate ' + esc(what) + '.</p>' +
+    '<button class="btn btn-primary" style="margin-top:12px" ' +
+    'onclick="showView(\'scan\')">Run a scan</button></div>';
+}
+
+/* -------------------------------------------------------------------------
+   Dashboard
+   ------------------------------------------------------------------------- */
+
+async function renderHome(main) {
+  if (needProfile(main)) return;
+  const p = await api('/api/profiles/' + S.pid);
+  const sum = p.findings_summary || {};
+  const total = Object.values(sum).reduce((a, b) => a + b, 0);
+
+  main.innerHTML =
+    '<h1>' + esc(p.name) + '</h1>' +
+    '<div class="sub">' + esc(p.provider || 'unknown provider') +
+      (p.dob ? ' &middot; born ' + esc(p.dob) : '') + '</div>' +
+    (total ? '' : '<div class="banner banner-info"><span>&#9432;</span><span>' +
+      'No findings yet. Run a scan to annotate your data.</span></div>') +
+    '<div class="card" style="display:flex;gap:26px;flex-wrap:wrap;">' +
+      tile(sum.pre_prescription || 0, 'Prescription critical') +
+      tile(sum.actionable || 0, 'Actionable') +
+      tile(sum.informational || 0, 'Informational') +
+      tile(total, 'Total findings') +
+    '</div>' +
+    '<div class="card"><h2 style="margin-top:0">Next steps</h2>' +
+      '<button class="btn btn-primary" onclick="showView(\'scan\')">Run a scan</button> ' +
+      '<button class="btn btn-outline" onclick="showView(\'findings\')">View findings</button> ' +
+      '<button class="btn btn-outline" onclick="showView(\'sources\')">Add another DNA file</button> ' +
+      '<button class="btn btn-outline" onclick="showView(\'reports\')">Generate a report</button>' +
+    '</div>' +
+    '<div class="card"><h2 style="margin-top:0">What this build can do</h2>' +
+      '<div id="caps-list"></div></div>';
+
+  const caps = [
+    ['frequency', 'Population frequency', 'How common your exact genotype is, in 16 populations'],
+    ['genosets', 'Genosets', 'Rules that combine several positions, such as the APOE pairs'],
+    ['traits', 'Traits and blood type', 'Well established trait calls, reported honestly when uncertain'],
+    ['prs', 'Polygenic risk scores', 'Additive scores with mandatory caveats'],
+    ['snpedia', 'Local SNPedia cache', 'Optional, you fetch it yourself, never bundled here'],
+  ];
+  el('caps-list').innerHTML = '<table>' + caps.map(([k, name, desc]) => {
+    const on = S.caps[k];
+    return '<tr><td style="width:190px"><strong>' + esc(name) + '</strong></td>' +
+      '<td>' + (on ? '<span class="badge" style="background:#e6f7ec;color:#14663a">available</span>'
+                   : '<span class="badge">not built</span>') + '</td>' +
+      '<td class="muted">' + esc(desc) + '</td></tr>';
+  }).join('') + '</table>';
+  updatePills();
+}
+
+function tile(n, label) {
+  return '<div class="stat"><div class="stat-num">' + n + '</div>' +
+    '<div class="muted" style="font-size:0.84em">' + esc(label) + '</div></div>';
+}
+
+function updatePills() {
+  const set = (id, v) => { const e = el(id); if (e) e.textContent = v || ''; };
+  set('pill-findings', S.total || '');
+  set('pill-sources', S.sources.length || '');
+}
+/* =========================================================================
+   FINDINGS: the filter engine and the geno cards.
+   ========================================================================= */
+
+function buildClinvarCheckboxes() {
+  el('cv-codes').innerHTML = CLINVAR_CODES.map(c =>
+    '<label title="ClinVar CLNSIG code ' + c.code + '">' +
+    '<input type="checkbox" value="' + c.code + '" onchange="onClinvarCode()"> ' +
+    esc(c.label) + '</label>').join('');
+}
+
+function buildSortOptions() {
+  el('sort-order').innerHTML = SORT_OPTIONS.map(([k, o, label]) =>
+    '<option value="' + k + '|' + o + '"' +
+    (k === 'magnitude' && o === 'desc' ? ' selected' : '') + '>' +
+    esc(label) + '</option>').join('');
+}
+
+function setClinvarMode(on) {
+  S.clinvarOnly = on;
+  el('cv-codes').style.display = on ? 'flex' : 'none';
+  el('cv-all').style.fontWeight = on ? '400' : '700';
+  el('cv-only').style.fontWeight = on ? '700' : '400';
+  if (on && S.clinvarCodes.size === 0) {
+    // Contract default: pathogenic and likely pathogenic only.
+    S.clinvarCodes = new Set([5, 4]);
+    el('cv-codes').querySelectorAll('input').forEach(i => {
+      i.checked = S.clinvarCodes.has(Number(i.value));
+    });
+  }
+  if (!on) {
+    S.clinvarCodes.clear();
+    el('cv-codes').querySelectorAll('input').forEach(i => { i.checked = false; });
+  }
+  applyFilters();
+}
+
+function onClinvarCode() {
+  S.clinvarCodes = new Set(
+    Array.from(el('cv-codes').querySelectorAll('input:checked')).map(i => Number(i.value)));
+  applyFilters();
+}
+
+/* --- dual handle sliders -------------------------------------------------
+   Two overlaid range inputs. Bounds come from the server's `ranges`, so a
+   Reset restores data derived limits rather than invented ones. */
+
+const SLIDER_DEFS = [
+  { key: 'magnitude', label: 'Magnitude', step: 0.1, dp: 1,
+    tip: '0 is boring, 1 is unscored, 2 and up is interesting' },
+  { key: 'publications', label: 'Publications', step: 1, dp: 0,
+    tip: 'Papers mentioning the variant. Does not apply to genosets, traits or scores.',
+    exempt: true },
+  { key: 'frequency', label: 'Frequency %', step: 0.1, dp: 1,
+    tip: 'How common your genotype is in the chosen population. Does not apply to genosets, traits or scores.',
+    exempt: true },
+];
+
+function buildSliders() {
+  el('sliders').innerHTML = SLIDER_DEFS.map(d => {
+    const r = S.ranges[d.key] || [0, 100];
+    const st = S.sliders[d.key] || { lo: r[0], hi: r[1] };
+    return '<div class="slider" id="sl-' + d.key + '">' +
+      '<div class="slider-head"><span title="' + esc(d.tip) + '">' + esc(d.label) +
+        (d.exempt ? ' <span class="exempt-note">(SNPs only)</span>' : '') +
+      '</span><span class="val" id="val-' + d.key + '">' +
+        fmt(st.lo, d.dp) + ' to ' + fmt(st.hi, d.dp) + '</span></div>' +
+      '<div class="dual">' +
+        rangeInput(d, 'lo', st.lo, r) + rangeInput(d, 'hi', st.hi, r) +
+      '</div>' +
+      '<div class="nudge">' +
+        nudgeBtn(d.key, 'lo', -1, 'min down') + nudgeBtn(d.key, 'lo', 1, 'min up') +
+        nudgeBtn(d.key, 'hi', -1, 'max down') + nudgeBtn(d.key, 'hi', 1, 'max up') +
+      '</div></div>';
+  }).join('');
+}
+
+function fmt(v, dp) { return Number(v).toFixed(dp); }
+
+function rangeInput(d, side, value, r) {
+  return '<input type="range" aria-label="' + esc(d.label + ' ' + side) +
+    '" min="' + r[0] + '" max="' + r[1] + '" step="' + d.step +
+    '" value="' + value + '" oninput="onSlider(\'' + d.key + '\',\'' + side + '\',this.value)">';
+}
+function nudgeBtn(key, side, dir, label) {
+  return '<button onclick="nudge(\'' + key + '\',\'' + side + '\',' + dir +
+    ')" title="' + label + '" aria-label="' + label + '">' +
+    (side === 'lo' ? 'min' : 'max') + (dir < 0 ? ' -' : ' +') + '</button>';
+}
+
+function onSlider(key, side, value) {
+  const d = SLIDER_DEFS.find(x => x.key === key);
+  const st = S.sliders[key] || { lo: 0, hi: 0 };
+  let v = Number(value);
+  if (side === 'lo') st.lo = Math.min(v, st.hi);
+  else st.hi = Math.max(v, st.lo);
+  S.sliders[key] = st;
+  el('val-' + key).textContent = fmt(st.lo, d.dp) + ' to ' + fmt(st.hi, d.dp);
+  scheduleFilters();
+}
+
+function nudge(key, side, dir) {
+  const d = SLIDER_DEFS.find(x => x.key === key);
+  const st = S.sliders[key];
+  const r = S.ranges[key];
+  if (!st || !d) return;
+  const step = d.step * (d.step < 1 ? 5 : Math.max(1, Math.round((r[1] - r[0]) / 20)));
+  if (side === 'lo') st.lo = Math.max(r[0], Math.min(st.lo + dir * step, st.hi));
+  else st.hi = Math.min(r[1], Math.max(st.hi + dir * step, st.lo));
+  buildSliders();
+  applyFilters();
+}
+
+function resetSliderState() {
+  S.sliders = {};
+  for (const d of SLIDER_DEFS) {
+    const r = S.ranges[d.key] || [0, 100];
+    S.sliders[d.key] = { lo: r[0], hi: r[1] };
+  }
+}
+
+/* --- searchable multi select facets ------------------------------------- */
+
+const FACETS = [
+  { id: 'facet-genes', key: 'gene', bucket: 'genes', label: 'Genes' },
+  { id: 'facet-topics', key: 'topic', bucket: 'topics', label: 'Topics' },
+  { id: 'facet-medicines', key: 'medicine', bucket: 'medicines', label: 'Medicines' },
+  { id: 'facet-conditions', key: 'condition', bucket: 'conditions', label: 'Conditions' },
+];
+
+function buildFacets() {
+  for (const f of FACETS) {
+    const values = S.facets[f.bucket] || [];
+    const chosen = S.selected[f.key];
+    const box = el(f.id);
+    if (!values.length) { box.innerHTML = ''; continue; }
+    box.innerHTML =
+      '<div class="ms"><input type="text" placeholder="' + esc(f.label) + ' (' +
+        values.length + ')" aria-label="Filter ' + esc(f.label) +
+        '" oninput="filterFacetList(this,\'' + f.id + '\')">' +
+      '<div class="ms-chips" id="' + f.id + '-chips"></div>' +
+      '<div class="ms-list" id="' + f.id + '-list">' +
+        values.map(v =>
+          '<label><input type="checkbox" value="' + esc(v.value) + '"' +
+          (chosen.has(v.value) ? ' checked' : '') +
+          ' onchange="onFacet(\'' + f.key + '\',this)"> <span>' + esc(v.value) +
+          '</span><span class="cnt">' + v.count + '</span></label>').join('') +
+      '</div></div>';
+    renderChips(f);
+  }
+}
+
+function renderChips(f) {
+  const box = el(f.id + '-chips');
+  if (!box) return;
+  const chosen = Array.from(S.selected[f.key]);
+  box.innerHTML = chosen.map(v =>
+    '<span class="ms-chip" title="Remove" onclick="removeFacet(\'' + f.key + '\',\'' +
+    esc(v).replace(/'/g, "\\'") + '\')">' + esc(v) + ' &times;</span>').join('');
+}
+
+function onFacet(key, input) {
+  if (input.checked) S.selected[key].add(input.value);
+  else S.selected[key].delete(input.value);
+  const f = FACETS.find(x => x.key === key);
+  if (f) renderChips(f);
+  applyFilters();
+}
+
+function removeFacet(key, value) {
+  S.selected[key].delete(value);
+  buildFacets();
+  applyFilters();
+}
+
+function addFacetValue(key, value) {
+  if (!S.selected[key]) return;
+  S.selected[key].add(value);
+  buildFacets();
+  applyFilters();
+  togglePanel(true);
+}
+
+function filterFacetList(input, id) {
+  const needle = input.value.toLowerCase();
+  el(id + '-list').querySelectorAll('label').forEach(l => {
+    l.style.display = l.textContent.toLowerCase().includes(needle) ? 'flex' : 'none';
   });
-  const main = document.getElementById('main-content');
-  switch(name) {
-    case 'home':     renderHome(main); break;
-    case 'findings': renderFindings(main); break;
-    case 'reports':  renderReports(main); break;
-    case 'scan':     renderScan(main); break;
-    case 'profiles': renderProfilesList(main); break;
-    case 'database': renderDatabase(main); break;
-  }
 }
 
-// ============================================================
-// HOME
-// ============================================================
-function renderHome(el) {
-  const p = state.activeProfile;
-  if (!p) {
-    el.innerHTML = `
-      <div class="hero">
-        <h1>Welcome to DNAInsight</h1>
-        <p>A privacy-first, open-source tool for analyzing your raw DNA data. Add a profile to get started.</p>
-      </div>
-      <div class="card">
-        <h2>Getting Started</h2>
-        <ol style="line-height:2;padding-left:20px;font-size:0.95em;">
-          <li>Download your raw DNA file from AncestryDNA, 23andMe, MyHeritage, or FamilyTreeDNA.</li>
-          <li>Click <strong>"+ Add Profile"</strong> in the sidebar.</li>
-          <li>Enter your name, upload your DNA file, and click Create.</li>
-          <li>Run a scan to annotate your SNPs against ClinVar and PharmGKB.</li>
-          <li>Generate your Genetic Report and Doctor Discussion Report.</li>
-        </ol>
-        <br>
-        <button class="btn btn-primary" onclick="openAddModal()">+ Add Your First Profile</button>
-      </div>
-      <div class="card">
-        <h2>Supported DNA Providers</h2>
-        <div class="provider-grid">
-          <div class="provider-chip detected">AncestryDNA</div>
-          <div class="provider-chip detected">23andMe</div>
-          <div class="provider-chip detected">MyHeritage</div>
-          <div class="provider-chip detected">FamilyTreeDNA</div>
-          <div class="provider-chip detected">LivingDNA</div>
-          <div class="provider-chip detected">Generic TSV</div>
-        </div>
-      </div>`;
-    return;
+/* --- query building ----------------------------------------------------- */
+
+function buildQuery() {
+  const p = new URLSearchParams();
+  if (S.q) p.set('q', S.q);
+
+  const ent = [];
+  if (el('show-snp') && el('show-snp').checked) ent.push('snp');
+  if (el('show-genoset') && el('show-genoset').checked) ent.push('genoset');
+  if (el('show-trait') && el('show-trait').checked) ent.push('trait');
+  if (el('show-prs') && el('show-prs').checked) ent.push('prs');
+  if (ent.length && ent.length < 4) p.set('entity_type', ent.join(','));
+  if (!ent.length) p.set('entity_type', 'none');
+
+  const rep = Array.from(el('repute-row').querySelectorAll('input:checked')).map(i => i.value);
+  if (rep.length && rep.length < 3) p.set('repute', rep.join(','));
+
+  const zyg = [];
+  if (el('z-hom').checked) zyg.push('homozygous', 'hemizygous');
+  if (el('z-het').checked) zyg.push('heterozygous');
+  if (el('z-nocall').checked) zyg.push('no_call');
+  if (zyg.length && zyg.length < 4) p.set('zygosity', zyg.join(','));
+
+  for (const d of SLIDER_DEFS) {
+    const st = S.sliders[d.key], r = S.ranges[d.key];
+    if (!st || !r) continue;
+    const prefix = d.key === 'frequency' ? 'freq'
+      : d.key === 'publications' ? 'publications' : 'magnitude';
+    if (st.lo > r[0]) p.set('min_' + prefix, st.lo);
+    if (st.hi < r[1]) p.set('max_' + prefix, st.hi);
   }
 
-  fetch(`/api/profiles/${p.id}`).then(r=>r.json()).then(data => {
-    const s = data.findings_summary || {};
-    const total = Object.values(s).reduce((a,b)=>a+b,0);
-    el.innerHTML = `
-      <div class="hero">
-        <h1>${data.name}</h1>
-        <p>DOB: ${data.dob||'N/A'} &nbsp;|&nbsp; Sex: ${(data.sex||'N/A')[0].toUpperCase()+(data.sex||'').slice(1)}
-           &nbsp;|&nbsp; DNA Source: ${(data.provider||'Unknown')[0].toUpperCase()+(data.provider||'').slice(1)}</p>
-      </div>
-      <div class="summary-grid">
-        <div class="summary-card">
-          <div class="num" style="color:var(--blue-dark);">${total}</div>
-          <div class="label">Total Findings</div>
-        </div>
-        <div class="summary-card">
-          <div class="num" style="color:var(--red);">${s.pre_prescription||0}</div>
-          <div class="label">Prescription-Critical</div>
-        </div>
-        <div class="summary-card">
-          <div class="num" style="color:var(--orange);">${s.actionable||0}</div>
-          <div class="label">Actionable</div>
-        </div>
-        <div class="summary-card">
-          <div class="num" style="color:var(--blue-mid);">${s.informational||0}</div>
-          <div class="label">Informational</div>
-        </div>
-      </div>
-      <div class="card">
-        <h2>Quick Actions</h2>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;">
-          <button class="btn btn-primary" onclick="showView('scan')">&#x25B6; Run Annotation Scan</button>
-          <button class="btn btn-success" onclick="generateReport('genetic')">&#x1F4C4; Genetic Report</button>
-          <button class="btn btn-outline" onclick="generateReport('doctor')">&#x1F3E5; Doctor Report</button>
-          <button class="btn btn-outline" onclick="showView('findings')">&#x1F50D; View Findings</button>
-        </div>
-      </div>
-      <div class="card">
-        <h2>What to Do Next</h2>
-        ${total === 0 ? '<div class="alert alert-warning">No findings yet. Run a scan to annotate your DNA.</div>' : ''}
-        ${s.pre_prescription > 0 ? `<div class="alert alert-danger">&#9888; <strong>${s.pre_prescription} prescription-critical variant(s)</strong> found. Generate a Doctor Report and share with your prescriber before any medication changes.</div>` : ''}
-        ${s.actionable > 0 ? `<div class="alert alert-warning">&#x1F4CB; <strong>${s.actionable} actionable finding(s)</strong> identified. Review and discuss with your healthcare provider.</div>` : ''}
-        ${total > 0 && !s.pre_prescription ? '<div class="alert alert-success">&#x2713; No prescription-critical variants detected in the bundled reference set.</div>' : ''}
-      </div>`;
-  });
-}
+  if (S.clinvarOnly) p.set('clinvar_only', '1');
+  if (S.clinvarCodes.size) p.set('clinvar_sig', Array.from(S.clinvarCodes).join(','));
+  const stars = el('min-stars').value;
+  if (stars) p.set('min_stars', stars);
 
-// ============================================================
-// FINDINGS
-// ============================================================
-function renderFindings(el) {
-  if (!state.activeProfile) {
-    el.innerHTML = `<div class="card"><div class="empty-state"><div class="icon">&#x1F9EC;</div><h3>Select a Profile</h3><p>Choose a profile from the sidebar to view findings.</p></div></div>`;
-    return;
-  }
-  el.innerHTML = `
-    <div class="card">
-      <h2>SNP Findings &mdash; ${state.activeProfile.name}</h2>
-      <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab(this,'tab-all')">All</button>
-        <button class="tab-btn" onclick="switchTab(this,'tab-pre')">Prescription-Critical</button>
-        <button class="tab-btn" onclick="switchTab(this,'tab-act')">Actionable</button>
-        <button class="tab-btn" onclick="switchTab(this,'tab-inf')">Informational</button>
-      </div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center;">
-        <button class="btn btn-outline" onclick="exportFindings('json')" title="Download findings as JSON">&#x2B07; Export JSON</button>
-        <button class="btn btn-outline" onclick="exportFindings('csv')" title="Download findings as CSV (Excel-compatible)">&#x2B07; Export CSV</button>
-        <span style="flex:1;"></span>
-        <input type="text" id="rsid-lookup" placeholder="Look up any rsID (e.g. rs1801133)" style="padding:7px 10px;min-width:230px;" onkeydown="if(event.key==='Enter')lookupRsid()">
-        <button class="btn btn-outline" onclick="lookupRsid()">&#x1F50E; Look up</button>
-      </div>
-      <div id="rsid-lookup-result" style="margin-bottom:16px;"></div>
-      <div id="findings-category-chart" style="margin-bottom:24px;display:none;">
-        <canvas id="categoryChart" height="90"></canvas>
-      </div>
-      <div id="tab-all" class="tab-panel active">
-        <div class="filter-bar">
-          <input type="text" id="search-findings" placeholder="Search rsID, gene, keyword..." oninput="filterFindings()">
-          <select id="filter-gene" onchange="filterFindings()"><option value="">All Genes</option></select>
-        </div>
-        <div id="findings-table-wrap">Loading...</div>
-      </div>
-      <div id="tab-pre" class="tab-panel"></div>
-      <div id="tab-act" class="tab-panel"></div>
-      <div id="tab-inf" class="tab-panel"></div>
-    </div>`;
-
-  loadFindings();
-}
-
-async function loadFindings() {
-  if (!state.activeProfile) return;
-  const r = await fetch(`/api/profiles/${state.activeProfile.id}/findings`);
-  const data = await r.json();
-  state.findings = data.findings || [];
-  state.findingsTotal = data.total || 0;
-  state.findingsSummary = data.summary || {};
-
-  // Populate gene filter
-  const genes = [...new Set(state.findings.map(f=>f.gene).filter(Boolean))].sort();
-  const gf = document.getElementById('filter-gene');
-  if (gf) {
-    gf.innerHTML = '<option value="">All Genes</option>' + genes.map(g=>`<option value="${g}">${g}</option>`).join('');
+  for (const f of FACETS) {
+    const chosen = Array.from(S.selected[f.key]);
+    if (chosen.length) p.set(f.key, chosen.join(','));
   }
 
-  renderCategoryChart(state.findings);
-  renderFindingsTable(state.findings, 'findings-table-wrap');
-  renderFindingsTab('pre_prescription', 'tab-pre');
-  renderFindingsTab('actionable', 'tab-act');
-  renderFindingsTab('informational', 'tab-inf');
+  if (el('require-freq').checked) p.set('require_frequency', '1');
+  if (el('only-conflicts').checked) p.set('conflicts_only', '1');
+  if (el('only-ambiguous').checked) p.set('ambiguous_only', '1');
+  if (el('only-carriers').checked) p.set('carrier_only', '1');
+
+  const [sort, order] = el('sort-order').value.split('|');
+  p.set('sort', sort); p.set('order', order);
+  p.set('population', S.population);
+  p.set('limit', '0');       // filter server side, cap rendering client side
+  return p;
 }
 
-function filterFindings() {
-  const q  = (document.getElementById('search-findings')?.value||'').toLowerCase();
-  const g  = document.getElementById('filter-gene')?.value||'';
-  const filtered = state.findings.filter(f => {
-    const match_q = !q || [f.rsid,f.gene,f.interpretation,f.conditions].join(' ').toLowerCase().includes(q);
-    const match_g = !g || f.gene === g;
-    return match_q && match_g;
-  });
-  renderFindingsTable(filtered, 'findings-table-wrap');
+function activeFilterNames() {
+  const out = [];
+  if (S.q) out.push('search "' + S.q + '"');
+  if (S.clinvarOnly) out.push('ClinVar only');
+  if (el('min-stars').value) out.push('minimum review stars');
+  for (const d of SLIDER_DEFS) {
+    const st = S.sliders[d.key], r = S.ranges[d.key];
+    if (st && r && (st.lo > r[0] || st.hi < r[1])) out.push(d.label + ' range');
+  }
+  for (const f of FACETS) if (S.selected[f.key].size) out.push(f.label.toLowerCase());
+  const rep = el('repute-row').querySelectorAll('input:checked').length;
+  if (rep < 3) out.push('repute');
+  if (el('require-freq').checked) out.push('requires a frequency');
+  if (el('only-conflicts').checked) out.push('conflicts only');
+  if (el('only-ambiguous').checked) out.push('ambiguous only');
+  if (el('only-carriers').checked) out.push('carriers only');
+  return out;
 }
 
-function exportFindings(fmt) {
-  if (!state.activeProfile) return;
-  const url = `/api/profiles/${state.activeProfile.id}/export/${fmt}`;
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = '';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+function onSearchInput() {
+  clearTimeout(S.searchTimer);
+  S.searchTimer = setTimeout(() => { S.q = el('q').value.trim(); applyFilters(); }, 250);
+}
+function scheduleFilters() {
+  clearTimeout(S.searchTimer);
+  S.searchTimer = setTimeout(applyFilters, 220);
 }
 
-async function lookupRsid() {
-  if (!state.activeProfile) return;
-  const box = document.getElementById('rsid-lookup-result');
-  const inp = document.getElementById('rsid-lookup');
-  const rsid = (inp.value || '').trim().toLowerCase();
-  if (!rsid) return;
-  box.innerHTML = `<div class="alert alert-info">Looking up ${rsid}...</div>`;
+async function applyFilters() {
+  if (!S.pid) return;
+  if (S.view !== 'findings') { showView('findings'); return; }
+  await fetchFindings();
+  renderGenos();
+  buildFacets();
+  drawReputeChart();
+}
+
+async function fetchFindings() {
+  const body = el('genos-list');
+  if (body) body.style.opacity = '.45';
   try {
-    const r = await fetch(`/api/profiles/${state.activeProfile.id}/lookup/${encodeURIComponent(rsid)}`);
-    const d = await r.json();
-    if (d.error) { box.innerHTML = `<div class="alert alert-danger">${d.error}</div>`; return; }
-    if (!d.in_your_data) {
-      box.innerHTML = `<div class="alert alert-warning"><strong>${d.rsid}</strong> was not genotyped on your array.</div>`;
+    const data = await api('/api/profiles/' + S.pid + '/findings/v2?' + buildQuery());
+    S.findings = data.findings || [];
+    S.total = data.total || 0;
+    S.summary = data.summary || {};
+    S.qc = data.qc || {};
+    S.facets = data.facets || {};
+    if (data.ranges) {
+      const changed = JSON.stringify(data.ranges) !== JSON.stringify(S.ranges);
+      S.ranges = data.ranges;
+      if (changed && !Object.keys(S.sliders).length) { resetSliderState(); buildSliders(); }
+    }
+    if (data.population) S.population = data.population;
+  } finally {
+    if (body) body.style.opacity = '1';
+  }
+  updatePills();
+}
+
+async function renderFindings(main) {
+  if (needProfile(main)) return;
+  main.innerHTML =
+    '<h1>Findings</h1>' +
+    '<div class="sub" id="findings-sub">Loading</div>' +
+    '<div id="qc-banner"></div>' +
+    '<div class="card" style="padding:10px 14px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;">' +
+      '<canvas id="cat-chart" height="70" style="flex:1;min-width:240px;max-height:80px"></canvas>' +
+      '<button class="btn btn-outline btn-sm" onclick="togglePanel(true)">Open filters</button>' +
+    '</div>' +
+    '<div id="genos-list"></div>' +
+    '<div id="genos-footer" style="text-align:center;margin:16px 0;"></div>';
+
+  if (!Object.keys(S.sliders).length) resetSliderState();
+  buildSliders();
+  await fetchFindings();
+  if (!S.total && !activeFilterNames().length) { needScan(main, 'your findings'); return; }
+  renderGenos();
+  buildFacets();
+  drawReputeChart();
+  drawCategoryChart();
+}
+
+/* --- rendering the list ------------------------------------------------- */
+
+function renderGenos() {
+  S.allowed = Math.max(1, Number(el('allowed').value) || 50);
+  const list = el('genos-list');
+  if (!list) return;
+
+  const shown = S.findings.slice(0, S.allowed);
+  const off = Math.max(0, S.findings.length - shown.length);
+  el('cnt-visible').textContent = shown.length;
+  el('cnt-off').textContent = off;
+
+  const sub = el('findings-sub');
+  if (sub) {
+    const s = S.summary.silos || {};
+    sub.innerHTML = S.total + ' matching &middot; ' +
+      (s.pre_prescription || 0) + ' prescription critical, ' +
+      (s.actionable || 0) + ' actionable, ' +
+      (s.informational || 0) + ' informational &middot; frequencies for <strong>' +
+      esc(S.population) + '</strong>';
+  }
+  renderQcBanner();
+
+  if (!S.findings.length) {
+    const active = activeFilterNames();
+    list.innerHTML = '<div class="empty"><h2>Nothing matches</h2>' +
+      (active.length
+        ? '<p class="muted">Active filters: ' + esc(active.join(', ')) + '</p>'
+        : '<p class="muted">No findings at all. Run a scan.</p>') +
+      '<button class="btn btn-primary" style="margin-top:10px" onclick="resetFilters()">' +
+      'Reset all filters</button></div>';
+    el('genos-footer').innerHTML = '';
+    return;
+  }
+
+  list.innerHTML = shown.map(genoCard).join('');
+  el('genos-footer').innerHTML = off
+    ? '<span class="muted">' + off + ' more match. </span>' +
+      '<button class="btn btn-outline btn-sm" onclick="doubleAllowed()">Show twice as many</button>'
+    : '<span class="muted">End of ' + S.findings.length + ' results</span>';
+}
+
+function doubleAllowed() {
+  el('allowed').value = Math.min(20000, (Number(el('allowed').value) || 50) * 2);
+  renderGenos();
+}
+
+function reputeClass(f) {
+  if (f.repute === 'Good') return 'goodRepute';
+  if (f.repute === 'Bad') return 'badRepute';
+  return 'noRepute';
+}
+function magClass(m) {
+  if (m === null || m === undefined) return 'mag-low';
+  if (m === 0) return 'mag-0';
+  if (m < 2) return 'mag-low';
+  if (m < 6) return 'mag-mid';
+  return 'mag-high';
+}
+
+function genoCard(f) {
+  const isSnp = f.entity_type === 'snp';
+  const mag = num(f.magnitude, 2);
+  const badges = [];
+
+  if (f.silo === 'pre_prescription') badges.push(['badge-rx', 'prescription critical']);
+  else if (f.silo === 'actionable') badges.push(['badge-act', 'actionable']);
+  if (f.entity_type !== 'snp') badges.push(['badge-info', f.entity_type]);
+  if (f.zygosity && f.zygosity !== 'no_call') badges.push(['badge-info', f.zygosity]);
+  if (f.zygosity === 'no_call') badges.push(['badge-warn', 'no call']);
+  if (f.review_stars) badges.push(['badge-star', f.review_stars + ' star' +
+    (f.review_stars > 1 ? 's' : '')]);
+  if (f.cpic_level) badges.push(['badge-cpic', 'CPIC ' + f.cpic_level]);
+  if (f.carrier === false) badges.push(['badge-nocarrier', 'not a carrier']);
+  if (f.conflict) badges.push(['badge-warn', 'files disagree']);
+  if (f.flipped) badges.push(['badge-info', 'strand flipped']);
+  if (f.ambiguous || f.freq_ambiguous) badges.push(['badge-warn', 'strand ambiguous']);
+  if (f.partial_coverage) badges.push(['badge-warn', 'partial coverage']);
+
+  const head =
+    '<div class="geno-head">' +
+      (isSnp
+        ? '<a class="geno-id" target="_blank" rel="noopener" ' +
+          'href="https://www.ncbi.nlm.nih.gov/snp/' + encodeURIComponent(f.rsid) +
+          '" title="Look up ' + esc(f.rsid) + ' at dbSNP">' + esc(f.rsid) + '</a>'
+        : '<span class="geno-id">' + esc(f.rsid) + '</span>') +
+      (f.token ? '<span class="geno-token">' + esc(f.token) + '</span>' : '') +
+      (f.gene ? '<span class="muted">' + esc(f.gene) + '</span>' : '') +
+      '<span class="mag-pill ' + magClass(mag) + '" title="DNAInsight magnitude, ' +
+        'computed locally. Blank means unscored and sorts as 1.">' +
+        (mag === null ? 'unscored' : mag) + '</span>' +
+      badges.map(([c, t]) => '<span class="badge ' + c + '">' + esc(t) + '</span>').join('') +
+    '</div>';
+
+  const left =
+    head +
+    (f.summary ? '<div class="geno-summary">' + esc(f.summary) + '</div>' : '') +
+    (f.interpretation && f.interpretation !== f.summary
+      ? '<div class="geno-body">' + esc(f.interpretation) + '</div>' : '') +
+    (f.criteria
+      ? '<div class="geno-crit" title="The rule this genoset evaluates">' +
+        esc(f.criteria) + '</div>' : '') +
+    conflictBlock(f) + comparisonBlock(f) + caveatBlock(f) + tagRows(f) + factorBlock(f);
+
+  return '<div class="geno ' + reputeClass(f) + (f.dubious ? ' is-dubious' : '') + '">' +
+    '<div>' + left + '</div><div>' + kvTable(f) + popBars(f) + '</div></div>';
+}
+
+const KV_TIPS = {
+  Magnitude: 'Interest score 0 to 10, computed on this machine',
+  Repute: 'Good, Bad, or blank when neutral or unclassified',
+  Confidence: 'How much the underlying evidence supports this',
+  Frequency: 'Percentage of the chosen population with your exact genotype',
+  Band: 'Coarse rarity band for the frequency',
+  GMAF: 'Global minor allele frequency across all populations',
+  Publications: 'Approximate number of papers mentioning this variant',
+  Evidence: 'Strongest evidence behind this finding',
+  Copies: 'How many copies of the reported variant allele you carry',
+  Seen: 'How many of your uploaded files called this position',
+  Coverage: 'Fraction of the required positions that were genotyped',
+  Percentile: 'Where your score sits in the reference distribution',
+  Position: 'Chromosome position, GRCh37',
+  Strand: 'Whether the alleles had to be complemented to match the reference',
+};
+
+function kvTable(f) {
+  const rows = [];
+  const add = (k, v) => {
+    if (v === null || v === undefined || v === '' || v === false) return;
+    rows.push('<tr><td title="' + esc(KV_TIPS[k] || k) + '">' + esc(k) + '</td><td>' +
+      v + '</td></tr>');
+  };
+  const mag = num(f.magnitude, 2);
+  add('Magnitude', mag === null ? 'unscored' : mag);
+  add('Repute', f.repute || (f.entity_type === 'trait' || f.entity_type === 'prs'
+    ? '<span class="muted">neutral by design</span>' : '<span class="muted">not set</span>'));
+  add('Confidence', f.confidence && f.confidence !== 'none' ? f.confidence
+    : '<span class="muted">none</span>');
+  if (f.entity_type === 'snp') {
+    const fr = pct(f.freq);
+    add('Frequency', fr === null
+      ? '<span class="muted">no data</span>'
+      : fr + '%' + (f.freq_derived ? ' <span class="muted">(derived)</span>' : ''));
+    add('Band', f.freq_band && f.freq_band !== 'unknown' ? f.freq_band.replace('_', ' ') : null);
+    const g = num(f.gmaf, 4);
+    add('GMAF', g === null ? null : g);
+    add('Publications', f.publications || null);
+  }
+  add('Evidence', f.evidence || null);
+  add('Copies', Number.isInteger(f.variant_copies)
+    ? f.variant_copies + ' of 2' + (f.variant_allele ? ' (' + esc(f.variant_allele) + ')' : '')
+    : null);
+  if (f.entity_type === 'snp') {
+    add('Chromosome', f.chromosome || null);
+    add('Position', f.position || null);
+  }
+  add('Coverage', f.coverage !== null && f.coverage !== undefined
+    ? Math.round(f.coverage * 100) + '%' : null);
+  add('Percentile', f.percentile !== null && f.percentile !== undefined
+    ? num(f.percentile, 1) : null);
+  add('Band', f.band || null);
+  add('Seen', f.count > 1 ? f.count + ' files' : null);
+  add('Strand', f.ambiguous ? 'cannot be verified'
+    : (f.flipped ? 'complemented to match' : null));
+  return '<table class="kv">' + rows.join('') + '</table>';
+}
+
+function popBars(f) {
+  const series = f.population_series || [];
+  if (!series.length) return '';
+  const max = Math.max(...series.map(s => Number(s.frequency) || 0), 1);
+  return '<div class="popbars">' + series.map(s => {
+    const v = s.frequency;
+    const h = v === null || v === undefined ? 2 : Math.max(2, (Number(v) / max) * 32);
+    const tip = v === null || v === undefined
+      ? 'No data for ' + s.code
+      : num(v, 1) + '% of ' + s.code + ' (' + (s.brief || '') + ') ' +
+        (s.yours ? 'share your ' + (f.token || 'genotype') : 'have this genotype');
+    return '<div class="popbar' + (s.yours ? ' is-you' : '') + '" style="height:' + h +
+      'px;background:' + rarityColor(v) + '" title="' + esc(tip) + '"></div>';
+  }).join('') + '</div><div class="popbar-label">' +
+    esc(series.map(s => s.code).join(' ')) + '</div>';
+}
+
+function tagRows(f) {
+  const rows = [];
+  const row = (label, key, values) => {
+    if (!values || !values.length) return;
+    rows.push('<div class="tagrow"><span class="tl">' + esc(label) + '</span>' +
+      values.slice(0, 14).map(v =>
+        '<button class="tag" onclick="addFacetValue(\'' + key + '\',\'' +
+        esc(String(v)).replace(/'/g, "\\'") + '\')" title="Filter by this">' +
+        esc(v) + '</button>').join('') + '</div>');
+  };
+  row('Topics', 'topic', f.topics);
+  row('Medicines', 'medicine', f.medicines);
+  row('Conditions', 'condition', f.conditions_list);
+  if (f.gene) row('Gene', 'gene', [f.gene]);
+  if (f.matched_rsids && f.matched_rsids.length) {
+    rows.push('<div class="tagrow"><span class="tl">Uses</span><span class="mono muted">' +
+      esc(f.matched_rsids.join(', ')) + '</span></div>');
+  }
+  return rows.join('');
+}
+
+function conflictBlock(f) {
+  if (!f.conflict || !(f.calls || []).length) return '';
+  return '<div class="conflictbox"><strong>Your files disagree here.</strong> ' +
+    'Both calls are kept and neither was chosen, because a disagreement is ' +
+    'information about reliability.<table style="margin-top:6px">' +
+    f.calls.map(c => '<tr><td>' + esc(c.label) + '</td><td class="mono">' +
+      esc(c.genotype) + '</td></tr>').join('') + '</table></div>';
+}
+
+function comparisonBlock(f) {
+  if (!(f.comparison || []).length) return '';
+  return '<div class="tagrow"><span class="tl">Compared</span></div>' +
+    '<table style="font-size:0.8em">' + f.comparison.map(c =>
+      '<tr><td>' + esc(c.label) + ' <span class="muted">(' + esc(c.role) + ')</span></td>' +
+      '<td class="mono">' + esc(c.genotype) + '</td><td>' +
+      (c.shared ? '<span class="badge">same as yours</span>'
+                : '<span class="badge badge-warn">differs</span>') + '</td></tr>').join('') +
+    '</table>';
+}
+
+function caveatBlock(f) {
+  const items = [];
+  if (f.caveats && f.caveats.length) items.push(...f.caveats);
+  if (f.caveat) items.push(f.caveat);
+  if ((num(f.magnitude, 2) || 0) >= 6 && f.entity_type === 'snp') {
+    items.push('This variant is rare and scored high. Rare high impact calls on a ' +
+      'consumer array are sometimes miscalls. Confirm with a clinically validated ' +
+      'test before acting, and consider speaking to a genetic counsellor.');
+  }
+  if (f.ambiguous || f.freq_ambiguous) {
+    items.push('This is an A/T or C/G genotype, so the strand cannot be verified from ' +
+      'the data. The reading shown may be the complement.');
+  }
+  if (!items.length) return '';
+  return '<div class="caveatbox"><strong>Read with care</strong><ul>' +
+    items.map(c => '<li>' + esc(c) + '</li>').join('') + '</ul></div>';
+}
+
+function factorBlock(f) {
+  if (!(f.magnitude_factors || []).length) return '';
+  return '<details style="margin-top:7px;font-size:0.79em"><summary class="muted" ' +
+    'style="cursor:pointer">How this magnitude was calculated</summary><ul style="margin:5px 0 0 16px">' +
+    f.magnitude_factors.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul></details>';
+}
+
+function renderQcBanner() {
+  const box = el('qc-banner');
+  if (!box) return;
+  const q = S.qc || {};
+  const bits = [];
+  if (q.flipped) bits.push(q.flipped + ' had their alleles complemented to match the reference, which is routine');
+  if (q.ambiguous) bits.push(q.ambiguous + ' are A/T or C/G genotypes whose strand cannot be verified');
+  if (q.no_call) bits.push(q.no_call + ' were no calls and score zero');
+  if (q.conflicts) bits.push(q.conflicts + ' positions where two of your files disagree');
+  if (!bits.length) { box.innerHTML = ''; return; }
+  box.innerHTML = '<div class="banner banner-info"><span>&#9432;</span><div>' +
+    '<strong>Data quality note.</strong> ' + esc(bits.join('; ')) + '. ' +
+    '<a onclick="showView(\'qc\')" style="cursor:pointer">See the full report</a>.' +
+    '</div></div>';
+}
+
+/* --- charts, degrading quietly when Chart.js did not load --------------- */
+
+function haveChart() { return typeof Chart !== 'undefined'; }
+
+function drawReputeChart() {
+  if (!haveChart()) { el('nav-pie-wrap').style.display = 'none'; return; }
+  const r = (S.summary.reputes) || { Good: 0, Bad: 0, unset: 0 };
+  const style = getComputedStyle(document.body);
+  const colors = [style.getPropertyValue('--repute-good').trim() || '#60B060',
+                  '#C0C0C0',
+                  style.getPropertyValue('--repute-bad').trim() || '#FF9090'];
+  const data = [r.Good || 0, r.unset || 0, r.Bad || 0];
+  if (S.charts.pie) S.charts.pie.destroy();
+  S.charts.pie = new Chart(el('nav-pie'), {
+    type: 'doughnut',
+    data: { labels: ['Good', 'Not Set', 'Bad'],
+            datasets: [{ data, backgroundColor: colors, borderWidth: 0 }] },
+    options: { plugins: { legend: { display: false },
+      tooltip: { callbacks: { label: c => {
+        const total = data.reduce((a, b) => a + b, 0) || 1;
+        return c.label + ' ' + c.parsed + ' (' + Math.round(c.parsed / total * 100) + '%)';
+      } } } }, cutout: '58%', responsive: false, animation: false },
+  });
+}
+
+function drawCategoryChart() {
+  const canvas = el('cat-chart');
+  if (!canvas) return;
+  if (!haveChart()) { canvas.parentElement.style.display = 'none'; return; }
+  const cats = (S.facets.categories || []).slice(0, 12);
+  if (!cats.length) { canvas.style.display = 'none'; return; }
+  if (S.charts.cat) S.charts.cat.destroy();
+  S.charts.cat = new Chart(canvas, {
+    type: 'bar',
+    data: { labels: cats.map(c => c.value),
+            datasets: [{ label: 'Findings', data: cats.map(c => c.count),
+                         backgroundColor: '#2980b9' }] },
+    options: { plugins: { legend: { display: false } }, responsive: true,
+               maintainAspectRatio: false, animation: false,
+               scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } },
+  });
+}
+
+/* --- panel, reset, misc UI --------------------------------------------- */
+
+function togglePanel(force) {
+  const p = el('panel'), s = el('panel-scrim');
+  const open = force === undefined ? !p.classList.contains('open') : !!force;
+  p.classList.toggle('open', open);
+  s.classList.toggle('open', open);
+  if (open) { const f = p.querySelector('button, input, select'); if (f) f.focus(); }
+  else el('panel-toggle').focus();
+}
+
+function resetFilters() {
+  S.q = ''; el('q').value = '';
+  S.clinvarOnly = false; S.clinvarCodes.clear();
+  el('cv-codes').style.display = 'none';
+  el('cv-codes').querySelectorAll('input').forEach(i => { i.checked = false; });
+  el('min-stars').value = '';
+  for (const f of FACETS) S.selected[f.key].clear();
+  ['show-snp','show-genoset','show-trait','show-prs','z-hom','z-het','z-nocall']
+    .forEach(id => { const e = el(id); if (e && !e.disabled) e.checked = true; });
+  ['require-freq','only-conflicts','only-ambiguous','only-carriers']
+    .forEach(id => { const e = el(id); if (e) e.checked = false; });
+  el('repute-row').querySelectorAll('input').forEach(i => { i.checked = true; });
+  el('sort-order').value = 'magnitude|desc';
+  resetSliderState(); buildSliders();
+  applyFilters();
+}
+
+function onPopulationChange() {
+  S.population = el('pop-select').value;
+  applyFilters();
+}
+
+function setVision(mode) { document.body.classList.toggle('colorblind', mode === 'colorblind');
+  drawReputeChart(); }
+function bumpFont(dir) {
+  S.fontStep = Math.max(-2, Math.min(4, S.fontStep + dir));
+  document.body.style.setProperty('--base-size', (15 + S.fontStep) + 'px');
+}
+
+function setupKeys() {
+  document.addEventListener('keydown', e => {
+    if (e.ctrlKey && (e.key === 'h' || e.key === 'H')) { e.preventDefault(); openHelp(); return; }
+    const typing = ['INPUT','SELECT','TEXTAREA'].includes((e.target.tagName || ''));
+    if (e.key === 'Escape') {
+      if (el('help-modal').classList.contains('open')) { closeHelp(); return; }
+      if (el('panel').classList.contains('open')) { togglePanel(false); return; }
+      if (S.view === 'findings') resetFilters();
       return;
     }
-    const ref = d.in_reference
-      ? `<br><strong>${d.gene||''}</strong> &middot; ${d.category||''} &middot; ${(d.clinical_sig||'')}<br><span style="font-size:0.9em;color:#444;">${d.interpretation||''}</span>`
-      : `<br><span style="color:#888;">Not in the curated reference (no clinical annotation).</span>`;
-    box.innerHTML = `<div class="alert alert-info">
-      <strong>${d.rsid}</strong> &mdash; Genotype <code>${d.genotype}</code>
-      <span style="color:#666;">(${(d.zygosity||'').replace('_',' ')})</span>
-      &nbsp;chr${d.chromosome}:${d.position}${ref}
-    </div>`;
-  } catch(e) {
-    box.innerHTML = `<div class="alert alert-danger">Lookup failed: ${e.message}</div>`;
-  }
-}
-
-function renderCategoryChart(findings) {
-  const wrap = document.getElementById('findings-category-chart');
-  if (!wrap || !findings.length) return;
-
-  // Count by category
-  const counts = {};
-  findings.forEach(f => {
-    const cat = f.category || 'OTHER';
-    counts[cat] = (counts[cat] || 0) + 1;
-  });
-  const labels = Object.keys(counts);
-  const data   = labels.map(l => counts[l]);
-  const COLORS  = ['#2980b9','#27ae60','#e67e22','#c0392b','#8e44ad','#16a085','#f39c12'];
-
-  wrap.style.display = 'block';
-  const existing = Chart.getChart('categoryChart');
-  if (existing) existing.destroy();
-
-  new Chart(document.getElementById('categoryChart'), {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [{
-        label: 'Findings by Category',
-        data,
-        backgroundColor: labels.map((_,i) => COLORS[i % COLORS.length]),
-        borderRadius: 4,
-      }],
-    },
-    options: {
-      plugins: { legend: { display: false } },
-      scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } },
-    },
+    if (!typing && (e.key === 'f' || e.key === 'F')) { e.preventDefault(); togglePanel(); }
   });
 }
 
-function renderFindingsTable(findings, containerId) {
-  const el = document.getElementById(containerId);
-  if (!el) return;
-  if (!findings.length) {
-    el.innerHTML = `<div class="empty-state"><div class="icon">&#x1F50D;</div><h3>No Findings</h3><p>Run a scan to annotate your DNA.</p></div>`;
-    return;
+function openHelp() { el('help-modal').classList.add('open'); }
+function closeHelp() { el('help-modal').classList.remove('open'); }
+
+function exportFiltered(fmt) {
+  if (!S.pid) return;
+  window.location = '/api/profiles/' + S.pid + '/export/v2/' + fmt + '?' + buildQuery();
+}
+
+function openTable() {
+  const cols = ['rsid','entity_type','gene','genotype','zygosity','magnitude','repute',
+                'confidence','silo','review_stars','cpic_level','freq','gmaf',
+                'publications','summary'];
+  const rows = S.findings.map(f => '<tr>' + cols.map(c => {
+    let v = f[c]; if (v === null || v === undefined) v = '';
+    return '<td>' + esc(v) + '</td>';
+  }).join('') + '</tr>').join('');
+  const html = '<!DOCTYPE html><html><head><meta charset="utf-8">' +
+    '<title>DNAInsight table, ' + S.findings.length + ' rows</title><style>' +
+    'body{font-family:Segoe UI,Arial,sans-serif;font-size:12px;padding:14px}' +
+    'table{border-collapse:collapse;width:100%}th,td{border:1px solid #ddd;padding:3px 6px;' +
+    'text-align:left}th{background:#ecf0f1;position:sticky;top:0}</style></head><body>' +
+    '<h3>' + S.findings.length + ' rows, honouring the active filters</h3><table><thead><tr>' +
+    cols.map(c => '<th>' + esc(c) + '</th>').join('') + '</tr></thead><tbody>' + rows +
+    '</tbody></table></body></html>';
+  const w = window.open('', '_blank');
+  if (w) { w.document.write(html); w.document.close(); }
+  else showError('Your browser blocked the table window. Allow popups for this page.');
+}
+
+function openCharts() {
+  const buckets = ['silos','entity_types','reputes','categories','freq_bands',
+                   'confidence','cpic_levels','review_stars'];
+  let body = '';
+  for (const b of buckets) {
+    const vals = S.facets[b] || [];
+    if (!vals.length) continue;
+    const max = Math.max(...vals.map(v => v.count), 1);
+    body += '<h3>' + esc(b.replace('_', ' ')) + '</h3><table>' + vals.map(v =>
+      '<tr><td style="width:190px">' + esc(v.value) + '</td>' +
+      '<td><div style="background:#2980b9;height:12px;width:' +
+      Math.max(2, v.count / max * 320) + 'px"></div></td>' +
+      '<td style="width:56px;text-align:right">' + v.count + '</td></tr>').join('') + '</table>';
   }
-  const SILO_BADGE = {
-    pre_prescription: '<span class="badge badge-red">Rx-Critical</span>',
-    actionable:       '<span class="badge badge-orange">Actionable</span>',
-    informational:    '<span class="badge badge-blue">Informational</span>',
+  const html = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>DNAInsight charts</title>' +
+    '<style>body{font-family:Segoe UI,Arial,sans-serif;padding:16px;font-size:13px}' +
+    'table{border-collapse:collapse;margin-bottom:16px}td{padding:2px 6px}' +
+    'h3{margin:14px 0 6px;text-transform:capitalize}</style></head><body>' +
+    '<h2>Current selection, ' + S.findings.length + ' rows</h2>' + body + '</body></html>';
+  const w = window.open('', '_blank');
+  if (w) { w.document.write(html); w.document.close(); }
+  else showError('Your browser blocked the charts window. Allow popups for this page.');
+}
+/* =========================================================================
+   SUBSYSTEM VIEWS
+   ========================================================================= */
+
+async function renderGenosets(main) {
+  if (needProfile(main)) return;
+  let d;
+  try { d = await api('/api/profiles/' + S.pid + '/genosets'); }
+  catch (e) { needScan(main, 'genosets'); return; }
+
+  const card = g => {
+    const mag = num(g.magnitude, 2);
+    return '<div class="geno ' + reputeClass(g) + '"><div>' +
+      '<div class="geno-head"><span class="geno-id">' + esc(g.rsid) + '</span>' +
+      (g.aka ? '<span class="muted">' + esc(g.aka) + '</span>' : '') +
+      '<span class="mag-pill ' + magClass(mag) + '">' + (mag === null ? 'unscored' : mag) +
+      '</span>' + (g.repute ? '<span class="badge">' + esc(g.repute) + '</span>' : '') +
+      (g.silo === 'pre_prescription' ? '<span class="badge badge-rx">prescription critical</span>' : '') +
+      '</div>' +
+      '<div class="geno-summary">' + esc(g.summary || '') + '</div>' +
+      (g.interpretation ? '<div class="geno-body">' + esc(g.interpretation) + '</div>' : '') +
+      '<div class="geno-crit">' + esc(g.criteria || '') + '</div>' +
+      tagRows(g) + '</div><div>' +
+      '<table class="kv"><tr><td>Coverage</td><td>' +
+      (g.coverage !== null && g.coverage !== undefined
+        ? Math.round(g.coverage * 100) + '%' : 'unknown') + '</td></tr>' +
+      (g.clinical_sig ? '<tr><td>Evidence</td><td>' + esc(g.clinical_sig) + '</td></tr>' : '') +
+      '</table></div></div>';
   };
-  el.innerHTML = `
-    <div style="font-size:0.82em;color:#888;margin-bottom:8px;">${findings.length} finding(s)</div>
-    <div style="overflow-x:auto;">
-    <table class="findings-table">
-      <thead>
-        <tr>
-          <th>rsID</th><th>Gene</th><th>Genotype</th><th>Zygosity</th><th>Classification</th><th>Status</th><th>Interpretation</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${findings.map(f=>`
-          <tr>
-            <td><code style="font-size:0.85em;">${f.rsid}</code></td>
-            <td><strong>${f.gene||'?'}</strong></td>
-            <td><code>${f.genotype||f.allele1+f.allele2||'?'}</code></td>
-            <td style="font-size:0.8em;color:#666;">${(f.zygosity||'').replace('_',' ')}</td>
-            <td>${(f.clinical_sig||'').replace(/^\w/,c=>c.toUpperCase())}</td>
-            <td>${SILO_BADGE[f.silo]||''}</td>
-            <td class="interp">${(f.interpretation||f.conditions||'').substring(0,200)}</td>
-          </tr>
-        `).join('')}
-      </tbody>
-    </table>
-    </div>`;
+
+  main.innerHTML =
+    '<h1>Genosets</h1>' +
+    '<div class="sub">Rules that combine several positions. A genoset is either ' +
+      'present or absent, and a position your array did not read makes the rule ' +
+      'impossible to evaluate at all.</div>' +
+    '<h2>Present in your data (' + d.matched.length + ')</h2>' +
+    (d.matched.length ? d.matched.map(card).join('')
+      : '<div class="card muted">None of the rules matched.</div>') +
+    '<h2>Checked and not present (' + d.unmatched.length + ')</h2>' +
+    (d.unmatched.length
+      ? '<div class="card"><table><thead><tr><th>Genoset</th><th>Also known as</th>' +
+        '<th>Summary</th></tr></thead><tbody>' + d.unmatched.map(g =>
+          '<tr><td class="mono">' + esc(g.rsid) + '</td><td>' + esc(g.aka || '') +
+          '</td><td>' + esc(g.summary || '') + '</td></tr>').join('') +
+        '</tbody></table></div>'
+      : '<div class="card muted">Nothing in this category.</div>') +
+    '<h2>Not testable on your array (' + d.incomplete.length + ')</h2>' +
+    '<div class="banner banner-warn"><span>&#9888;</span><div>' + esc(d.note ||
+      'These rules need a position your array did not genotype, so they could not ' +
+      'be evaluated. That is different from having been checked and found absent.') +
+    '</div></div>' +
+    (d.incomplete.length
+      ? '<div class="card"><table><thead><tr><th>Genoset</th><th>Also known as</th>' +
+        '<th>Coverage</th><th>Summary</th></tr></thead><tbody>' + d.incomplete.map(g =>
+          '<tr><td class="mono">' + esc(g.rsid) + '</td><td>' + esc(g.aka || '') + '</td>' +
+          '<td>' + (g.coverage !== null && g.coverage !== undefined
+            ? Math.round(g.coverage * 100) + '%' : '?') + '</td>' +
+          '<td>' + esc(g.summary || '') + '</td></tr>').join('') +
+        '</tbody></table></div>'
+      : '');
+  const p = el('pill-genosets'); if (p) p.textContent = d.matched.length || '';
 }
 
-function renderFindingsTab(silo, containerId) {
-  const el = document.getElementById(containerId);
-  if (!el) return;
-  const findings = state.findings.filter(f=>f.silo===silo);
-  renderFindingsTable(findings, containerId);
+async function renderPgx(main) {
+  if (needProfile(main)) return;
+  let d;
+  try { d = await api('/api/profiles/' + S.pid + '/pgx'); }
+  catch (e) { needScan(main, 'the medicines view'); return; }
+
+  main.innerHTML =
+    '<h1>Medicines and drug metabolism</h1>' +
+    '<div class="banner banner-err"><span>&#9888;</span><div><strong>' +
+      esc(d.warning || '') + '</strong></div></div>' +
+    (d.drugs.length ? d.drugs.map(drug =>
+      '<div class="card"><h2 style="margin-top:0">' + esc(drug.drug) +
+      (drug.highest_cpic ? ' <span class="badge badge-cpic">CPIC ' +
+        esc(drug.highest_cpic) + '</span>' : '') + '</h2>' +
+      '<table><thead><tr><th>Variant</th><th>Gene</th><th>Genotype</th>' +
+      '<th>Magnitude</th><th>Confidence</th><th>What it means</th></tr></thead><tbody>' +
+      drug.variants.map(v =>
+        '<tr><td class="mono">' + esc(v.rsid) + '</td><td>' + esc(v.gene || '') + '</td>' +
+        '<td class="mono">' + esc(v.genotype || '') +
+          (v.carrier === false ? ' <span class="badge badge-nocarrier">not a carrier</span>' : '') +
+        '</td>' +
+        '<td>' + (num(v.magnitude, 2) === null ? '-' : num(v.magnitude, 2)) + '</td>' +
+        '<td>' + esc(v.confidence || '') + '</td>' +
+        '<td>' + esc(v.summary || '') + '</td></tr>').join('') +
+      '</tbody></table></div>').join('')
+      : '<div class="card muted">No pharmacogenomic findings yet.</div>');
+  const p = el('pill-pgx'); if (p) p.textContent = d.count || '';
 }
 
-function switchTab(btn, panelId) {
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById(panelId)?.classList.add('active');
+async function renderTraits(main) {
+  if (needProfile(main)) return;
+  let d;
+  try { d = await api('/api/profiles/' + S.pid + '/traits'); }
+  catch (e) { needScan(main, 'traits'); return; }
+
+  const bt = d.blood_type || {};
+  const unknown = !bt.blood_type || bt.blood_type === 'unknown';
+  const abo = bt.abo || {}, rh = bt.rh || {};
+
+  main.innerHTML =
+    '<h1>Traits</h1>' +
+    '<div class="sub">Traits are never marked good or bad. A trait is not a verdict.</div>' +
+    '<div class="card"><h2 style="margin-top:0">Blood type</h2>' +
+      (unknown
+        ? '<div class="banner banner-warn"><span>&#9888;</span><div>' +
+          '<strong>Not determinable from this file.</strong> ' +
+          esc(bt.summary || '') + '</div></div>'
+        : '<div style="font-size:2em;font-weight:700;color:var(--blue-dark)">' +
+          esc(bt.blood_type) + '</div><div class="muted">confidence ' +
+          esc(bt.confidence || 'unknown') + '</div>') +
+      '<table style="margin-top:12px"><tbody>' +
+      '<tr><td style="width:130px">ABO</td><td>' + esc(abo.abo || 'unknown') +
+        ' <span class="muted">(' + esc(abo.confidence || 'none') + ')</span></td></tr>' +
+      (abo.caveat ? '<tr><td class="muted">Why</td><td class="muted">' +
+        esc(abo.caveat) + '</td></tr>' : '') +
+      '<tr><td>RhD</td><td>' + esc(rh.rh || 'unknown') +
+        ' <span class="muted">(' + esc(rh.confidence || 'none') + ')</span></td></tr>' +
+      (rh.caveat ? '<tr><td class="muted">Why</td><td class="muted">' +
+        esc(rh.caveat) + '</td></tr>' : '') +
+      '</tbody></table></div>' +
+    (d.traits || []).map(t =>
+      '<div class="geno noRepute"><div>' +
+      '<div class="geno-head"><span class="geno-id">' + esc(t.name) + '</span>' +
+      '<span class="badge">' + esc(t.category || 'trait') + '</span>' +
+      (t.rsid ? '<span class="muted mono">' + esc(t.rsid) + '</span>' : '') +
+      (t.genotype ? '<span class="geno-token">' + esc(t.genotype) + '</span>' : '') +
+      '</div><div class="geno-summary">' + esc(t.call || '') + '</div>' +
+      '<div class="geno-body">' + esc(t.detail || '') + '</div>' +
+      (t.caveat ? '<div class="caveatbox"><strong>Read with care</strong><ul><li>' +
+        esc(t.caveat) + '</li></ul></div>' : '') +
+      '</div><div><table class="kv">' +
+      (t.evidence ? '<tr><td>Evidence</td><td style="text-align:left">' +
+        esc(t.evidence) + '</td></tr>' : '') +
+      '</table></div></div>').join('');
+  const p = el('pill-traits'); if (p) p.textContent = (d.traits || []).length || '';
 }
 
-// ============================================================
-// SCAN
-// ============================================================
-function renderScan(el) {
-  if (!state.activeProfile) {
-    el.innerHTML = `<div class="card"><div class="empty-state"><div class="icon">&#x25B6;</div><h3>Select a Profile</h3></div></div>`;
-    return;
-  }
-  el.innerHTML = `
-    <div class="card">
-      <h2>Run Annotation Scan &mdash; ${state.activeProfile.name}</h2>
-      <div class="alert alert-info">
-        The scanner annotates your SNPs using the bundled reference database (offline, instant) and optionally queries
-        <strong>MyVariant.info</strong> for additional ClinVar and PharmGKB annotations (requires internet).
-      </div>
-      <div class="form-group" style="margin-top:16px;">
-        <label>
-          <input type="checkbox" id="use-api" checked>
-          &nbsp;Use online API (MyVariant.info) for extended annotation
-        </label>
-        <div style="font-size:0.8em;color:#888;margin-top:4px;margin-left:20px;">
-          Sends rsIDs (not genotypes) to myvariant.info. No personally identifiable information is transmitted.
-        </div>
-      </div>
-      <div id="scan-status-area"></div>
-      <button class="btn btn-primary" id="btn-start-scan" onclick="startScan()">&#x25B6; Start Scan</button>
-    </div>`;
+async function renderPrs(main) {
+  if (needProfile(main)) return;
+  let d;
+  try { d = await api('/api/profiles/' + S.pid + '/prs'); }
+  catch (e) { needScan(main, 'risk scores'); return; }
+
+  main.innerHTML =
+    '<h1>Polygenic risk scores</h1>' +
+    '<div class="banner banner-warn"><span>&#9888;</span><div>' +
+      esc(d.disclaimer || '') + '</div></div>' +
+    ((d.results || []).length ? d.results.map(r =>
+      '<div class="geno noRepute"><div>' +
+      '<div class="geno-head"><span class="geno-id">' + esc(r.trait || r.id) + '</span>' +
+      '<span class="badge">' + esc(r.band || '') + '</span>' +
+      (r.reliable === false
+        ? '<span class="badge badge-warn">low coverage, treat as indicative only</span>' : '') +
+      '</div>' +
+      '<div class="geno-summary">' +
+        (r.percentile !== null && r.percentile !== undefined
+          ? 'Around the ' + num(r.percentile, 0) + 'th percentile of the ' +
+            esc(r.population_reference || 'reference') + ' reference distribution'
+          : 'Percentile not available') + '</div>' +
+      '<div class="geno-body">Computed from ' + (r.variants_used || 0) + ' of ' +
+        (r.variants_total || 0) + ' variants in the model' +
+        (r.mean_imputed ? ', with missing genotypes set to the population mean' : '') +
+        '.' + (r.citation ? ' Weights from ' + esc(r.citation) + '.' : '') + '</div>' +
+      ((r.caveats || []).length
+        ? '<div class="caveatbox"><strong>Every one of these applies</strong><ul>' +
+          r.caveats.map(c => '<li>' + esc(c) + '</li>').join('') + '</ul></div>' : '') +
+      '</div><div><table class="kv">' +
+      '<tr><td>Percentile</td><td>' + (r.percentile !== null && r.percentile !== undefined
+        ? num(r.percentile, 1) : '-') + '</td></tr>' +
+      '<tr><td>Band</td><td>' + esc(r.band || '-') + '</td></tr>' +
+      '<tr><td>Coverage</td><td>' + Math.round((r.coverage || 0) * 100) + '%</td></tr>' +
+      '<tr><td>Reliable</td><td>' + (r.reliable ? 'yes' : 'no') + '</td></tr>' +
+      '</table></div></div>').join('')
+      : '<div class="card muted">No scores computed.</div>');
+  const p = el('pill-prs'); if (p) p.textContent = (d.results || []).length || '';
+}
+
+async function renderQc(main) {
+  if (needProfile(main)) return;
+  let d;
+  try { d = await api('/api/profiles/' + S.pid + '/qc'); }
+  catch (e) { needScan(main, 'the quality report'); return; }
+  const q = d.qc || {}, c = d.counts || {};
+
+  main.innerHTML =
+    '<h1>Data quality</h1>' +
+    '<div class="sub">What the scan could and could not establish. Worth reading ' +
+      'before you trust any single finding.</div>' +
+    '<div class="card" style="display:flex;gap:24px;flex-wrap:wrap">' +
+      tile(q.total || 0, 'SNP findings') +
+      tile(q.flipped || 0, 'Strand complemented') +
+      tile(q.ambiguous || 0, 'Strand unverifiable') +
+      tile(q.no_call || 0, 'No calls') +
+      tile(q.non_carrier || 0, 'Not a carrier') +
+      tile(q.conflicts || 0, 'File disagreements') +
+    '</div>' +
+    '<div class="card"><h2 style="margin-top:0">Why strand matters</h2>' +
+      '<p style="font-size:0.9em">' + esc(q.note || '') + '</p>' +
+      '<p style="font-size:0.9em">A <em>complemented</em> call is routine and safe: ' +
+      'the testing company and the reference database simply describe the same ' +
+      'position from opposite strands, and the software reconciled them. An ' +
+      '<em>unverifiable</em> call is different. For an A/T or C/G genotype, ' +
+      'complementing gives the other allele you already have, so no amount of ' +
+      'metadata settles which reading is right. Those are capped at magnitude 2 ' +
+      'and marked, so they cannot outrank a call that can be verified.</p></div>' +
+    '<div class="card"><h2 style="margin-top:0">Your files</h2>' +
+      '<table><thead><tr><th>File</th><th>Role</th><th>Provider</th>' +
+      '<th>Contributed</th><th>Overlapped</th><th>Conflicting</th></tr></thead><tbody>' +
+      (d.sources || []).map(s =>
+        '<tr><td>' + esc(s.label) + '</td><td>' + esc(s.role) + '</td>' +
+        '<td>' + esc(s.provider || '') + '</td><td>' + (s.contributed || 0) + '</td>' +
+        '<td>' + (s.overlapped || 0) + '</td><td>' + (s.conflicting || 0) + '</td></tr>').join('') +
+      '</tbody></table>' +
+      '<div class="muted" style="font-size:0.85em;margin-top:8px">' +
+      'Pooled positions: ' + (c.union || 0) + ' &middot; read by more than one file: ' +
+      (c.shared || 0) + ' &middot; disagreements kept: ' + (c.conflicts || 0) + '</div>' +
+    '</div>' +
+    '<div class="card"><h2 style="margin-top:0">Subsystems with data</h2><table>' +
+      Object.entries(d.subsystems || {}).map(([k, v]) =>
+        '<tr><td style="width:190px">' + esc(k) + '</td><td>' +
+        (v ? '<span class="badge" style="background:#e6f7ec;color:#14663a">available</span>'
+           : '<span class="badge">not built</span>') + '</td></tr>').join('') +
+    '</table></div>';
+  const p = el('pill-qc');
+  if (p) p.textContent = ((q.ambiguous || 0) + (q.conflicts || 0)) || '';
+}
+
+/* =========================================================================
+   SOURCES, SCAN, REPORTS, PROFILES, DATABASE
+   ========================================================================= */
+
+async function renderSources(main) {
+  if (needProfile(main)) return;
+  const d = await api('/api/profiles/' + S.pid + '/sources');
+  S.sources = d.sources || [];
+  main.innerHTML =
+    '<h1>DNA files</h1>' +
+    '<div class="sub">Pool a second file from the same person to fill gaps between ' +
+      'testing chips, or add a relative for comparison.</div>' +
+    '<div class="card"><table><thead><tr><th>Label</th><th>Whose</th><th>Provider</th>' +
+      '<th>SNPs</th><th>Added</th><th></th></tr></thead><tbody>' +
+      S.sources.map(s =>
+        '<tr><td>' + esc(s.label) + '</td><td>' + esc(s.role) + '</td>' +
+        '<td>' + esc(s.provider || '') + '</td>' +
+        '<td>' + (s.snp_count || 0).toLocaleString() + '</td>' +
+        '<td class="muted">' + esc((s.uploaded_at || '').slice(0, 10)) + '</td>' +
+        '<td>' + (S.sources.length > 1
+          ? '<button class="btn btn-outline btn-sm" onclick="removeSource(' + s.id +
+            ')">Remove</button>' : '') + '</td></tr>').join('') +
+      '</tbody></table>' +
+      '<button class="btn btn-primary" style="margin-top:12px" onclick="openSourceModal()">' +
+      '+ Add another file</button>' +
+      (S.sources.length > 1
+        ? ' <button class="btn btn-outline" style="margin-top:12px" onclick="showView(\'scan\')">' +
+          'Re-run the scan to apply</button>' : '') +
+    '</div>';
+  updatePills();
+}
+
+function openSourceModal() { el('source-modal').classList.add('open'); }
+function closeSourceModal() { el('source-modal').classList.remove('open'); }
+
+async function submitSource() {
+  const file = el('src-file').files[0];
+  if (!file) { el('src-status').textContent = 'Choose a file first.'; return; }
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('role', el('src-role').value);
+  if (el('src-label').value) fd.append('label', el('src-label').value);
+  el('src-status').innerHTML = '<span class="spinner"></span> Parsing';
+  try {
+    const r = await api('/api/profiles/' + S.pid + '/sources',
+      { method: 'POST', body: fd });
+    el('src-status').textContent = r.message || 'Added.';
+    setTimeout(() => { closeSourceModal(); showView('sources'); }, 900);
+  } catch (e) { el('src-status').textContent = ''; }
+}
+
+async function removeSource(sid) {
+  if (!confirm('Remove this file from the profile? Your findings stay until you re-scan.')) return;
+  await api('/api/profiles/' + S.pid + '/sources/' + sid, { method: 'DELETE' });
+  showView('sources');
+}
+
+function renderScan(main) {
+  if (needProfile(main)) return;
+  const on = k => S.caps[k] !== false;
+  main.innerHTML =
+    '<h1>Run a scan</h1>' +
+    '<div class="sub">Annotates your data against the bundled reference and every ' +
+      'subsystem you enable. Nothing leaves this computer unless you tick the ' +
+      'online option.</div>' +
+    '<div class="card">' +
+      '<div class="checkrow" style="flex-direction:column;gap:8px">' +
+        opt('sc-genosets', 'Genosets', on('genosets'),
+            'Rules combining several positions') +
+        opt('sc-traits', 'Traits and blood type', on('traits'),
+            'Well established trait calls') +
+        opt('sc-prs', 'Polygenic risk scores', on('prs'),
+            'Additive scores with mandatory caveats') +
+        opt('sc-snpedia', 'Use my local SNPedia cache', on('snpedia'),
+            'Only if you have already fetched it yourself') +
+        opt('sc-api', 'Query MyVariant.info online', true,
+            'Sends rsIDs only, never your genotypes. Much slower.', false) +
+      '</div>' +
+      '<div style="margin-top:14px">' +
+        '<label for="sc-pop">Reference population for frequencies </label>' +
+        '<select id="sc-pop"></select>' +
+      '</div>' +
+      '<button class="btn btn-primary" style="margin-top:14px" id="btn-scan" ' +
+      'onclick="startScan()">Start scan</button>' +
+    '</div>' +
+    '<div id="scan-status"></div>';
+
+  const sel = el('sc-pop');
+  sel.innerHTML = S.populations.filter(p => p.available).map(p =>
+    '<option value="' + p.code + '"' + (p.code === S.population ? ' selected' : '') + '>' +
+    p.code + ' - ' + esc(p.brief) + '</option>').join('');
+}
+
+function opt(id, label, enabled, tip, checked) {
+  const isOn = checked === undefined ? enabled : checked;
+  return '<label title="' + esc(tip) + '"' + (enabled ? '' : ' style="opacity:.5"') + '>' +
+    '<input type="checkbox" id="' + id + '"' + (isOn ? ' checked' : '') +
+    (enabled ? '' : ' disabled') + '> ' + esc(label) +
+    (enabled ? '' : ' <span class="muted">(no data built)</span>') +
+    ' <span class="muted" style="font-size:0.86em">' + esc(tip) + '</span></label>';
 }
 
 async function startScan() {
-  if (!state.activeProfile) return;
-  const useApi = document.getElementById('use-api')?.checked !== false;
-  document.getElementById('btn-start-scan').disabled = true;
-  document.getElementById('scan-status-area').innerHTML = `
-    <div class="scan-status">
-      <div><strong>Scan in progress...</strong></div>
-      <div class="progress-bar-wrap"><div class="progress-bar" id="scan-pbar" style="width:5%;"></div></div>
-      <div class="scan-stats">
-        <div class="stat"><div class="stat-num" id="stat-proc">0</div>SNPs Processed</div>
-        <div class="stat"><div class="stat-num" id="stat-findings">0</div>Findings So Far</div>
-      </div>
-    </div>`;
-
-  await fetch(`/api/profiles/${state.activeProfile.id}/scan`, {
-    method: 'POST',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({use_api: useApi}),
-  });
-
-  pollScanStatus();
+  el('btn-scan').disabled = true;
+  const body = {
+    use_api: el('sc-api').checked,
+    population: el('sc-pop').value,
+    include_genosets: el('sc-genosets').checked,
+    include_traits: el('sc-traits').checked,
+    include_prs: el('sc-prs').checked,
+    use_snpedia: el('sc-snpedia').checked,
+  };
+  S.population = body.population;
+  try {
+    await api('/api/profiles/' + S.pid + '/scan/v2',
+      { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body) });
+  } catch (e) { el('btn-scan').disabled = false; return; }
+  el('scan-status').innerHTML =
+    '<div class="card"><div id="scan-phase">Starting</div>' +
+    '<div class="progress-bar-wrap" style="margin-top:10px">' +
+    '<div class="progress-bar" id="scan-pbar"></div></div>' +
+    '<div class="muted" style="font-size:0.85em;margin-top:6px" id="scan-detail"></div></div>';
+  pollScan();
 }
 
-function pollScanStatus() {
-  if (state.scanPolling) clearInterval(state.scanPolling);
-  state.scanPolling = setInterval(async () => {
-    if (!state.activeProfile) return;
-    const r = await fetch(`/api/profiles/${state.activeProfile.id}/scan/status`);
-    const data = await r.json();
-
-    if (data.error) {
-      clearInterval(state.scanPolling);
-      document.getElementById('scan-status-area').innerHTML = `<div class="alert alert-danger">Scan error: ${data.error}</div>`;
-      document.getElementById('btn-start-scan').disabled = false;
-      return;
+function pollScan() {
+  clearInterval(S.scanTimer);
+  S.scanTimer = setInterval(async () => {
+    let st;
+    try { st = await api('/api/profiles/' + S.pid + '/scan/v2/status'); }
+    catch (e) { clearInterval(S.scanTimer); el('btn-scan').disabled = false; return; }
+    const phase = el('scan-phase'), bar = el('scan-pbar'), det = el('scan-detail');
+    if (phase) phase.textContent = st.error ? 'Failed'
+      : (st.done ? 'Complete' : 'Working: ' + (st.phase || ''));
+    if (bar) {
+      const p = st.total ? Math.round(st.processed / st.total * 100) : (st.done ? 100 : 12);
+      bar.style.width = Math.max(5, p) + '%';
     }
-
-    const pct = data.total > 0 ? Math.round((data.processed/data.total)*100) : (data.done ? 100 : 10);
-    const pb = document.getElementById('scan-pbar');
-    if (pb) pb.style.width = pct + '%';
-    const sp = document.getElementById('stat-proc');
-    if (sp) sp.textContent = (data.processed||0).toLocaleString();
-    const sf = document.getElementById('stat-findings');
-    if (sf) sf.textContent = (data.findings||0).toLocaleString();
-
-    if (data.done && !data.running) {
-      clearInterval(state.scanPolling);
-      document.getElementById('scan-status-area').innerHTML = `
-        <div class="alert alert-success">
-          &#x2713; Scan complete! Found <strong>${data.findings||0}</strong> annotated variants.
-        </div>`;
-      document.getElementById('btn-start-scan').disabled = false;
-      loadProfiles();
+    if (det) det.textContent = st.error ? st.error
+      : (st.total ? st.processed + ' of ' + st.total : '');
+    if (st.done) {
+      clearInterval(S.scanTimer);
+      el('btn-scan').disabled = false;
+      if (!st.error) {
+        await loadProfiles();
+        S.sliders = {};
+        setTimeout(() => showView('findings'), 500);
+      }
     }
-  }, 2000);
+  }, 700);
 }
 
-// ============================================================
-// REPORTS
-// ============================================================
-function renderReports(el) {
-  if (!state.activeProfile) {
-    el.innerHTML = `<div class="card"><div class="empty-state"><div class="icon">&#x1F4C4;</div><h3>Select a Profile</h3></div></div>`;
-    return;
-  }
-  el.innerHTML = `
-    <div class="card">
-      <h2>Generate Reports &mdash; ${state.activeProfile.name}</h2>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;">
-        <button class="btn btn-primary" onclick="generateReport('genetic')">&#x1F9EC; Genetic Health Report</button>
-        <button class="btn btn-outline" onclick="generateReport('doctor')">&#x1F3E5; Doctor Discussion Report</button>
-      </div>
-      <h2>Generated Reports</h2>
-      <div id="report-list-area">Loading...</div>
-    </div>`;
-  loadReports();
+async function renderReports(main) {
+  if (needProfile(main)) return;
+  const list = await api('/api/profiles/' + S.pid + '/reports');
+  main.innerHTML =
+    '<h1>Reports</h1>' +
+    '<div class="sub">Printable documents built from your current findings.</div>' +
+    '<div class="card">' +
+      '<button class="btn btn-primary" onclick="genReport(\'genetic\')">' +
+      'Genetic health report</button> ' +
+      '<button class="btn btn-primary" onclick="genReport(\'doctor\')">' +
+      'Doctor discussion report</button> ' +
+      '<button class="btn btn-outline" onclick="genReport(\'interactive\')" ' +
+      'title="Single file with the filter engine embedded, opens with no server">' +
+      'Interactive offline report</button>' +
+      '<div id="report-status" class="muted" style="margin-top:8px"></div>' +
+    '</div>' +
+    '<div class="card"><h2 style="margin-top:0">Previous</h2>' +
+      (list.length
+        ? '<table><thead><tr><th>Type</th><th>Created</th><th></th></tr></thead><tbody>' +
+          list.map(r => '<tr><td>' + esc(r.report_type) + '</td>' +
+            '<td class="muted">' + esc((r.created_at || '').replace('T', ' ').slice(0, 16)) +
+            '</td><td><a class="btn btn-outline btn-sm" target="_blank" rel="noopener" ' +
+            'href="/api/reports/' + r.id + '/view">Open</a></td></tr>').join('') +
+          '</tbody></table>'
+        : '<div class="muted">None yet.</div>') +
+    '</div>';
 }
 
-async function loadReports() {
-  if (!state.activeProfile) return;
-  const r = await fetch(`/api/profiles/${state.activeProfile.id}/reports`);
-  const reports = await r.json();
-  state.reports = reports;
-  const el = document.getElementById('report-list-area');
-  if (!el) return;
-  if (!reports.length) {
-    el.innerHTML = '<div class="alert alert-info">No reports generated yet. Generate one above.</div>';
-    return;
-  }
-  el.innerHTML = `<div class="report-list">${reports.map(r=>`
-    <div class="report-card">
-      <div class="report-info">
-        <div class="report-type">${r.report_type==='genetic'?'&#x1F9EC; Genetic Health Report':'&#x1F3E5; Doctor Discussion Report'}</div>
-        <div class="report-meta">${new Date(r.created_at).toLocaleString()} &nbsp;|&nbsp; HTML</div>
-      </div>
-      <div style="display:flex;gap:8px;">
-        <button class="btn btn-outline btn-sm" onclick="window.open('/api/reports/${r.id}/view','_blank')">Open</button>
-      </div>
-    </div>
-  `).join('')}</div>`;
+async function genReport(type) {
+  el('report-status').innerHTML = '<span class="spinner"></span> Generating';
+  try {
+    const r = await api('/api/profiles/' + S.pid + '/reports',
+      { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type }) });
+    el('report-status').textContent = r.message || 'Done.';
+    if (r.view_url) window.open(r.view_url, '_blank');
+    showView('reports');
+  } catch (e) { el('report-status').textContent = ''; }
 }
 
-async function generateReport(type) {
-  if (!state.activeProfile) { alert('Select a profile first.'); return; }
-  const r = await fetch(`/api/profiles/${state.activeProfile.id}/reports`, {
-    method: 'POST',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({type}),
-  });
-  const data = await r.json();
-  if (data.error) {
-    alert('Error: ' + data.error);
-    return;
-  }
-  window.open(data.view_url, '_blank');
-  loadReports();
-}
-
-// ============================================================
-// PROFILES LIST VIEW
-// ============================================================
-function renderProfilesList(el) {
-  el.innerHTML = `
-    <div class="card">
-      <h2>All Profiles</h2>
-      <div id="all-profiles-content">Loading...</div>
-      <br><button class="btn btn-primary" onclick="openAddModal()">+ Add Profile</button>
-    </div>`;
-  renderAllProfiles();
-}
-
-async function renderAllProfiles() {
-  const el = document.getElementById('all-profiles-content');
-  if (!el) return;
-  const profiles = state.profiles;
-  if (!profiles.length) {
-    el.innerHTML = '<div class="empty-state"><div class="icon">&#x1F465;</div><h3>No profiles</h3><p>Add your first DNA profile to get started.</p></div>';
-    return;
-  }
-  el.innerHTML = `<div class="report-list">${profiles.map(p=>{
-    const s = p.findings_summary||{};
-    const t = Object.values(s).reduce((a,b)=>a+b,0);
-    return `<div class="report-card">
-      <div class="report-info">
-        <div class="report-type">${p.name}</div>
-        <div class="report-meta">Provider: ${p.provider||'Unknown'} &nbsp;|&nbsp; ${t} findings &nbsp;|&nbsp; Added: ${new Date(p.created_at).toLocaleDateString()}</div>
-      </div>
-      <div style="display:flex;gap:8px;">
-        <button class="btn btn-outline btn-sm" onclick="selectProfile(${p.id});showView('home')">View</button>
-        <button class="btn btn-danger btn-sm" onclick="deleteProfile(${p.id})">Delete</button>
-      </div>
-    </div>`;
-  }).join('')}</div>`;
+async function renderProfilesList(main) {
+  await loadProfiles();
+  main.innerHTML =
+    '<h1>Profiles</h1>' +
+    '<div class="card"><table><thead><tr><th>Name</th><th>Provider</th>' +
+      '<th>Findings</th><th></th></tr></thead><tbody>' +
+      S.profiles.map(p => {
+        const n = Object.values(p.findings_summary || {}).reduce((a, b) => a + b, 0);
+        return '<tr><td>' + esc(p.name) + '</td><td>' + esc(p.provider || '') + '</td>' +
+          '<td>' + n + '</td><td class="nowrap">' +
+          '<button class="btn btn-outline btn-sm" onclick="selectProfile(' + p.id +
+            ');showView(\'home\')">Open</button> ' +
+          '<button class="btn btn-danger btn-sm" onclick="deleteProfile(' + p.id +
+            ')">Delete</button></td></tr>';
+      }).join('') + '</tbody></table>' +
+      '<button class="btn btn-primary" style="margin-top:12px" onclick="openAddModal()">' +
+      '+ Add profile</button></div>';
 }
 
 async function deleteProfile(id) {
-  if (!confirm('Delete this profile and all associated findings and reports?')) return;
-  await fetch(`/api/profiles/${id}`, {method: 'DELETE'});
-  if (state.activeProfile?.id === id) state.activeProfile = null;
+  if (!confirm('Delete this profile and all of its data? This cannot be undone.')) return;
+  await api('/api/profiles/' + id, { method: 'DELETE' });
+  if (S.pid === id) S.pid = null;
   await loadProfiles();
   showView('profiles');
 }
 
-// ============================================================
-// DATABASE MANAGEMENT
-// ============================================================
-
 async function checkDatabaseStatus() {
   try {
-    const r = await fetch('/api/admin/db-status');
-    const data = await r.json();
-    state.dbMeta = data;
-    if (data.error) return;
-
-    const banner = document.getElementById('db-staleness-banner');
-    const bannerText = document.getElementById('db-banner-text');
-
-    if (!data.updated_at) {
-      // Never updated from source
-      banner.style.display = 'flex';
-      bannerText.textContent = 'Bundled SNP reference has never been refreshed from ClinVar. Update it monthly for best results.';
-      return;
+    const meta = await api('/api/admin/db-status');
+    S.dbMeta = meta;
+    const when = meta.updated_at || meta.built_at;
+    if (!when) return;
+    const days = Math.floor((Date.now() - new Date(when).getTime()) / 86400000);
+    if (days >= 30) {
+      el('db-banner-text').textContent =
+        'The variant reference was last refreshed ' + days + ' days ago.';
+      el('db-staleness-banner').style.display = 'flex';
     }
-
-    const lastUpdate = new Date(data.updated_at);
-    const daysSince  = Math.floor((Date.now() - lastUpdate.getTime()) / (1000 * 86400));
-    if (daysSince >= 30) {
-      banner.style.display = 'flex';
-      bannerText.textContent = `SNP reference last updated ${daysSince} day${daysSince !== 1 ? 's' : ''} ago. Refresh it to get the latest ClinVar annotations.`;
-    }
-  } catch(e) {
-    // Server not ready yet -- silently ignore
-  }
+  } catch (e) { /* a missing reference is reported in the database view */ }
 }
 
-async function renderDatabase(el) {
-  el.innerHTML = `<div class="card"><div class="empty-state"><div class="icon">&#x1F4E6;</div><h3>Loading database info...</h3></div></div>`;
+async function renderDatabase(main) {
+  const meta = await api('/api/admin/db-status');
+  let sn = null;
+  try { sn = await api('/api/admin/snpedia/status'); } catch (e) {}
 
-  let meta = {};
-  try {
-    const r = await fetch('/api/admin/db-status');
-    meta = await r.json();
-    state.dbMeta = meta;
-  } catch(e) {
-    el.innerHTML = `<div class="card"><div class="alert alert-danger">Could not reach server.</div></div>`;
-    return;
-  }
-
-  const lastUpdated = meta.updated_at
-    ? new Date(meta.updated_at).toLocaleString()
-    : 'Never (bundled reference only)';
-
-  const daysSince = meta.updated_at
-    ? Math.floor((Date.now() - new Date(meta.updated_at).getTime()) / (1000 * 86400))
-    : null;
-
-  const freshnessHtml = daysSince === null
-    ? `<span class="badge badge-orange">Never updated</span>`
-    : daysSince < 30
-    ? `<span class="badge badge-green">Current (${daysSince}d ago)</span>`
-    : `<span class="badge badge-orange">Stale (${daysSince}d ago)</span>`;
-
-  el.innerHTML = `
-    <div class="card">
-      <h2>&#x1F4E6; SNP Reference Database</h2>
-
-      <div class="alert alert-info" style="margin-bottom:20px;">
-        DNAInsight annotates your SNPs against a bundled reference of ${meta.snp_count || 91} high-priority medical SNPs.
-        Refreshing queries <strong>MyVariant.info</strong> (ClinVar + PharmGKB) to pull the latest clinical significance
-        ratings. No DNA genotype data leaves your computer during this update.
-      </div>
-
-      <table style="width:100%;font-size:0.92em;border-collapse:collapse;margin-bottom:24px;">
-        <tr>
-          <td style="padding:8px;color:#666;width:180px;font-weight:600;">SNP Count</td>
-          <td style="padding:8px;">${meta.snp_count || 91} curated medical SNPs</td>
-        </tr>
-        <tr style="background:#f9f9f9;">
-          <td style="padding:8px;color:#666;font-weight:600;">Last Updated</td>
-          <td style="padding:8px;">${lastUpdated} &nbsp; ${freshnessHtml}</td>
-        </tr>
-        <tr>
-          <td style="padding:8px;color:#666;font-weight:600;">Source</td>
-          <td style="padding:8px;">${meta.source || 'MyVariant.info (ClinVar + PharmGKB)'}</td>
-        </tr>
-        ${meta.updated_at ? `
-        <tr style="background:#f9f9f9;">
-          <td style="padding:8px;color:#666;font-weight:600;">Last Result</td>
-          <td style="padding:8px;">
-            ${meta.updated || 0} refreshed &nbsp;|&nbsp;
-            ${meta.skipped || 0} skipped (no ClinVar data) &nbsp;|&nbsp;
-            ${meta.errors || 0} errors
-          </td>
-        </tr>` : ''}
-      </table>
-
-      <div style="margin-bottom:20px;">
-        <h2>Update Database</h2>
-        <p style="font-size:0.9em;color:#555;margin-bottom:12px;line-height:1.6;">
-          Re-fetches fresh ClinVar clinical significance ratings and condition names for all
-          ${meta.snp_count || 91} bundled SNPs. Takes 1-3 minutes. Requires internet access.
-          Recommended: once per month.
-        </p>
-        <button class="btn btn-primary" id="btn-db-update" onclick="startDbUpdate()">
-          &#x21BB; Update Databases Now
-        </button>
-      </div>
-
-      <div id="db-update-status-area"></div>
-
-      <div class="card" style="background:var(--gray-bg);box-shadow:none;">
-        <h2>What Gets Updated</h2>
-        <ul style="font-size:0.88em;line-height:2;padding-left:20px;">
-          <li><strong>ClinVar classifications</strong> — Pathogenic, drug response, risk factor, protective</li>
-          <li><strong>Associated conditions</strong> — Disease names linked to each variant</li>
-          <li><strong>PharmGKB annotations</strong> — Drug-gene interaction data</li>
-        </ul>
-        <p style="font-size:0.82em;color:var(--gray-text);margin-top:10px;">
-          Gene names, curated interpretations, and category assignments are not overwritten.
-          Those come from the clinical curation in <code>data/build_reference.py</code>.
-        </p>
-      </div>
-    </div>`;
+  main.innerHTML =
+    '<h1>Reference database</h1>' +
+    '<div class="card"><h2 style="margin-top:0">Bundled reference</h2>' +
+      '<table><tbody>' +
+      '<tr><td style="width:170px">Version</td><td>' + esc(meta.version || '') + '</td></tr>' +
+      '<tr><td>Variants</td><td>' + (meta.snp_count || 0) + '</td></tr>' +
+      '<tr><td>Built</td><td>' + esc(meta.built_at || 'unknown') + '</td></tr>' +
+      '<tr><td>Last refreshed</td><td>' + esc(meta.updated_at || 'never') + '</td></tr>' +
+      '<tr><td>Source</td><td>' + esc(meta.source || '') + '</td></tr>' +
+      '</tbody></table>' +
+      '<button class="btn btn-primary" style="margin-top:12px" id="btn-db-update" ' +
+      'onclick="startDbUpdate()">Refresh clinical significance</button>' +
+      '<div class="muted" style="font-size:0.84em;margin-top:6px">' +
+      'Sends rsIDs only to MyVariant.info. Your genotypes never leave this machine.</div>' +
+      '<div id="db-update-status"></div>' +
+    '</div>' +
+    '<div class="card"><h2 style="margin-top:0">Local SNPedia cache</h2>' +
+      '<div class="banner banner-warn"><span>&#9888;</span><div>' +
+      'SNPedia is licensed <strong>CC BY-NC-SA 3.0 US</strong>, which is a ' +
+      'non-commercial share-alike licence. Nothing from it ships with DNAInsight. ' +
+      'If you fetch it, the cache is written outside the project folder, it is for ' +
+      'your own personal non-commercial use, and it must not be redistributed.' +
+      '</div></div>' +
+      (sn
+        ? '<table><tbody>' +
+          '<tr><td style="width:170px">Available</td><td>' +
+            (sn.available ? 'yes' : 'no') + '</td></tr>' +
+          '<tr><td>Cache location</td><td class="mono" style="font-size:0.85em">' +
+            esc(sn.path || '') + '</td></tr>' +
+          '<tr><td>Variants cached</td><td>' + (sn.snps || 0) + '</td></tr>' +
+          '<tr><td>Genotypes cached</td><td>' + (sn.genotypes || 0) + '</td></tr>' +
+          '<tr><td>Last harvest</td><td>' + esc(sn.last_harvest || 'never') + '</td></tr>' +
+          '</tbody></table>' +
+          '<label style="display:block;margin:12px 0"><input type="checkbox" id="sn-accept"> ' +
+          'I accept the CC BY-NC-SA 3.0 US licence and will use this cache only for ' +
+          'my own personal, non-commercial purposes.</label>' +
+          '<button class="btn btn-primary" onclick="harvestSnpedia()">Fetch now</button> ' +
+          (sn.available
+            ? '<button class="btn btn-danger" onclick="purgeSnpedia()">Delete cache</button>'
+            : '') +
+          '<div id="sn-status" class="muted" style="margin-top:8px"></div>'
+        : '<div class="muted">SNPedia support is not installed.</div>') +
+    '</div>';
 }
 
 async function startDbUpdate() {
-  const btn = document.getElementById('btn-db-update');
-  const area = document.getElementById('db-update-status-area');
-  if (btn) btn.disabled = true;
+  el('btn-db-update').disabled = true;
+  el('db-update-status').innerHTML =
+    '<div style="margin-top:12px"><div class="progress-bar-wrap">' +
+    '<div class="progress-bar" id="db-pbar"></div></div>' +
+    '<div class="muted" style="font-size:0.84em;margin-top:6px" id="db-detail">' +
+    'Connecting</div></div>';
+  try { await api('/api/admin/update-databases', { method: 'POST' }); }
+  catch (e) { el('btn-db-update').disabled = false; return; }
+  const timer = setInterval(async () => {
+    let st;
+    try { st = await api('/api/admin/update-databases/status'); }
+    catch (e) { clearInterval(timer); return; }
+    const bar = el('db-pbar'), det = el('db-detail');
+    if (bar && st.total) bar.style.width =
+      Math.max(5, Math.round(st.processed / st.total * 100)) + '%';
+    if (det) det.textContent = st.error ? st.error
+      : (st.done ? 'Updated ' + (st.updated || 0) + ', skipped ' + (st.skipped || 0)
+                 : (st.processed || 0) + ' of ' + (st.total || 0));
+    if (st.done) {
+      clearInterval(timer);
+      el('btn-db-update').disabled = false;
+      if (bar) bar.style.width = '100%';
+      setTimeout(() => showView('database'), 900);
+    }
+  }, 800);
+}
 
-  area.innerHTML = `
-    <div class="scan-status" style="margin-bottom:16px;">
-      <div><strong>Fetching latest annotations from MyVariant.info...</strong></div>
-      <div class="progress-bar-wrap" style="margin-top:10px;">
-        <div class="progress-bar" id="db-pbar" style="width:5%;"></div>
-      </div>
-      <div style="font-size:0.82em;color:#666;margin-top:6px;" id="db-update-detail">Connecting...</div>
-    </div>`;
-
+async function harvestSnpedia() {
+  const accepted = el('sn-accept') && el('sn-accept').checked;
+  el('sn-status').innerHTML = '<span class="spinner"></span> Starting';
   try {
-    const r = await fetch('/api/admin/update-databases', {method: 'POST'});
-    if (r.status === 409) {
-      area.innerHTML = `<div class="alert alert-warning">An update is already running.</div>`;
-      if (btn) btn.disabled = false;
-      return;
-    }
-    if (!r.ok) {
-      const d = await r.json();
-      area.innerHTML = `<div class="alert alert-danger">Error: ${d.error || 'Unknown error'}</div>`;
-      if (btn) btn.disabled = false;
-      return;
-    }
-  } catch(e) {
-    area.innerHTML = `<div class="alert alert-danger">Could not reach server: ${e.message}</div>`;
-    if (btn) btn.disabled = false;
-    return;
+    const r = await api('/api/admin/snpedia/harvest',
+      { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ accept_license: !!accepted }) });
+    el('sn-status').textContent = r.message || 'Started.';
+  } catch (e) {
+    el('sn-status').textContent =
+      'Tick the licence box first. The fetch is blocked until you do.';
   }
-
-  pollDbUpdateStatus();
 }
 
-function pollDbUpdateStatus() {
-  if (state.dbUpdatePolling) clearInterval(state.dbUpdatePolling);
-  state.dbUpdatePolling = setInterval(async () => {
-    try {
-      const r    = await fetch('/api/admin/update-databases/status');
-      const data = await r.json();
-
-      const pct = data.total > 0
-        ? Math.round((data.processed / data.total) * 100)
-        : (data.done ? 100 : 15);
-
-      const pb = document.getElementById('db-pbar');
-      if (pb) pb.style.width = pct + '%';
-
-      const detail = document.getElementById('db-update-detail');
-      if (detail && data.total > 0) {
-        detail.textContent = `${(data.processed||0).toLocaleString()} / ${(data.total||0).toLocaleString()} SNPs processed`;
-      }
-
-      if (data.done && !data.running) {
-        clearInterval(state.dbUpdatePolling);
-        const btn = document.getElementById('btn-db-update');
-        if (btn) btn.disabled = false;
-
-        const area = document.getElementById('db-update-status-area');
-        if (data.error) {
-          if (area) area.innerHTML = `<div class="alert alert-danger">Update failed: ${data.error}</div>`;
-        } else {
-          if (area) area.innerHTML = `
-            <div class="alert alert-success">
-              &#x2713; Database updated successfully.
-              <strong>${data.updated || 0}</strong> SNPs refreshed,
-              <strong>${data.skipped || 0}</strong> skipped,
-              <strong>${data.errors || 0}</strong> errors.
-            </div>`;
-          // Dismiss the staleness banner
-          document.getElementById('db-staleness-banner').style.display = 'none';
-          // Refresh the view to show new timestamp
-          setTimeout(() => renderDatabase(document.getElementById('main-content')), 800);
-        }
-      }
-    } catch(e) {
-      // Ignore transient fetch errors during polling
-    }
-  }, 2000);
+async function purgeSnpedia() {
+  if (!confirm('Delete the local SNPedia cache?')) return;
+  const r = await api('/api/admin/snpedia/cache', { method: 'DELETE' });
+  el('sn-status').textContent = r.message || 'Purged.';
+  setTimeout(() => showView('database'), 700);
 }
 
-// ============================================================
-// ADD PROFILE WIZARD
-// ============================================================
-function openAddModal() {
-  document.getElementById('add-modal').classList.add('open');
-  resetWizard();
-}
+/* =========================================================================
+   ADD PROFILE WIZARD
+   ========================================================================= */
 
-function closeAddModal() {
-  document.getElementById('add-modal').classList.remove('open');
-  resetWizard();
-}
+let wizardFile = null;
+
+function openAddModal() { resetWizard(); el('add-modal').classList.add('open'); }
+function closeAddModal() { el('add-modal').classList.remove('open'); }
 
 function resetWizard() {
-  selectedFile = null;
-  document.getElementById('inp-name').value = '';
-  document.getElementById('inp-dob').value = '';
-  document.getElementById('inp-sex').value = 'unknown';
-  document.getElementById('chosen-file-name').textContent = '';
-  document.getElementById('btn-wizard-upload').disabled = true;
-  document.getElementById('file-input').value = '';
-  document.querySelectorAll('.provider-chip').forEach(c=>c.classList.remove('detected'));
+  wizardFile = null;
+  ['inp-name', 'inp-dob'].forEach(id => { el(id).value = ''; });
+  el('inp-sex').value = 'unknown';
+  el('chosen-file-name').textContent = '';
+  el('btn-wizard-upload').disabled = true;
+  el('upload-confirm').style.display = '';
+  el('upload-progress').style.display = 'none';
   showWizardStep(1);
 }
 
 function showWizardStep(n) {
-  [1,2,3].forEach(i => {
-    document.getElementById(`wizard-step-${i}`).style.display = i===n ? '' : 'none';
-    const step = document.getElementById(`step-${i}`);
-    if (i < n) step.className = 'step done';
-    else if (i === n) step.className = 'step active';
-    else step.className = 'step';
+  [1, 2, 3].forEach(i => {
+    el('wizard-step-' + i).style.display = i === n ? '' : 'none';
+    el('step-' + i).classList.toggle('active', i === n);
   });
 }
 
-function wizardNext(currentStep) {
-  if (currentStep === 1) {
-    if (!document.getElementById('inp-name').value.trim()) {
-      alert('Please enter a name.'); return;
-    }
+function wizardNext(step) {
+  if (step === 1) {
+    if (!el('inp-name').value.trim()) { showError('A name is required.'); return; }
     showWizardStep(2);
-  } else if (currentStep === 2) {
-    if (!selectedFile) { alert('Please select a DNA file.'); return; }
-    document.getElementById('confirm-name').textContent = document.getElementById('inp-name').value;
-    document.getElementById('confirm-dob').textContent  = document.getElementById('inp-dob').value||'N/A';
-    document.getElementById('confirm-sex').textContent  = document.getElementById('inp-sex').value;
-    document.getElementById('confirm-file').textContent = selectedFile.name;
+  } else if (step === 2) {
+    if (!wizardFile) { showError('Choose your raw DNA file.'); return; }
+    el('confirm-name').textContent = el('inp-name').value;
+    el('confirm-dob').textContent = el('inp-dob').value || 'not given';
+    el('confirm-sex').textContent = el('inp-sex').value;
+    el('confirm-file').textContent = wizardFile.name +
+      ' (' + Math.round(wizardFile.size / 1048576) + ' MB)';
     showWizardStep(3);
   }
 }
-
-function wizardBack(currentStep) {
-  showWizardStep(currentStep - 1);
-}
+function wizardBack(step) { showWizardStep(step - 1); }
 
 function fileSelected(input) {
-  if (!input.files[0]) return;
-  selectedFile = input.files[0];
-  document.getElementById('chosen-file-name').textContent = selectedFile.name;
-  document.getElementById('btn-wizard-upload').disabled = false;
-  // Detect provider from filename
-  const fn = selectedFile.name.toLowerCase();
-  const detected = fn.includes('ancestry') ? 'AncestryDNA' :
-                   fn.includes('23andme') || fn.includes('genome') ? '23andMe' :
-                   fn.includes('myheritage') ? 'MyHeritage' :
-                   fn.includes('ftdna') || fn.includes('familytree') ? 'FamilyTreeDNA' :
-                   fn.includes('living') ? 'LivingDNA' : null;
-  document.querySelectorAll('.provider-chip').forEach(c => {
-    c.classList.toggle('detected', detected && c.textContent.includes(detected));
-  });
+  wizardFile = input.files[0] || null;
+  el('chosen-file-name').textContent = wizardFile ? wizardFile.name : '';
+  el('btn-wizard-upload').disabled = !wizardFile;
 }
 
 function setupDropZone() {
-  const dz = document.getElementById('drop-zone');
+  const dz = el('drop-zone');
   if (!dz) return;
-  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
-  dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
+  ['dragenter', 'dragover'].forEach(ev => dz.addEventListener(ev, e => {
+    e.preventDefault(); dz.classList.add('over');
+  }));
+  ['dragleave', 'drop'].forEach(ev => dz.addEventListener(ev, e => {
+    e.preventDefault(); dz.classList.remove('over');
+  }));
   dz.addEventListener('drop', e => {
-    e.preventDefault(); dz.classList.remove('dragover');
-    if (e.dataTransfer.files[0]) {
-      document.getElementById('file-input').files = e.dataTransfer.files;
-      fileSelected(document.getElementById('file-input'));
-    }
+    const f = e.dataTransfer.files[0];
+    if (!f) return;
+    wizardFile = f;
+    el('chosen-file-name').textContent = f.name;
+    el('btn-wizard-upload').disabled = false;
   });
 }
 
 async function submitProfile() {
-  if (!selectedFile) return;
-  document.getElementById('upload-confirm').style.display = 'none';
-  document.getElementById('upload-progress').style.display = '';
-
-  const statusText = document.getElementById('upload-status-text');
-  const pbar       = document.getElementById('upload-pbar');
-  statusText.textContent = 'Uploading and parsing DNA file...';
-  pbar.style.width = '20%';
+  el('upload-confirm').style.display = 'none';
+  el('upload-progress').style.display = '';
+  el('upload-status-text').textContent = 'Uploading and parsing';
+  el('upload-pbar').style.width = '35%';
 
   const fd = new FormData();
-  fd.append('file', selectedFile);
-  fd.append('name', document.getElementById('inp-name').value.trim());
-  fd.append('dob',  document.getElementById('inp-dob').value);
-  fd.append('sex',  document.getElementById('inp-sex').value);
-
+  fd.append('name', el('inp-name').value.trim());
+  fd.append('dob', el('inp-dob').value);
+  fd.append('sex', el('inp-sex').value);
+  fd.append('file', wizardFile);
   try {
-    pbar.style.width = '60%';
-    const r    = await fetch('/api/profiles', {method:'POST', body: fd});
-    const data = await r.json();
-    pbar.style.width = '100%';
-
-    if (data.error) {
-      statusText.textContent = 'Error: ' + data.error;
-      document.getElementById('upload-confirm').style.display = '';
-      document.getElementById('upload-progress').style.display = 'none';
-      return;
-    }
-
-    statusText.textContent = `Success! Loaded ${(data.snp_count||0).toLocaleString()} SNPs from ${data.provider}.`;
+    const r = await api('/api/profiles', { method: 'POST', body: fd });
+    el('upload-pbar').style.width = '100%';
+    el('upload-status-text').textContent = r.message || 'Created.';
     await loadProfiles();
-    const newProfile = state.profiles.find(p=>p.id===data.profile_id);
-    if (newProfile) state.activeProfile = newProfile;
-
-    setTimeout(() => {
-      closeAddModal();
-      showView('home');
-    }, 1500);
-  } catch(e) {
-    statusText.textContent = 'Upload failed: ' + e.message;
+    S.pid = r.profile_id;
+    S.sliders = {};
+    setTimeout(() => { closeAddModal(); showView('scan'); }, 900);
+  } catch (e) {
+    el('upload-confirm').style.display = '';
+    el('upload-progress').style.display = 'none';
   }
 }
 </script>

@@ -1,365 +1,340 @@
-DNAInsight v1.2.0
+DNAInsight v2.0.0
 
 ![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
-![SNPs](https://img.shields.io/badge/Bundled_SNPs-122-orange)
+![Bundled SNPs](https://img.shields.io/badge/Bundled_SNPs-122_curated-orange)
+![Genosets](https://img.shields.io/badge/Genosets-65-orange)
+![Tests](https://img.shields.io/badge/Tests-1866_passing-brightgreen)
 
-Personal DNA Analysis Tool — Process your raw DNA file from any major provider, annotate SNPs against ClinVar and PharmGKB, generate a Genetic Health Report and a Doctor Discussion Report, and analyze results with Grok or any AI assistant.
+Personal DNA analysis that runs entirely on your own computer. Read your raw DNA
+file from any major provider, annotate it against curated clinical evidence,
+explore the results with real filters, and generate reports you can print, keep
+or hand to a clinician.
 
----
-
-What This Tool Does
-
-DNAInsight reads your raw DNA file (the uncompressed text file you downloaded from your DNA testing company) and:
-
-1. Parses your 600,000+ SNPs into a local database.
-2. Annotates each SNP against a bundled clinical reference (122 high-priority medical SNPs, offline, instant) and optionally the MyVariant.info API (ClinVar + PharmGKB, requires internet, no personal data transmitted).
-3. Classifies findings into three tiers: Prescription-Critical, Actionable, and Informational.
-4. Generates two HTML reports: a Genetic Health Report and a Doctor Discussion Report.
-5. Provides a Grok-compatible AI prompt for AI-assisted clinical interpretation.
-
-Privacy: All processing is local. Your DNA data never leaves your computer unless you explicitly enable API annotation (which sends only rsIDs, never genotypes, to myvariant.info).
+Nothing leaves your machine unless you explicitly ask it to.
 
 ---
 
-Supported DNA Providers
+What is new in v2.0
+
+v1.x told you what a position meant. v2.0 tells you what it means FOR YOU, ranks
+it, and is honest about what it cannot establish.
+
+| Capability | v1.2 | v2.0 |
+|---|---|---|
+| Interest ranking | none, every finding looked equal | DNAInsight magnitude, 0 to 10, with a per-finding audit trail |
+| Direction of effect | none | repute: good, bad, or deliberately unset |
+| Carrier awareness | online API only | offline too, from a bundled risk allele per variant |
+| Multi-SNP rules | none | 65 genosets with a full boolean criteria engine |
+| Population frequency | none | 16 populations, your exact genotype, observed or Hardy-Weinberg |
+| Strand handling | none | full reconciliation, with unverifiable sites flagged not guessed |
+| Multiple DNA files | one per profile | pool several, keep disagreements, compare relatives |
+| Polygenic scores | none | 7 models with mandatory caveats and coverage honesty |
+| Traits and blood type | none | 18 traits plus ABO and RhD, refusing to guess when uncertain |
+| Filtering | search box and a gene dropdown | server-side engine, sliders, facets, 20 sort orders, query grammar |
+| Reports | 2 static | 3, including a self-contained offline interactive report |
+| Tests | 138 | 1866 |
+
+---
+
+The honesty features, which are the point
+
+Most consumer DNA tools fail in the same four ways. v2.0 addresses each one
+directly, and these behaviours are covered by tests so they cannot regress.
+
+**1. It will not alarm you about a variant you do not carry.**
+A ClinVar classification describes an ALLELE, not a position. Showing
+"pathogenic" to someone carrying two reference copies is simply wrong, and it is
+the most common way these tools frighten people for no reason. Non-carriers are
+scored down to a quarter, their repute is cleared, and the card says plainly that
+you do not carry the reported variant.
+
+**2. It admits when the strand cannot be verified.**
+Testing companies report the plus strand of GRCh37. Reference databases sometimes
+store the other one. For an A/T or C/G genotype, complementing gives you the
+other allele you already have, so no metadata can settle which reading is right.
+Those sites are capped at magnitude 2, badged "strand ambiguous", and explained.
+13 of the 122 bundled variants are affected.
+
+**3. It distinguishes "not present" from "never checked".**
+A genoset is a rule over several positions. If your array did not read one of
+them, the rule cannot be evaluated at all. Those appear in a separate section
+headed "not testable on your array", never mixed in with rules that were checked
+and found absent.
+
+**4. It never labels a trait good or bad.**
+Traits and polygenic scores always render neutral grey. Eye colour is not a
+verdict. A no-call scores exactly zero, because a failed probe is not a finding.
+
+---
+
+Why the magnitude is not the SNPedia magnitude
+
+SNPedia's Magnitude and Repute are hand-curated by wiki editors and licensed
+CC-BY-NC-SA-3.0-US. Redistributing them would force this repository to
+non-commercial share-alike. So DNAInsight computes its own from CC0 and public
+domain evidence: CPIC guideline level, ClinVar review status, replicated GWAS
+support, publication counts, population frequency and your carrier status.
+
+The 0 to 10 shape is intentional, so anyone who has read a Promethease report can
+read this one. The numbers are not the same, and the interface says so.
+
+Every card can expand to show exactly how its number was produced, step by step.
+An opaque interest score would be worse than none.
+
+If you want the real SNPedia values, the Database view has an opt-in fetch that
+runs on your machine and writes to `~/.dnainsight/`, outside this project folder.
+It is licence-gated and refuses to run until you accept the terms. Nothing it
+downloads is ever committed. See `data/DATA_SOURCES.md`.
+
+---
+
+Supported DNA providers
 
 | Provider | Format | Notes |
-|----------|--------|-------|
-| AncestryDNA | .txt (tab-delimited) | V1 and V2 arrays supported |
-| 23andMe | .txt (tab-delimited) | All array versions |
+|---|---|---|
+| AncestryDNA | .txt tab-delimited | V1 and V2 arrays |
+| 23andMe | .txt tab-delimited | all array versions |
 | MyHeritage | .csv or .txt | |
-| FamilyTreeDNA (FTDNA) | .csv | |
+| FamilyTreeDNA | .csv | the SNP test, not the STR test |
 | LivingDNA | .txt | |
-| Generic TSV | .txt / .csv | Auto-detected column layout |
+| Generic TSV | .txt / .csv | auto-detected column layout |
 
-Note: Upload only the uncompressed raw file. Do NOT upload the .zip file from your provider — extract it first.
+Upload the uncompressed file. Extract the zip from your provider first.
 
 ---
 
 Requirements
 
-- Python 3.10 or newer (auto-installed by the installer if missing)
-- Internet connection (optional, for extended API annotation and database updates)
-- ~50 MB disk space
+- Python 3.10 or newer
+- About 60 MB of disk space
+- Internet optional. Everything core works offline.
 
-No other software required. All dependencies install automatically.
-
----
-
-Downloading DNAInsight
-
-New to GitHub? Here is the simplest way to get the files onto your computer. You only need to do this once.
-
-Option A: Download ZIP (recommended, no extra software needed)
-
-1. Go to https://github.com/JBrady0850/dnainsight in your web browser.
-2. Click the green Code button near the top of the page.
-3. Click Download ZIP.
-4. Find the downloaded file (usually in your Downloads folder) named dnainsight-main.zip.
-5. Right-click the ZIP file and choose Extract All... (Windows) or double-click it (macOS) to unzip it.
-6. Move the extracted dnainsight-main folder wherever you want to keep it (for example, your Documents folder). You can rename it to dnainsight if you like; either name works. This is the project folder the rest of this guide refers to.
-
-Option B: Clone with Git (for users who already have Git installed)
-
-1. Open a terminal (Command Prompt, PowerShell, or Terminal).
-2. Run: git clone https://github.com/JBrady0850/dnainsight.git
-3. This creates a dnainsight folder in your current location containing all project files.
-
-Once you have the folder on your computer, continue to Installation below.
+Two dependencies, Flask and requests. No compiler, no scientific stack, no
+database server.
 
 ---
 
-Installation
+Install
 
-Windows
+Windows: double-click `install.bat`
+macOS and Linux: `bash install.sh`
 
-1. Extract the dnainsight folder anywhere on your computer.
-2. Double-click install.bat
+Or manually:
 
-The installer automatically detects whether Python is installed. If Python is not found:
-- It tries Windows Package Manager (winget) first.
-- If winget is unavailable, it downloads and installs Python 3.12 silently.
-- If Python is auto-installed, the installer will prompt you to close and re-run it once (PATH refresh required).
+```
+pip install -r requirements.txt
+python app.py
+```
 
-All Python packages (Flask, requests) install automatically. No manual steps required.
+DNAInsight opens at http://127.0.0.1:5050 . Press Ctrl+C to stop.
 
-macOS / Linux
+To run the test suite as well:
 
-1. Open Terminal in the dnainsight folder.
-2. Run: bash install.sh
-
-The installer automatically detects whether Python 3 is installed and uses the appropriate
-package manager (Homebrew, apt, dnf, yum, or pacman) to install it. If the system pip
-conflicts with PEP 668 restrictions (Ubuntu 23.04+, Debian 12+), the installer creates
-a virtual environment automatically.
+```
+pip install -r requirements.txt -r requirements-dev.txt
+python -m pytest tests -q
+```
 
 ---
 
-Running DNAInsight
+Walkthrough
 
-Windows: Double-click launch.bat
+**1. Get your raw data.** AncestryDNA: your name, then DNA, Settings, Download
+DNA Data. 23andMe: Tools, Browse Raw Data, Download. MyHeritage: DNA, Manage DNA
+Kits, Download. FamilyTreeDNA: myDNA, Chromosome Browser, Download Raw Data.
 
-macOS/Linux: ./launch.sh or python3 app.py
+**2. Add a profile.** Click "+ Add profile", enter your details and upload the
+extracted .txt file. DNAInsight reports how many variants it read, typically
+600,000 to 700,000.
 
-Any platform: python app.py
+**3. Run a scan.** Choose which subsystems to include. Everything except the
+online API option works with no internet. A scan of the bundled reference is
+effectively instant; the optional API pass can take 30 to 60 minutes because it
+batches every rsID.
 
-DNAInsight opens automatically in your browser at http://127.0.0.1:5050
+**4. Explore the findings.** Open the Filters panel. Drag the magnitude slider,
+untick reputes, pick a gene, change the reference population, or type a query:
 
-Press Ctrl+C in the terminal to stop the server.
+```
+chr7                 everything on chromosome 7
+chr7:1000-2000       a position range
+/MAG>=3              magnitude 3 and above
+/STARS>=2            ClinVar review stars
+/CLNSIG=5,4          pathogenic and likely pathogenic only
+/flipped             calls whose alleles were complemented
+/ambiguous           calls whose strand cannot be verified
+/carrier             variants you actually carry
+```
 
----
+Escape resets every filter. Ctrl+H opens help. F opens the panel.
 
-User Walkthrough
+**5. Generate reports.**
 
-Step 1: Download Your Raw DNA File
-
-AncestryDNA:
-1. Log in at ancestry.com
-2. Click your name > DNA > Settings
-3. Scroll to "Download DNA Data" > click Download
-4. Extract the zip; use the file named AncestryDNA.txt
-
-23andMe:
-1. Log in at 23andme.com
-2. Browse to Tools > Browse Raw Data > Download
-3. Request download; wait for the email link
-4. Extract and use the file named genome_*.txt
-
-MyHeritage:
-1. Log in > DNA > Manage DNA Kits > Download Raw Data
-
-FamilyTreeDNA:
-1. Log in > myDNA > Chromosome Browser > Download Raw Data
-
-Step 2: Add a Profile
-
-1. Open DNAInsight in your browser.
-2. Click "+ Add Profile" in the left sidebar.
-3. Enter your name, date of birth, and biological sex.
-4. Upload your raw DNA file by clicking or dragging it onto the upload area.
-5. Click Next then Upload and Create Profile.
-
-DNAInsight will parse the file and report how many SNPs were loaded (typically 600,000-700,000).
-
-Step 3: Run a Scan
-
-1. Click Run Scan in the navigation.
-2. Choose whether to use the online API (recommended for more complete results).
-3. Click Start Scan.
-
-The scan has two phases:
-- Bundled reference (instant, offline): Annotates 122 high-priority medical SNPs immediately.
-- API annotation (if enabled): Queries myvariant.info in batches. This may take several minutes for a full file, but DNAInsight will show progress. When the API returns an authoritative variant allele, findings are refined by carrier status (see below).
-
-Step 4: Review Findings
-
-Click Findings in the navigation to view your annotated SNPs.
-
-| Tier | Meaning |
-|------|---------|
-| Prescription-Critical | Variants that affect drug metabolism, dosing, or contraindications. Show these to your prescriber before any medication changes. |
-| Actionable | Variants with lifestyle, supplement, or monitoring implications. |
-| Informational | Background genetic information; no immediate action required. |
-
-Use the search bar and gene filter to explore findings by gene, rsID, or keyword.
-
-Step 5: Generate Reports
-
-Click Reports in the navigation.
-
-Genetic Health Report: A comprehensive annotated report covering all findings organized by tier and gene pathway. Designed for personal use and general health review.
-
-Doctor Discussion Report: A clinical-style document designed to bring to a physician, pharmacist, or genetic counselor. Includes:
-- Prescription-critical variant table
-- Drug class interaction summary
-- Recommended lab follow-ups
-- AI analysis prompt block (ready to paste into Grok or Claude)
-
-Both reports open in your browser and can be printed or saved as PDF using your browser's print function (Ctrl+P > Save as PDF).
-
-Step 6: AI-Assisted Analysis with Grok
-
-1. Open your Doctor Discussion Report.
-2. Copy the text in the AI-Assisted Analysis Prompt section.
-3. Open Grok at https://x.ai/grok or the Grok desktop app.
-4. Paste the prompt into Grok.
-
-Alternatively, use the standalone prompt in grok/GROK_SYSTEM_PROMPT.md with any AI assistant.
+- **Genetic health report.** For you. Plain language, a glossary, and a clear
+  split between what needs a prescriber, what needs a lifestyle change, and what
+  is background.
+- **Doctor discussion report.** For a clinician. Leads with a prescription
+  critical table sorted by CPIC level, groups interactions by drug, states its
+  own limitations, and includes an AI analysis prompt block.
+- **Interactive offline report.** One HTML file containing the findings AND a
+  working filter engine. No server, no internet, no DNAInsight install. It makes
+  zero network requests. This is the copy worth keeping.
 
 ---
 
-Multiple Family Members
+Pooling several DNA files
 
-DNAInsight supports multiple profiles. Each profile is stored separately in the local database. Add as many family members as needed by clicking "+ Add Profile" and uploading their raw DNA file.
+Different testing chips read different positions, so two files from the same
+person cover more together than either alone.
 
----
+Go to DNA files, add another file, and set the relationship to "Yourself". The
+files are pooled.
 
-Updating the SNP Reference Database
+**Where the two files disagree, both readings are kept and shown side by side.**
+Nothing is voted on and no winner is picked, because a disagreement between two
+arrays is information about reliability that a silent merge would destroy.
 
-The bundled SNP reference can be refreshed directly from DNAInsight without any command-line steps.
-
-In-app update (recommended, monthly):
-
-1. Open DNAInsight.
-2. Click Database in the sidebar or top navigation.
-3. Click Update Databases Now.
-
-DNAInsight re-fetches the latest ClinVar clinical significance ratings and associated
-condition names for all 122 bundled SNPs from MyVariant.info. The update takes 1-3 minutes
-and requires internet access. Only rsIDs are transmitted -- no genotype data leaves your
-computer.
-
-DNAInsight displays a warning banner if the reference has not been updated in 30 or more days.
-
-Manual rebuild (advanced):
-
-To regenerate the reference from the curated source list in build_reference.py:
-  python data/build_reference.py
-
-This resets clinical significance and interpretation back to the curated static values.
+Set any other relationship, such as Mother, and that file is used for comparison
+only. It never changes your own calls. With both parents loaded you also get
+offspring transmission probability and Mendelian consistency checking.
 
 ---
 
-Contributing & Extending the SNP Reference
+What is in the bundled reference
 
-Evidence-based SNP additions are welcome. To add entries:
+`data/snp_reference.json`, 122 curated variants, chosen for actionability rather
+than count. Each carries a plain-English interpretation plus, new in v2.0, a risk
+allele, CPIC level, ClinVar review stars, publication count, topics and
+medicines. That evidence layer is what makes ranking and offline carrier
+awareness possible.
 
-1. Edit data/build_reference.py and add a new tuple to the REFERENCE list using the format: (rsID, gene, category, clinical_sig, interpretation)
-2. Run: python data/build_reference.py
-3. Verify by restarting DNAInsight and scanning a test DNA file.
-4. Submit a Pull Request with supporting references (CPIC, PharmGKB, ClinVar, or GWAS catalog).
+| Category | Focus | Key genes |
+|---|---|---|
+| Pharmacogenomics | CPIC-level drug response: warfarin, statins, antidepressants, opioids, thiopurines, fluoropyrimidines | CYP2D6, CYP2C19, CYP2C9, VKORC1, SLCO1B1, TPMT, NUDT15, DPYD, UGT1A1, G6PD |
+| Metabolic | obesity, type 2 diabetes, nutrient processing, iron overload | FTO, TCF7L2, PPARG, MTHFR, HFE, SLC30A8, MTNR1B |
+| Cardiovascular | clotting, lipids, coronary risk | F5, F2, APOE, LPA, 9p21, APOA5 |
+| Inflammation | chronic inflammation, autoimmune susceptibility | IL6, TNFA, IL10, CTLA4, IL6R, ERAP1, HLA-DQA1 |
+| Neurological | mood, folate cycle, stress response, neurotransmitters | MTHFR, COMT, BDNF, MAOA, SLC6A4, FKBP5, OXTR |
+| Detox | oxidative stress, alcohol, nicotine | GSTP1, SOD2, NQO1, ALDH2, CYP1A2, CHRNA3 |
 
-Criteria for inclusion:
-- Covered on major consumer arrays (23andMe v4/v5, AncestryDNA v2)
-- CPIC Level A or B evidence, high ClinVar significance, or replicated GWAS hits
-- Actionable (lifestyle, supplement, or physician discussion implication)
-- Plain-English interpretation targeted at non-experts
+Coverage: 115 of 122 have a risk allele, 46 have a CPIC assignment of which 24
+are Level A, and 118 have population frequencies across 16 populations.
 
----
-
-Bundled SNP Reference (122 High-Priority SNPs)
-
-The file data/snp_reference.json contains 122 carefully curated SNPs focused on maximum actionability for consumer DNA arrays. These are prioritized for clear lifestyle, supplement, or physician discussion implications.
-
-| Category | Focus | Key Genes |
-|----------|-------|-----------|
-| Pharmacogenomics (PHARM) | CPIC-level drug response: warfarin, statins, antidepressants, opioids, antiplatelet agents, thiopurines | CYP2D6, CYP2C19, CYP2C9, CYP4F2, VKORC1, SLCO1B1, ABCB1, TPMT, APOE |
-| Metabolic Health (METAB) | Obesity, T2D, nutrient processing, iron overload | FTO, TCF7L2, PPARG, MTHFR, HFE, SLC30A8, KCNJ11 |
-| Inflammation (INFLAM) | Chronic inflammation, autoimmune susceptibility | IL6, TNFA, IL10, CRP, CTLA4, IL6R |
-| Neurological (NEURO) | Mood, folate cycle, stress response, neurotransmitters, social behavior | MTHFR, COMT, BDNF, MAOA, SLC6A4, FKBP5, CLOCK, OXTR |
-| Detox & Cardio (DETOX/CARDIO) | Oxidative stress, clotting risk, alcohol metabolism, nicotine dependence | GSTP1, SOD2, NQO1, ALDH2, F5, F2, CYP1A2, CHRNA3 |
-
-**Why 122 and not more?** Consumer arrays have limited SNP coverage compared to clinical sequencing. This reference focuses on well-covered, high-evidence SNPs with CPIC Level A/B support or strong replicated GWAS associations. Quantity without evidence quality creates false confidence.
-
-To view or extend the full curated list, open data/build_reference.py.
-To rebuild the reference after edits: python data/build_reference.py
+**Want more?** `python data/build_full_reference.py --array-file <your raw file>`
+builds a much larger local database from ClinVar, the GWAS Catalog and CPIC,
+filtered to the positions your array actually reads. It is gitignored because it
+is large and fully reproducible.
 
 ---
 
-Privacy and Data Security
+Privacy
 
-- All DNA data is stored locally in dnainsight.db (SQLite) on your computer.
-- No data is uploaded to any server.
-- When API annotation is enabled, only rsIDs (not genotypes) are sent to myvariant.info. rsIDs are not personally identifiable.
-- To delete all data for a profile, use the Delete button in the Profiles view.
+- Your DNA is stored only in `dnainsight.db` on your computer.
+- The optional MyVariant.info pass sends rsIDs only. Never genotypes.
+- The optional SNPedia harvest sends page titles only, and writes outside this
+  folder.
+- The interactive report makes no network requests at all.
+- Delete a profile and its data goes with it.
+
+`.gitignore` blocks `uploads/`, every `.db`, and anything with `snpedia` in its
+name, so your genetic data and any non-commercial cache cannot be committed by
+accident.
 
 ---
 
 Disclaimer
 
-DNAInsight is not a medical device and does not provide medical advice. Consumer DNA arrays are not clinical-grade tests and have significantly limited coverage compared to clinical exome or genome sequencing. Negative results do not rule out genetic risks. Results must not be used to make prescribing or diagnostic decisions without consultation with a licensed healthcare provider or clinical geneticist. All findings require clinical validation before any medical action.
+DNAInsight is not a medical device and does not provide medical advice. Consumer
+DNA arrays are not clinical-grade tests and cover far less than clinical exome or
+genome sequencing, so a negative result here does not rule anything out.
 
-For questions about your genetic results, consider consulting a genetic counselor. The American Board of Genetic Counseling maintains a directory at findageneticcounselor.com.
+Do not start, stop or change any medication based on this software. Confirm any
+significant finding with a clinically validated test and discuss it with a
+licensed clinician, pharmacist or genetic counsellor. The American Board of
+Genetic Counseling maintains a directory at findageneticcounselor.com .
 
-The information provided is for personal educational use only.
+For educational and research use only.
 
 ---
 
-File Structure
+Project layout
 
 ```
 dnainsight/
-├── app.py                    Entry point (Flask server)
-├── requirements.txt          Python dependencies
-├── install.bat               Windows installer
-├── install.sh                macOS/Linux installer
-├── launch.bat                Windows launcher (created by installer)
-├── README.md                 This file
-├── LICENSE                   MIT License
-├── dnainsight.db             SQLite database (created on first run)
+├── app.py                     Flask entry point, initialises the schema
+├── requirements.txt           two runtime dependencies
+├── requirements-dev.txt       adds pytest
 ├── backend/
-│   ├── __init__.py
-│   ├── parsers.py            DNA file format parsers
-│   ├── scanner.py            SNP annotation engine
-│   ├── database.py           SQLite data access layer
-│   ├── genetic_report.py     Genetic Health Report generator
-│   ├── doctor_report.py      Doctor Discussion Report generator
-│   └── routes.py             Flask API endpoints
+│   ├── parsers.py             provider detection and raw file parsing
+│   ├── merge.py               multi-file pooling, conflicts, trio
+│   ├── orientation.py         strand reconciliation and ambiguity
+│   ├── scanner.py             offline annotation and the API pass
+│   ├── frequency.py           population frequency, strand tolerant
+│   ├── genosets.py            criteria parser and evaluator
+│   ├── traits.py              traits, ABO and RhD
+│   ├── prs.py                 polygenic scores
+│   ├── snpedia.py             opt-in local cache, licence gated
+│   ├── scoring.py             magnitude, repute, confidence
+│   ├── pipeline.py            scan orchestrator, correct stage order
+│   ├── filters.py             filtering, sorting, faceting
+│   ├── database.py            SQLite access
+│   ├── routes.py              v1 endpoints, unchanged behaviour
+│   ├── routes_v2.py           v2 endpoints
+│   ├── genetic_report.py      report for you
+│   ├── doctor_report.py       report for a clinician
+│   └── interactive_report.py  self-contained offline report
 ├── data/
-│   ├── build_reference.py    Script to regenerate bundled SNP reference
-│   └── snp_reference.json    Bundled SNP reference (122 SNPs, versioned)
-├── frontend/
-│   └── index.html            Single-page web application
-├── grok/
-│   └── GROK_SYSTEM_PROMPT.md  AI analysis prompt for Grok/Claude/ChatGPT
-├── uploads/                  Uploaded DNA files (created on first run)
-└── reports_output/           Generated HTML reports (created on first run)
+│   ├── build_reference.py     curated table plus evidence overlay
+│   ├── evidence_overlay.py    risk alleles, CPIC levels, stars, publications
+│   ├── build_genosets.py      the 65-rule corpus
+│   ├── build_frequencies.py   population frequencies from Ensembl
+│   ├── build_prs.py           polygenic models, with a licence gate
+│   ├── build_full_reference.py  optional large local database
+│   └── DATA_SOURCES.md        licence record for every source
+├── frontend/index.html        the single page app
+├── docs/
+│   ├── API_V2.md              the authoritative API contract
+│   └── HANDOFF_V2.md          engineering notes and known hazards
+└── tests/                     1866 tests
 ```
 
 ---
 
-Troubleshooting
+Contributing
 
-"No module named flask"
-Run: pip install flask or python3 -m pip install flask
+Evidence bar for a new variant: CPIC Level A or B, or ClinVar pathogenic at 2
+review stars or better, or a GWAS association replicated in two or more
+independent studies. It must plausibly be on 23andMe v4/v5 or AncestryDNA v2, and
+it needs a plain-English interpretation aimed at a non-expert.
 
-"Parsed 0 valid SNPs"
-The file may be compressed. Open the zip from your DNA provider and use the .txt file inside.
+Add the row to `data/build_reference.py`, add its evidence to
+`data/evidence_overlay.py` including the risk allele on the GRCh37 plus strand,
+then run:
 
-Browser does not open automatically
-Navigate to http://127.0.0.1:5050 manually.
+```
+python data/build_reference.py
+python -m pytest tests -q
+```
 
-Port 5050 already in use
-Run: python app.py --port 8080 and open http://127.0.0.1:8080
+Before opening a pull request, run the full release gate:
 
-Scan takes a long time
-The API phase processes SNPs in batches of 200 with 4 parallel threads. For a full 650,000-SNP file, a full API scan can take 30-60 minutes. The bundled reference scan (no API) is instant.
+```
+pwsh -File _build/gate2.ps1
+```
 
----
+It rebuilds every derived artifact, audits every source file for duplication,
+runs the module smoke tests, the strand regression, the pipeline contract check,
+the filter engine check, a 42-endpoint API sweep, the interactive report
+verification and the full test suite.
 
-Screenshots
-
-(Screenshots coming soon -- UI, findings view, and sample report.)
-
----
-
-Roadmap
-
-| Version | Planned Features |
-|---------|-----------------|
-| v1.1 ✅ | Expanded reference (122 SNPs), JSON/CSV export, Chart.js category chart, CI/CD, unit tests, versioned reference, CONTRIBUTING.md |
-| v1.2 ✅ | Zygosity on every finding, carrier-aware API annotation, single-SNP lookup, upload security hardening (path traversal + size/type limits), reference dedup guard, version consistency |
-| v1.3 | Basic polygenic risk score (PRS) support for T2D and CAD using public weight files; genotype-specific risk-allele mapping for the bundled reference |
-| v1.4 | CYP2D6 star allele calling, improved risk visualizations (Chart.js heatmaps) |
-| Future | Community-curated reference updates, auto-update mechanism for new app versions |
-
-### Interpreting findings: allele-general vs carrier-aware
-
-Offline (bundled) findings are **allele-general**: they describe what a variant
-at that position means, and now include your zygosity, but the bundled reference
-does not yet store which allele confers risk. Treat these as "this position was
-genotyped; here is the relevant biology," not as confirmation you carry the risk
-allele. When online API annotation is enabled and MyVariant returns an
-authoritative variant allele, findings become **carrier-aware**: DNAInsight
-counts your copies of that allele and de-emphasizes classifications for variants
-you do not carry. Genotype-specific risk-allele mapping for the full bundled set
-is planned for v1.3.
-
-Contributions and feedback are welcome. Open an issue or submit a pull request.
+`docs/HANDOFF_V2.md` documents the design decisions that should not be quietly
+reversed, and one real tooling hazard worth reading before you edit anything.
 
 ---
 
 License
 
-MIT License. Free to use, modify, and distribute for personal and non-commercial use.
+MIT. The code is freely reusable. Bundled data is CC0 or US public domain, so the
+whole repository is redistributable. Per-source licences are recorded in
+`data/DATA_SOURCES.md`.

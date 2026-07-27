@@ -1,0 +1,15 @@
+# Development and test dependencies for DNAInsight.
+#
+# Install with:
+#     pip install -r requirements.txt -r requirements-dev.txt
+#
+# Not needed to RUN the application. The 1866-test suite, the source-integrity
+# auditor and the release gate need only pytest on top of the runtime deps;
+# everything else under _build/ uses the standard library.
+
+-r requirements.txt
+
+pytest>=8.0,<9.0
+
+# Optional, only if you want lint parity with the repository's .flake8 config.
+# flake8>=7.0,<8.0

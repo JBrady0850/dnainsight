@@ -1,2 +1,31 @@
-flask==3.0.3
-requests==2.32.3
+# DNAInsight v2.0 runtime dependencies.
+#
+# Deliberately minimal. The whole application is Flask plus requests plus the
+# Python standard library. No ORM, no task queue, no charting library on the
+# server, no scientific stack. That is what makes a single-folder offline-first
+# install realistic, and it is worth protecting.
+#
+# PINNING POLICY
+# The v1.2 file pinned exact versions (flask==3.0.3, requests==2.32.3) that had
+# already drifted from what was actually installed and tested (Flask 3.1.3,
+# requests 2.34.2). An exact pin that nobody verifies is worse than a range: it
+# gives a false sense of reproducibility while guaranteeing that a fresh clone
+# runs different code from the developer's machine.
+#
+# So: a floor at the version this release was tested against, and a ceiling at
+# the next major version, where breaking changes are permitted by semver.
+
+flask>=3.1.3,<4.0
+requests>=2.32.3,<3.0
+
+# ---------------------------------------------------------------------------
+# NOT required, and intentionally absent
+# ---------------------------------------------------------------------------
+# pytest        needed only to run the test suite. See requirements-dev.txt.
+# pandas/numpy  the reference builders stream and parse with the standard
+#               library on purpose, so a user rebuilding the variant database
+#               does not need a compiler toolchain.
+# a charting library
+#               the frontend loads Chart.js from a CDN and degrades gracefully
+#               when it is unavailable; the offline interactive report draws its
+#               own SVG so it needs nothing at all.

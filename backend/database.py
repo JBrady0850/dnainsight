@@ -18,32 +18,76 @@ def _resolve_db_path() -> Path:
       2. User home directory ~/.dnainsight/ -- if the app folder is read-only.
       3. System temp directory -- last resort for FUSE/container environments.
     """
-    import tempfile, sqlite3 as _sqlite3
+    import os, tempfile, sqlite3 as _sqlite3
 
     def _test_sqlite(path: Path) -> bool:
-        path.parent.mkdir(parents=True, exist_ok=True)
+        """Can we use SQLite with WAL at this location?
+
+        CRITICAL: this must NEVER delete or modify an existing database.
+
+        The original version connected to the real path, created and dropped a
+        table inside it, and then called path.unlink(). Because DB_PATH is
+        resolved at import time, that meant every launch of DNAInsight deleted
+        the user's entire database: all profiles, all findings, all reports.
+
+        It was intermittent rather than constant, which made it worse. On Windows
+        the unlink sometimes failed because a WAL or SHM handle was still open,
+        so the data survived some launches and vanished on others. To a user that
+        looks like random corruption rather than a bug with a cause.
+
+        Two separate cases now:
+
+          1. The database ALREADY EXISTS. Open it read-only and run a harmless
+             query. Never write, never delete. An existing database is proof
+             enough that the location works.
+          2. It does NOT exist. Probe with a uniquely named temporary file in the
+             same directory, and delete only that probe file. The real path is
+             never created as a side effect of resolution.
+        """
         try:
-            conn = _sqlite3.connect(str(path))
-            # Test WAL mode -- this is what the app uses; FUSE mounts often fail here
-            conn.execute("PRAGMA journal_mode=WAL")
-            conn.executescript("""
-                CREATE TABLE IF NOT EXISTS _write_test (x INTEGER);
-                INSERT INTO _write_test VALUES (1);
-                DROP TABLE _write_test;
-            """)
-            conn.close()
-            # Clean up test file
+            path.parent.mkdir(parents=True, exist_ok=True)
+        except Exception:
+            return False
+
+        # Case 1: an existing database. Verify access without touching it.
+        if path.exists():
             try:
-                path.unlink(missing_ok=True)
+                conn = _sqlite3.connect(f"file:{path}?mode=ro", uri=True)
+                conn.execute("PRAGMA schema_version").fetchone()
+                conn.close()
+                return True
             except Exception:
+                # Unreadable, perhaps corrupt or locked by another process.
+                # Fall through and test the DIRECTORY instead, so a transient
+                # lock does not push the app onto a different path and silently
+                # strand the user's data.
                 pass
+
+        # Case 2: no database yet, or an existing one we could not read. Probe
+        # the directory with a throwaway file that carries our process id, so
+        # two concurrent starts cannot delete each other's probe.
+        probe = path.parent / f".dnainsight_write_probe_{os.getpid()}.db"
+        try:
+            conn = _sqlite3.connect(str(probe))
+            # WAL is what the app actually uses, and FUSE mounts often fail here,
+            # so it has to be part of the probe rather than assumed.
+            conn.execute("PRAGMA journal_mode=WAL")
+            conn.executescript(
+                "CREATE TABLE IF NOT EXISTS _write_test (x INTEGER);"
+                "INSERT INTO _write_test VALUES (1);"
+                "DROP TABLE _write_test;"
+            )
+            conn.close()
             return True
         except Exception:
-            try:
-                path.unlink(missing_ok=True)
-            except Exception:
-                pass
             return False
+        finally:
+            # Only ever remove the probe, and its WAL sidecars. Never the target.
+            for suffix in ("", "-wal", "-shm", "-journal"):
+                try:
+                    Path(str(probe) + suffix).unlink(missing_ok=True)
+                except Exception:
+                    pass
 
     candidates = [
         Path(__file__).parent.parent / "dnainsight.db",

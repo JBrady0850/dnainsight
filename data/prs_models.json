@@ -1,0 +1,606 @@
+{
+  "_meta": {
+    "version": "2.0.0",
+    "built_at": "2026-07-27T11:49:44Z",
+    "model_count": 7,
+    "license": "MIT (DNAInsight-authored weights from published effect sizes)",
+    "note": "Additive scores only. Weights are natural-log odds ratios from published per-allele effect sizes, restricted to rsIDs bundled in data/build_reference.py. Reference mean and sd are analytic under Hardy-Weinberg from European effect allele frequencies, so they assume the variants of a model are independent. Percentiles are meaningful only for European-ancestry users."
+  },
+  "models": {
+    "t2d": {
+      "id": "t2d",
+      "trait": "Type 2 diabetes",
+      "efo": "EFO_0001360",
+      "description": "Ten common variants with replicated per-allele associations with type 2 diabetes, covering insulin secretion (TCF7L2, KCNJ11, SLC30A8, MTNR1B, CDKN2A/B), insulin sensitivity (PPARG, IRS1), appetite (MC4R) and hepatic glucose handling (GCKR). rs7903146 and rs12255372 are both TCF7L2 markers in strong linkage disequilibrium, so their contributions overlap and the analytic sd understates the true spread.",
+      "build": "GRCh37",
+      "source": "DNAInsight additive model from published per-allele effect sizes",
+      "citation": "Zeggini E, Nature Genetics, 2008",
+      "pmid": "18372903",
+      "license": "MIT (DNAInsight-authored weights from published effect sizes)",
+      "variant_count": 10,
+      "variants": [
+        {
+          "rsid": "rs7903146",
+          "effect_allele": "T",
+          "other_allele": "C",
+          "weight": 0.314811,
+          "effect_allele_frequency": 0.313935,
+          "odds_ratio": 1.37,
+          "af_source": "frequencies.json EUR panel average",
+          "strand_flipped": false,
+          "strand_ambiguous": false
+        },
+        {
+          "rsid": "rs1801282",
+          "effect_allele": "C",
+          "other_allele": "G",
+          "weight": 0.131028,
+          "effect_allele_frequency": 0.879072,
+          "odds_ratio": 1.14,
+          "af_source": "frequencies.json EUR panel average, palindromic site so the strand could not be verified against the table",
+          "strand_flipped": false,
+          "strand_ambiguous": true
+        },
+        {
+          "rsid": "rs10811661",
+          "effect_allele": "T",
+          "other_allele": "C",
+          "weight": 0.182322,
+          "effect_allele_frequency": 0.833141,
+          "odds_ratio": 1.2,
+          "af_source": "frequencies.json EUR panel average",
+          "strand_flipped": false,
+          "strand_ambiguous": false
+        },
+        {
+          "rsid": "rs13266634",
+          "effect_allele": "C",
+          "other_allele": "T",
+          "weight": 0.113329,
+          "effect_allele_frequency": 0.716988,
+          "odds_ratio": 1.12,
+          "af_source": "frequencies.json EUR panel average",
+          "strand_flipped": false,
+          "strand_ambiguous": false
+        },
+        {
+          "rsid": "rs5219",
+          "effect_allele": "T",
+          "other_allele": "C",
+          "weight": 0.131028,
+          "effect_allele_frequency": 0.352049,
+          "odds_ratio": 1.14,
+          "af_source": "frequencies.json EUR panel average",
+          "strand_flipped": false,
+          "strand_ambiguous": false
+        },
+        {
+          "rsid": "rs780094",
+          "effect_allele": "C",
+          "other_allele": "T",
+          "weight": 0.058269,
+          "effect_allele_frequency": 0.591881,
+          "odds_ratio": 1.06,
+          "af_source": "frequencies.json EUR panel average",
+          "strand_flipped": false,
+          "strand_ambiguous": false
+        },
+        {
+          "rsid": "rs10830963",
+          "effect_allele": "G",
+          "other_allele": "C",
+          "weight": 0.139762,
+          "effect_allele_frequency": 0.288205,
+          "odds_ratio": 1.15,
+          "af_source": "frequencies.json EUR panel average, palindromic site so the strand could not be verified against the table",
+          "strand_flipped": false,
+          "strand_ambiguous": true
+        },
+        {
+          "rsid": "rs2943641",
+          "effect_allele": "C",
+          "other_allele": "T",
+          "weight": 0.173953,
+          "effect_allele_frequency": 0.627131,
+          "odds_ratio": 1.19,
+          "af_source": "frequencies.json EUR panel average",
+          "strand_flipped": false,
+          "strand_ambiguous": false
+        },
+        {
+          "rsid": "rs17782313",
+          "effect_allele": "C",
+          "other_allele": "T",
+          "weight": 0.076961,
+          "effect_allele_frequency": 0.238568,
+          "odds_ratio": 1.08,
+          "af_source": "frequencies.json EUR panel average",
+          "strand_flipped": false,
+          "strand_ambiguous": false
+        },
+        {
+          "rsid": "rs12255372",
+          "effect_allele": "T",
+          "other_allele": "G",
+          "weight": 0.270027,
+          "effect_allele_frequency": 0.290055,
+          "odds_ratio": 1.31,
+          "af_source": "frequencies.json EUR panel average",
+          "strand_flipped": false,
+          "strand_ambiguous": false
+        }
+      ],
+      "reference": {
+        "population": "EUR",
+        "mean": 1.547679667,
+        "sd": 0.353009633
+      }
+    },
+    "cad": {
+      "id": "cad",
+      "trait": "Coronary artery disease",
+      "efo": "EFO_0001645",
+      "description": "Seven variants spanning the dominant 9p21 susceptibility locus, lipoprotein(a) concentration, endothelial nitric oxide synthesis, the renin-angiotensin axis and two thrombophilias with replicated but modest coronary effects. rs4149056 is carried at a deliberately small weight: it is a statin transporter variant that acts on tolerability and adherence rather than a primary susceptibility locus.",
+      "build": "GRCh37",
+      "source": "DNAInsight additive model from published per-allele effect sizes",
+      "citation": "Schunkert H, Nature Genetics, 2011",
+      "pmid": "21378990",
+      "license": "MIT (DNAInsight-authored weights from published effect sizes)",
+      "variant_count": 7,
+      "variants": [
+        {
+          "rsid": "rs1333049",
+          "effect_allele": "C",
+          "other_allele": "G",
+          "weight": 0.254642,
+          "effect_allele_frequency": 0.471326,
+          "odds_ratio": 1.29,
+          "af_source": "frequencies.json EUR panel average, palindromic site so the strand could not be verified against the table",
+          "strand_flipped": false,
+          "strand_ambiguous": true
+        },
+        {
+          "rsid": "rs10455872",
+          "effect_allele": "G",
+          "other_allele": "A",
+          "weight": 0.530628,
+          "effect_allele_frequency": 0.07365,
+          "odds_ratio": 1.7,
+          "af_source": "frequencies.json EUR panel average",
+          "strand_flipped": false,
+          "strand_ambiguous": false
+        },
+        {
+          "rsid": "rs1799983",
+          "effect_allele": "T",
+          "other_allele": "G",
+          "weight": 0.10436,
+          "effect_allele_frequency": 0.3423,
+          "odds_ratio": 1.11,
+          "af_source": "frequencies.json EUR panel average",
+          "strand_flipped": false,
+          "strand_ambiguous": false
+        },
+        {
+          "rsid": "rs6025",
+          "effect_allele": "T",
+          "other_allele": "C",
+          "weight": 0.157004,
+          "effect_allele_frequency": 0.011984,
+          "odds_ratio": 1.17,
+          "af_source": "frequencies.json EUR panel average",
+          "strand_flipped": false,
+          "strand_ambiguous": false
+        },
+        {
+          "rsid": "rs1799963",
+          "effect_allele": "A",
+          "other_allele": "G",
+          "weight": 0.270027,
+          "effect_allele_frequency": 0.007477,
+          "odds_ratio": 1.31,
+          "af_source": "frequencies.json EUR panel average",
+          "strand_flipped": false,
+          "strand_ambiguous": false
+        },
+        {
+          "rsid": "rs4149056",
+          "effect_allele": "C",
+          "other_allele": "T",
+          "weight": 0.04879,
+          "effect_allele_frequency": 0.160583,
+          "odds_ratio": 1.05,
+          "af_source": "frequencies.json EUR panel average",
+          "strand_flipped": false,
+          "strand_ambiguous": false
+        },
+        {
+          "rsid": "rs5186",
+          "effect_allele": "C",
+          "other_allele": "A",
+          "weight": 0.086178,
+          "effect_allele_frequency": 0.272993,
+          "odds_ratio": 1.09,
+          "af_source": "frequencies.json EUR panel average",
+          "strand_flipped": false,
+          "strand_ambiguous": false
+        }
+      ],
+      "reference": {
+        "population": "EUR",
+        "mean": 0.460167877,
+        "sd": 0.284418926
+      }
+    },
+    "bmi": {
+      "id": "bmi",
+      "trait": "Body mass index",
+      "efo": "EFO_0004340",
+      "description": "Seven common variants associated with body mass index and obesity risk. Weights are obesity odds ratios rather than kg/m2 betas, which keeps every model in this file on one scale. rs9939609, rs1421085 and rs8050136 are three markers of the same FTO intron 1 haplotype and are not independent, so the analytic sd is a lower bound. rs1801282 enters with the Ala12 allele as the effect allele, the opposite direction to the type 2 diabetes model, because Ala12 improves insulin sensitivity while still associating with higher measured BMI.",
+      "build": "GRCh37",
+      "source": "DNAInsight additive model from published per-allele effect sizes",
+      "citation": "Speliotes EK, Nature Genetics, 2010",
+      "pmid": "20935630",
+      "license": "MIT (DNAInsight-authored weights from published effect sizes)",
+      "variant_count": 7,
+      "variants": [
+        {
+          "rsid": "rs9939609",
+          "effect_allele": "A",
+          "other_allele": "T",
+          "weight": 0.277632,
+          "effect_allele_frequency": 0.412988,
+          "odds_ratio": 1.32,
+          "af_source": "frequencies.json EUR panel average, palindromic site so the strand could not be verified against the table",
+          "strand_flipped": false,
+          "strand_ambiguous": true
+        },
+        {
+          "rsid": "rs1421085",
+          "effect_allele": "C",
+          "other_allele": "T",
+          "weight": 0.262364,
+          "effect_allele_frequency": 0.431691,
+          "odds_ratio": 1.3,
+          "af_source": "frequencies.json EUR panel average",
+          "strand_flipped": false,
+          "strand_ambiguous": false
+        },
+        {
+          "rsid": "rs8050136",
+          "effect_allele": "A",
+          "other_allele": "C",
+          "weight": 0.239017,
+          "effect_allele_frequency": 0.413077,
+          "odds_ratio": 1.27,
+          "af_source": "frequencies.json EUR panel average",
+          "strand_flipped": false,
+          "strand_ambiguous": false
+        },
+        {
+          "rsid": "rs17782313",
+          "effect_allele": "C",
+          "other_allele": "T",
+          "weight": 0.113329,
+          "effect_allele_frequency": 0.238568,
+          "odds_ratio": 1.12,
+          "af_source": "frequencies.json EUR panel average",
+          "strand_flipped": false,
+          "strand_ambiguous": false
+        },
+        {
+          "rsid": "rs1137101",
+          "effect_allele": "G",
+          "other_allele": "A",
+          "weight": 0.076961,
+          "effect_allele_frequency": 0.470007,
+          "odds_ratio": 1.08,
+          "af_source": "frequencies.json EUR panel average",
+          "strand_flipped": false,
+          "strand_ambiguous": false
+        },
+        {
+          "rsid": "rs1800544",
+          "effect_allele": "G",
+          "other_allele": "C",
+          "weight": 0.058269,
+          "effect_allele_frequency": 0.261403,
+          "odds_ratio": 1.06,
+          "af_source": "frequencies.json EUR panel average, palindromic site so the strand could not be verified against the table",
+          "strand_flipped": false,
+          "strand_ambiguous": true
+        },
+        {
+          "rsid": "rs1801282",
+          "effect_allele": "G",
+          "other_allele": "C",
+          "weight": 0.058269,
+          "effect_allele_frequency": 0.120928,
+          "odds_ratio": 1.06,
+          "af_source": "frequencies.json EUR panel average, palindromic site so the strand could not be verified against the table",
+          "strand_flipped": false,
+          "strand_ambiguous": true
+        }
+      ],
+      "reference": {
+        "population": "EUR",
+        "mean": 0.824276428,
+        "sd": 0.32939159
+      }
+    },
+    "vte": {
+      "id": "vte",
+      "trait": "Venous thromboembolism",
+      "efo": "",
+      "description": "The two established European thrombophilias plus one endothelial modifier. Weights are heterozygote odds ratios applied per-allele, which models a heterozygote correctly and understates the homozygote: factor V Leiden homozygotes carry far more than the squared heterozygote risk this additive form implies. A high score here reflects one or two large-effect alleles rather than a polygenic burden, so read the underlying genotypes, not the percentile alone.",
+      "build": "GRCh37",
+      "source": "DNAInsight additive model from published per-allele effect sizes",
+      "citation": "Emmerich J, Thrombosis and Haemostasis, 2001",
+      "pmid": "",
+      "license": "MIT (DNAInsight-authored weights from published effect sizes)",
+      "variant_count": 3,
+      "variants": [
+        {
+          "rsid": "rs6025",
+          "effect_allele": "T",
+          "other_allele": "C",
+          "weight": 1.589235,
+          "effect_allele_frequency": 0.011984,
+          "odds_ratio": 4.9,
+          "af_source": "frequencies.json EUR panel average",
+          "strand_flipped": false,
+          "strand_ambiguous": false
+        },
+        {
+          "rsid": "rs1799963",
+          "effect_allele": "A",
+          "other_allele": "G",
+          "weight": 1.029619,
+          "effect_allele_frequency": 0.007477,
+          "odds_ratio": 2.8,
+          "af_source": "frequencies.json EUR panel average",
+          "strand_flipped": false,
+          "strand_ambiguous": false
+        },
+        {
+          "rsid": "rs1799983",
+          "effect_allele": "T",
+          "other_allele": "G",
+          "weight": 0.198851,
+          "effect_allele_frequency": 0.3423,
+          "odds_ratio": 1.22,
+          "af_source": "frequencies.json EUR panel average",
+          "strand_flipped": false,
+          "strand_ambiguous": false
+        }
+      ],
+      "reference": {
+        "population": "EUR",
+        "mean": 0.189621102,
+        "sd": 0.305529534
+      }
+    },
+    "ldl": {
+      "id": "ldl",
+      "trait": "Elevated LDL cholesterol",
+      "efo": "EFO_0004611",
+      "description": "Five variants acting on circulating LDL and remnant lipoproteins. The two APOE sites pull in opposite directions and rs7412 therefore carries a negative weight: the e2 allele lowers LDL. A carrier of both raising and lowering alleles can land mid-distribution while still having an informative genotype, which is the case for reading the variant list rather than the band alone.",
+      "build": "GRCh37",
+      "source": "DNAInsight additive model from published per-allele effect sizes",
+      "citation": "Willer CJ, Nature Genetics, 2013",
+      "pmid": "24097068",
+      "license": "MIT (DNAInsight-authored weights from published effect sizes)",
+      "variant_count": 5,
+      "variants": [
+        {
+          "rsid": "rs429358",
+          "effect_allele": "C",
+          "other_allele": "T",
+          "weight": 0.262364,
+          "effect_allele_frequency": 0.15649,
+          "odds_ratio": 1.3,
+          "af_source": "frequencies.json EUR panel average",
+          "strand_flipped": false,
+          "strand_ambiguous": false
+        },
+        {
+          "rsid": "rs7412",
+          "effect_allele": "T",
+          "other_allele": "C",
+          "weight": -0.328504,
+          "effect_allele_frequency": 0.063218,
+          "odds_ratio": 0.72,
+          "af_source": "frequencies.json EUR panel average",
+          "strand_flipped": false,
+          "strand_ambiguous": false
+        },
+        {
+          "rsid": "rs1800588",
+          "effect_allele": "T",
+          "other_allele": "C",
+          "weight": 0.067659,
+          "effect_allele_frequency": 0.20889,
+          "odds_ratio": 1.07,
+          "af_source": "frequencies.json EUR panel average",
+          "strand_flipped": false,
+          "strand_ambiguous": false
+        },
+        {
+          "rsid": "rs3135506",
+          "effect_allele": "C",
+          "other_allele": "G",
+          "weight": 0.350657,
+          "effect_allele_frequency": 0.066843,
+          "odds_ratio": 1.42,
+          "af_source": "frequencies.json EUR panel average, palindromic site so the strand could not be verified against the table",
+          "strand_flipped": false,
+          "strand_ambiguous": true
+        },
+        {
+          "rsid": "rs1799983",
+          "effect_allele": "T",
+          "other_allele": "G",
+          "weight": 0.039221,
+          "effect_allele_frequency": 0.3423,
+          "odds_ratio": 1.04,
+          "af_source": "frequencies.json EUR panel average",
+          "strand_flipped": false,
+          "strand_ambiguous": false
+        }
+      ],
+      "reference": {
+        "population": "EUR",
+        "mean": 0.142575158,
+        "sd": 0.220225361
+      }
+    },
+    "homocysteine": {
+      "id": "homocysteine",
+      "trait": "Elevated homocysteine",
+      "efo": "",
+      "description": "Five variants in the folate and cobalamin remethylation pathway. Four of the five are stored in data/frequencies.json on the opposite strand to the array orientation used here, so this model is the sharpest test of the strand layer in the build: MTHFR rs1801133 is quoted C/T on an array and A/G by dbSNP. Homocysteine is a modifiable biochemical intermediate, so a high score is a prompt to measure the analyte rather than a finding in itself.",
+      "build": "GRCh37",
+      "source": "DNAInsight additive model from published per-allele effect sizes",
+      "citation": "Klerk M, JAMA, 2002",
+      "pmid": "12387654",
+      "license": "MIT (DNAInsight-authored weights from published effect sizes)",
+      "variant_count": 5,
+      "variants": [
+        {
+          "rsid": "rs1801133",
+          "effect_allele": "T",
+          "other_allele": "C",
+          "weight": 0.336472,
+          "effect_allele_frequency": 0.36122,
+          "odds_ratio": 1.4,
+          "af_source": "frequencies.json EUR panel average, complemented from dbSNP orientation to the array plus strand",
+          "strand_flipped": true,
+          "strand_ambiguous": false
+        },
+        {
+          "rsid": "rs1801131",
+          "effect_allele": "C",
+          "other_allele": "A",
+          "weight": 0.139762,
+          "effect_allele_frequency": 0.314247,
+          "odds_ratio": 1.15,
+          "af_source": "frequencies.json EUR panel average, complemented from dbSNP orientation to the array plus strand",
+          "strand_flipped": true,
+          "strand_ambiguous": false
+        },
+        {
+          "rsid": "rs1805087",
+          "effect_allele": "G",
+          "other_allele": "A",
+          "weight": 0.113329,
+          "effect_allele_frequency": 0.173313,
+          "odds_ratio": 1.12,
+          "af_source": "frequencies.json EUR panel average",
+          "strand_flipped": false,
+          "strand_ambiguous": false
+        },
+        {
+          "rsid": "rs1801394",
+          "effect_allele": "G",
+          "other_allele": "A",
+          "weight": 0.086178,
+          "effect_allele_frequency": 0.52611,
+          "odds_ratio": 1.09,
+          "af_source": "frequencies.json EUR panel average",
+          "strand_flipped": false,
+          "strand_ambiguous": false
+        },
+        {
+          "rsid": "rs601338",
+          "effect_allele": "A",
+          "other_allele": "G",
+          "weight": 0.09531,
+          "effect_allele_frequency": 0.441546,
+          "odds_ratio": 1.1,
+          "af_source": "frequencies.json EUR panel average",
+          "strand_flipped": false,
+          "strand_ambiguous": false
+        }
+      ],
+      "reference": {
+        "population": "EUR",
+        "mean": 0.545048902,
+        "sd": 0.269310073
+      }
+    },
+    "inflammation": {
+      "id": "inflammation",
+      "trait": "Systemic inflammation (hsCRP)",
+      "efo": "EFO_0004458",
+      "description": "Five regulatory variants influencing the baseline inflammatory set point read out by high-sensitivity CRP. Two sit in or near CRP itself and three in upstream cytokine genes. Weights are odds ratios for the upper tertile of hsCRP rather than betas on mg/L, so the score orders people and does not predict a concentration. hsCRP moves with acute infection, adiposity and smoking, all of which swamp this genetic component.",
+      "build": "GRCh37",
+      "source": "DNAInsight additive model from published per-allele effect sizes",
+      "citation": "Dehghan A, Circulation, 2011",
+      "pmid": "21300955",
+      "license": "MIT (DNAInsight-authored weights from published effect sizes)",
+      "variant_count": 5,
+      "variants": [
+        {
+          "rsid": "rs1205",
+          "effect_allele": "C",
+          "other_allele": "T",
+          "weight": 0.19062,
+          "effect_allele_frequency": 0.689427,
+          "odds_ratio": 1.21,
+          "af_source": "frequencies.json EUR panel average",
+          "strand_flipped": false,
+          "strand_ambiguous": false
+        },
+        {
+          "rsid": "rs30187",
+          "effect_allele": "T",
+          "other_allele": "C",
+          "weight": 0.165514,
+          "effect_allele_frequency": 0.348622,
+          "odds_ratio": 1.18,
+          "af_source": "frequencies.json EUR panel average",
+          "strand_flipped": false,
+          "strand_ambiguous": false
+        },
+        {
+          "rsid": "rs1800795",
+          "effect_allele": "G",
+          "other_allele": "C",
+          "weight": 0.139762,
+          "effect_allele_frequency": 0.582522,
+          "odds_ratio": 1.15,
+          "af_source": "frequencies.json EUR panel average, palindromic site so the strand could not be verified against the table",
+          "strand_flipped": false,
+          "strand_ambiguous": true
+        },
+        {
+          "rsid": "rs1800629",
+          "effect_allele": "A",
+          "other_allele": "G",
+          "weight": 0.182322,
+          "effect_allele_frequency": 0.134466,
+          "odds_ratio": 1.2,
+          "af_source": "frequencies.json EUR panel average",
+          "strand_flipped": false,
+          "strand_ambiguous": false
+        },
+        {
+          "rsid": "rs1143627",
+          "effect_allele": "C",
+          "other_allele": "T",
+          "weight": 0.113329,
+          "effect_allele_frequency": 0.351322,
+          "odds_ratio": 1.12,
+          "af_source": "frequencies.json EUR panel average, complemented from dbSNP orientation to the array plus strand",
+          "strand_flipped": true,
+          "strand_ambiguous": false
+        }
+      ],
+      "reference": {
+        "population": "EUR",
+        "mean": 0.669731834,
+        "sd": 0.226040728
+      }
+    }
+  }
+}

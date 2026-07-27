@@ -3,6 +3,203 @@
 All notable changes to DNAInsight are documented here. This project follows
 [Semantic Versioning](https://semver.org/).
 
+## [2.0.0] - 2026-07-26
+
+Feature parity with the Promethease and SNPedia model, built entirely from CC0
+and public-domain data so the repository stays redistributable.
+
+### Licensing position, decided first because it shapes everything else
+
+SNPedia is licensed `CC-BY-NC-SA-3.0-US`. Its Magnitude and Repute fields are
+hand-curated by wiki editors and have no open-data equivalent. Bundling them
+would force the derived database to non-commercial share-alike and permanently
+foreclose commercial use of DNAInsight. So:
+
+- **Nothing SNPedia-derived ships in this repository.** DNAInsight computes its
+  own magnitude and repute from CPIC (CC0), ClinVar (US public domain), gnomAD
+  and 1000 Genomes (CC0) and the GWAS Catalog.
+- An **opt-in harvester** lets a user build a local SNPedia cache on their own
+  machine for their own personal, non-commercial use. It is licence-gated, and
+  it writes to `~/.dnainsight/snpedia_cache.db`, deliberately outside the repo.
+- `data/DATA_SOURCES.md` records the licence for every source.
+
+### Added: interest scoring that can be audited
+
+- **`backend/scoring.py`** computes a 0 to 10 DNAInsight magnitude, a
+  Good / Bad / unset repute and a four-level confidence. The scale intentionally
+  mirrors the shape people already know from Promethease reports, but the numbers
+  are ours and the UI labels them as such.
+- Every score carries a **`magnitude_factors`** audit trail listing each step
+  that fired, so a number can be explained rather than taken on trust.
+- **Carrier awareness.** A ClinVar classification describes an allele, not a
+  position. A non-carrier is multiplied down to a quarter and has its repute
+  cleared, instead of being shown "pathogenic" for a variant they do not have.
+  This is the single largest honesty improvement in the release.
+- **No-calls score zero** and **palindromic sites are capped at 2.0** and flagged
+  dubious, because an unverifiable call must not outrank a verifiable one.
+
+### Added: the genoset engine
+
+- **`backend/genosets.py`** implements the full criteria grammar: `and`, `or`,
+  `not`, `atleast(N, ...)`, exact `rs1234(A;T)`, homozygous `rs1234(T;T)`,
+  at-least-one `rs1234(T)`, cross-genoset references and arbitrary nesting.
+- A **missing SNP evaluates false**, never null and never imputed to the
+  population-major allele.
+- **65 authored genosets** in `data/genosets.json`, including all six APOE
+  diplotypes, warfarin metabolizer classes and SLCO1B1 statin risk. Every rule
+  references only rsIDs that exist in the bundled reference.
+- A genoset whose required positions were not genotyped is reported as **not
+  testable**, which is a different fact from absent. Conflating those two is how
+  a report tells someone they do not have something it never checked.
+
+### Added: strand reconciliation, the dominant correctness risk
+
+- **`backend/orientation.py`** handles plus and minus orientation and
+  `StabilizedOrientation` semantics.
+- Consumer arrays report the GRCh37 plus strand; Ensembl and dbSNP store many
+  variants on the minus strand. rs1801133 is the canonical case: 23andMe calls it
+  C/T, Ensembl stores G/A. Before this release the frequency lookup silently
+  returned nothing for every such variant, which reads as missing data.
+- **A/T and C/G heterozygotes are irreducibly ambiguous** and are now flagged
+  rather than guessed. 13 of the 122 bundled SNPs are affected.
+
+### Added: population frequency
+
+- **`backend/frequency.py`** with 16 populations from 1000 Genomes Phase 3 via
+  Ensembl, covering 118 of the 122 bundled rsIDs.
+- Genotype frequency per population, observed where available and derived under
+  Hardy-Weinberg otherwise, with the method always reported.
+- A **rarity colour ramp** and coarse bands, plus a strict distinction between
+  `0.0` (not observed in that panel) and `null` (unknown). These are different
+  facts and are rendered differently.
+- A population selector is a **frequency denominator, not ancestry inference**,
+  and says so.
+
+### Added: multi-file pooling, comparison and trio
+
+- **`backend/merge.py`** pools any number of `self` files into one genotype set.
+- **Conflicting calls are both retained and surfaced.** There is no voting, no
+  confidence weighting and no automatic winner, because a disagreement between
+  two arrays is information about reliability that a silent merge destroys.
+- Eight relationship roles, comparison rows per relative, Mendelian violation
+  detection and offspring transmission probability.
+
+### Added: polygenic scores
+
+- **`backend/prs.py`** with seven authored additive models (type 2 diabetes,
+  coronary artery disease, BMI, venous thromboembolism, LDL, homocysteine,
+  inflammation), 42 variant rows, weights as natural-log odds ratios with the
+  source odds ratio recorded per row.
+- Reference means and standard deviations are derived analytically under
+  Hardy-Weinberg and validated to within 1e-6 by `--validate`.
+- A `--from-pgs` mode fetches PGS Catalog scores with a **hard licence gate**
+  that refuses NonCommercial, NoDerivatives and academic-only scores.
+- Every result carries mandatory caveats and is marked unreliable below 90
+  percent variant coverage.
+
+### Added: traits and blood type
+
+- **`backend/traits.py`** with 18 traits and ABO / Rh prediction.
+- Traits are **never** assigned a repute. A trait is not good or bad.
+- Blood type degrades honestly: when the decisive rs8176719 tag is missing or
+  uncalled the answer is "not determinable", never a guess.
+
+### Added: the filter engine and 20 new endpoints
+
+- **`backend/filters.py`** implements server-side filtering, 10 sort keys in both
+  directions, faceting with counts, and the free-text grammar including
+  `chr7:1000-2000` region search and `/CLNSIG=`, `/STARS>=`, `/MAG>=`,
+  `/COUNT>=`, `/flipped`, `/ambiguous` operators.
+- Frequency and publication filters are **exempt for genosets, traits and
+  scores**, which have no single position to have a frequency at.
+- A **null magnitude sorts and filters as 1**, not 0.
+- **`backend/routes_v2.py`** adds 20 endpoints: capabilities, populations,
+  sources CRUD, the v2 scan, filtered findings, facets, genosets, traits, prs,
+  pgx, conflicts, trio, qc, filtered export in three formats and the
+  licence-gated SNPedia admin surface.
+- **`backend/pipeline.py`** orchestrates the scan in the one correct order:
+  merge, annotate, resolve strand, then frequency, then scoring. Strand must
+  precede frequency, and frequency must precede scoring, or the score is
+  computed from the wrong numbers.
+- `docs/API_V2.md` is the authoritative contract for both backend and frontend.
+
+### Added: evidence layer
+
+- **`data/evidence_overlay.py`** adds risk allele, CPIC level, ClinVar review
+  stars, publication count, topics and medicines for 121 of the 122 bundled
+  rsIDs: 115 risk alleles, 46 CPIC assignments of which 24 are Level A.
+- This is what makes the offline reference **carrier-aware** rather than
+  allele-general, closing the limitation the v1.2 README acknowledged.
+- Before it, every finding scored an identical base of 1.0. After it, DPYD \*2A
+  homozygous scores 9.3 and a background trait scores 1.0.
+
+### Fixed
+
+- **rs8176719 `--` read as a homozygous deletion.** `--` is the token 23andMe and
+  AncestryDNA write for a failed probe, and `-` was in the deletion token set.
+  A failed read of the one decisive ABO tag was reported as a confident group O.
+  Now every no-call spelling degrades to unknown with confidence none.
+- **Strand-naive frequency lookup.** Every minus-strand variant returned
+  `unavailable` although the data was present. rs1801133 CEU now returns 41.84
+  percent with `flipped` recorded.
+- **`aggregate_frequency` GLOBAL mode was strand-naive** while MAX, AVG and MIN
+  were not, so GLOBAL returned null exactly where the others returned numbers.
+- **`load_frequencies(path)` did not persist.** Every accessor re-resolved to the
+  module default, so a caller pointing the module at a fixture was silently read
+  back off the bundled file. Added `reset_source()`.
+- **`create_app()` did not initialise the database schema**, so the app only
+  worked when launched through `main()`. Any WSGI host or test client failed with
+  "no such table: profiles".
+- **Two mislabelled genes** in the curated reference: rs1800544 was labelled
+  ADRB3 but is ADRA2A (ADRB3 Trp64Arg is rs4994), and rs30187 was labelled CRP
+  but is an ERAP1 variant. Both now carry a note about the common mislabelling.
+
+- **DATA LOSS: `_resolve_db_path()` deleted the user's database at import time.**
+  The write probe connected to the real database file, created a table inside it,
+  then called `unlink()` on it. Every launch destroyed every stored profile,
+  finding and report. It was intermittent on Windows only because WAL locks
+  sometimes made the unlink fail, which is why it survived to this point. The
+  probe now opens an existing database read-only and verifies it with a
+  `PRAGMA schema_version` round trip, touching nothing; writability is proved
+  against a separate pid-suffixed throwaway file which is the only path ever
+  unlinked. Guarded by `tests/test_database.py` and `_build/vdbloss.py`, which
+  writes a canary profile and asserts it survives both a bare import and a full
+  `create_app()`.
+- **Report filenames collided.** The generated name carried a one-second
+  timestamp, so four reports produced inside the same second shared a single
+  path and report id 1 served report 4's content. `_unique_report_name()` now
+  appends a counter until the path is free, on both the v1 and v2 report routes.
+- **`clinvar_sig_code` matched "pathogenic" inside "pathogenicity".** Records
+  classified "conflicting classifications of pathogenicity" scored as pathogenic
+  and were coloured Bad, sweeping genuinely disputed variants into the default
+  whitelist. The conflicting-record guard now runs before the compound fallback.
+- **`_ensure_contract_keys` omitted 13 contract keys** on genoset, trait and
+  polygenic-score findings, and its None coercion used `setdefault`, which cannot
+  replace an existing None, so the coercion never ran at all.
+- **`build_facets` omitted the documented `clinvar_diseases` bucket.**
+
+### Testing
+
+- 1885 tests passing, up from 138. New suites for scoring, filters,
+  pipeline, orientation, genosets, frequency, prs, merge, traits, snpedia
+  and database path resolution.
+- Verification harnesses under `_build/`: a structural auditor, a Markdown
+  duplicate detector, a repair pass, a pipeline contract check, a filter
+  engine check, an interactive-report check, a static-report check, a
+  frontend contract check, a data-loss canary and a 42-check API sweep.
+- `python _build/golive.py` runs every check above and prints one verdict.
+
+### Known build hazard, documented for future sessions
+
+The MCP file bridge used to author this release **double-applies append-mode
+writes and `edit_block` replacements**: `rewrite(A)` followed by `append(B)`
+lands on disk as `A+B+B`, and a single `edit_block` can insert its replacement
+twice. This silently duplicated seven source files and one Markdown file. Duplicated Python still imports cleanly
+because later definitions shadow earlier ones, so the corruption is invisible at
+runtime and must be detected structurally. `_build/audit.py` detects it and
+`_build/repair.py` reverses it losslessly. Never use append mode against this
+repository from that bridge.
+
 ## [1.2.0] - 2026-07-03
 
 ### Security

@@ -1,0 +1,1242 @@
+{
+  "_meta": {
+    "version": "2.0.0",
+    "genoset_count": 65,
+    "built_at": "2026-07-27T11:49:44Z",
+    "license": "MIT",
+    "note": "Authored for DNAInsight. Not derived from SNPedia."
+  },
+  "genosets": {
+    "dgs001": {
+      "aka": "APOE e2/e2",
+      "criteria": "and(rs429358(T;T), rs7412(T;T))",
+      "magnitude": 4.0,
+      "repute": "",
+      "summary": "You carry two copies of APOE e2, the rarest of the three common APOE forms.",
+      "interpretation": "e2/e2 usually means low LDL cholesterol and the lowest genetic Alzheimer risk of any APOE pair. The trade-off is a small chance of type III hyperlipoproteinaemia, which shows up as high triglycerides and remnant particles rather than high LDL. Ask for a full lipid panel that includes triglycerides rather than LDL alone.",
+      "category": "CARDIO",
+      "silo": "actionable",
+      "topics": [
+        "APOE",
+        "cholesterol",
+        "Alzheimer"
+      ],
+      "medicines": [],
+      "evidence": "OMIM / replicated GWAS"
+    },
+    "dgs002": {
+      "aka": "APOE e2/e3",
+      "criteria": "and(rs429358(T;T), rs7412(C;T))",
+      "magnitude": 2.0,
+      "repute": "Good",
+      "summary": "You carry one APOE e2 and one APOE e3, a combination associated with favourable cholesterol.",
+      "interpretation": "e2/e3 is the most protective common APOE pairing: lower average LDL and slightly lower Alzheimer risk than the e3/e3 majority. No specific action is needed beyond ordinary cardiovascular care, though triglycerides are still worth watching because e2 raises them.",
+      "category": "CARDIO",
+      "silo": "informational",
+      "topics": [
+        "APOE",
+        "cholesterol"
+      ],
+      "medicines": [],
+      "evidence": "replicated GWAS"
+    },
+    "dgs003": {
+      "aka": "APOE e2/e4",
+      "criteria": "and(rs429358(C;T), rs7412(C;T))",
+      "magnitude": 3.0,
+      "repute": "",
+      "summary": "You carry one APOE e2 and one APOE e4, so the two alleles pull your risk in opposite directions.",
+      "interpretation": "e2/e4 combines the triglyceride-raising e2 allele with the Alzheimer-risk and LDL-raising e4 allele, and the net effect is roughly average overall risk with an unusual lipid pattern. Because e4 is present, treat lipid and blood-pressure control as worthwhile, and interpret any single-number cardiovascular risk score with caution.",
+      "category": "CARDIO",
+      "silo": "actionable",
+      "topics": [
+        "APOE",
+        "cholesterol",
+        "Alzheimer"
+      ],
+      "medicines": [],
+      "evidence": "replicated GWAS"
+    },
+    "dgs004": {
+      "aka": "APOE e3/e3",
+      "criteria": "and(rs429358(T;T), rs7412(C;C))",
+      "magnitude": 1.0,
+      "repute": "",
+      "summary": "You carry the most common APOE pairing, e3/e3, which is the population reference.",
+      "interpretation": "e3/e3 is the baseline against which other APOE results are compared, so this result neither raises nor lowers your Alzheimer or lipid risk. Ordinary preventive care applies.",
+      "category": "CARDIO",
+      "silo": "informational",
+      "topics": [
+        "APOE"
+      ],
+      "medicines": [],
+      "evidence": "replicated GWAS"
+    },
+    "dgs005": {
+      "aka": "APOE e3/e4",
+      "criteria": "and(rs429358(C;T), rs7412(C;C))",
+      "magnitude": 4.5,
+      "repute": "Bad",
+      "summary": "You carry one copy of APOE e4, which raises Alzheimer disease and cardiovascular risk.",
+      "interpretation": "A single e4 allele roughly two- to three-fold raises lifetime Alzheimer risk relative to e3/e3 and modestly raises LDL cholesterol. This is a risk factor, not a diagnosis, and most single-e4 carriers never develop dementia. The evidence-supported levers are blood-pressure control, aerobic exercise, sleep quality, hearing correction, and not smoking.",
+      "category": "NEURO",
+      "silo": "actionable",
+      "topics": [
+        "APOE",
+        "Alzheimer",
+        "cholesterol"
+      ],
+      "medicines": [],
+      "evidence": "OMIM / replicated GWAS"
+    },
+    "dgs006": {
+      "aka": "APOE e4/e4",
+      "criteria": "and(rs429358(C;C), rs7412(C;C))",
+      "magnitude": 8.0,
+      "repute": "Bad",
+      "summary": "You carry two copies of APOE e4, the strongest common genetic risk factor for Alzheimer disease.",
+      "interpretation": "e4/e4 carries a substantially higher lifetime Alzheimer risk and an earlier average age of onset than e3/e3, along with higher LDL cholesterol. It is still a probability rather than a certainty. This result is worth discussing with a clinician: it affects anti-amyloid therapy eligibility and ARIA monitoring, and it makes aggressive vascular risk-factor control especially worthwhile. Genetic counselling is reasonable before sharing the result with family.",
+      "category": "NEURO",
+      "silo": "actionable",
+      "topics": [
+        "APOE",
+        "Alzheimer",
+        "cholesterol"
+      ],
+      "medicines": [],
+      "evidence": "OMIM / replicated GWAS"
+    },
+    "dgs007": {
+      "aka": "MTHFR 677TT",
+      "criteria": "rs1801133(A;A)",
+      "magnitude": 3.0,
+      "repute": "Bad",
+      "summary": "You carry two copies of the MTHFR C677T variant, which slows folate activation.",
+      "interpretation": "The enzyme runs at roughly a third of normal speed, so homocysteine can drift upward when folate or B12 intake is low. Ask for a plasma homocysteine measurement; if it is raised, supplement with methylfolate (5-MTHF) rather than plain folic acid, alongside B12 and B6. This variant is common and is not on its own a reason for alarm.",
+      "category": "NEURO",
+      "silo": "actionable",
+      "topics": [
+        "folate",
+        "homocysteine",
+        "methylation"
+      ],
+      "medicines": [],
+      "evidence": "OMIM / replicated GWAS"
+    },
+    "dgs008": {
+      "aka": "MTHFR 1298CC",
+      "criteria": "rs1801131(G;G)",
+      "magnitude": 2.5,
+      "repute": "Bad",
+      "summary": "You carry two copies of the MTHFR A1298C variant, a milder brake on folate metabolism.",
+      "interpretation": "A1298C reduces enzyme activity less than C677T does and rarely raises homocysteine by itself. It matters most when combined with C677T. A single homocysteine measurement is enough to decide whether methylated B-vitamin support is worth taking.",
+      "category": "NEURO",
+      "silo": "informational",
+      "topics": [
+        "folate",
+        "methylation"
+      ],
+      "medicines": [],
+      "evidence": "replicated GWAS"
+    },
+    "dgs009": {
+      "aka": "MTHFR compound heterozygote",
+      "criteria": "and(rs1801133(A;G), rs1801131(G;T))",
+      "magnitude": 3.5,
+      "repute": "Bad",
+      "summary": "You carry one copy each of MTHFR C677T and A1298C, the classic compound heterozygote pattern.",
+      "interpretation": "Carrying one of each variant reduces enzyme activity to roughly the same degree as two copies of C677T, so the two results should be read together rather than separately. Measure homocysteine, and if it is elevated use methylfolate with B12 rather than folic acid. Relevant in pregnancy planning and before any high-dose folate regimen.",
+      "category": "NEURO",
+      "silo": "actionable",
+      "topics": [
+        "folate",
+        "homocysteine",
+        "methylation",
+        "pregnancy"
+      ],
+      "medicines": [],
+      "evidence": "replicated GWAS"
+    },
+    "dgs010": {
+      "aka": "",
+      "criteria": "or(and(rs9923231(T;T), or(rs1799853(T), rs1057910(C), rs28371706(A))), rs1057910(C;C), rs1799853(T;T))",
+      "magnitude": 7.0,
+      "repute": "Bad",
+      "summary": "Your VKORC1 and CYP2C9 genotypes together predict high warfarin sensitivity.",
+      "interpretation": "You have both a low-expression VKORC1 promoter and at least one reduced-function CYP2C9 allele, or two reduced-function CYP2C9 alleles. That combination means a therapeutic INR is reached at a much lower daily dose than average, and a standard 5 mg start carries real bleeding risk. Give this result to the prescriber before the first dose so a genotype-guided algorithm can be used, and expect more frequent INR checks during induction. Direct oral anticoagulants are unaffected.",
+      "category": "PHARM",
+      "silo": "pre_prescription",
+      "topics": [
+        "warfarin",
+        "anticoagulation",
+        "bleeding"
+      ],
+      "medicines": [
+        "warfarin",
+        "acenocoumarol",
+        "phenprocoumon"
+      ],
+      "evidence": "CPIC Level A"
+    },
+    "dgs011": {
+      "aka": "",
+      "criteria": "and(not(dgs010), or(rs9923231(T), rs1799853(T), rs1057910(C), rs28371706(A)))",
+      "magnitude": 4.5,
+      "repute": "Bad",
+      "summary": "You carry one warfarin-sensitivity factor, predicting an intermediate dose requirement.",
+      "interpretation": "A single low-expression VKORC1 allele or a single reduced-function CYP2C9 allele typically shifts the maintenance dose modestly downward rather than dramatically. Genotype-guided dosing still shortens the time spent outside the therapeutic range, so pass the result to the prescriber. Routine INR monitoring during induction remains the safety net.",
+      "category": "PHARM",
+      "silo": "pre_prescription",
+      "topics": [
+        "warfarin",
+        "anticoagulation"
+      ],
+      "medicines": [
+        "warfarin",
+        "acenocoumarol"
+      ],
+      "evidence": "CPIC Level A"
+    },
+    "dgs012": {
+      "aka": "",
+      "criteria": "and(rs9923231(C;C), rs1799853(C;C), rs1057910(A;A), rs28371706(G;G), not(rs2108622(T;T)))",
+      "magnitude": 1.5,
+      "repute": "Good",
+      "summary": "None of the tested VKORC1, CYP2C9 or CYP4F2 warfarin-dose variants are present.",
+      "interpretation": "You carry the reference genotype at every warfarin variant on this panel, so a standard clinical starting dose is appropriate and no genotype-driven reduction is indicated. This does not remove the need for INR monitoring, and rarer CYP2C9 alleles are not covered by this array.",
+      "category": "PHARM",
+      "silo": "pre_prescription",
+      "topics": [
+        "warfarin",
+        "anticoagulation"
+      ],
+      "medicines": [
+        "warfarin"
+      ],
+      "evidence": "CPIC Level A"
+    },
+    "dgs013": {
+      "aka": "CYP4F2 *3/*3",
+      "criteria": "rs2108622(T;T)",
+      "magnitude": 2.5,
+      "repute": "",
+      "summary": "You carry two copies of CYP4F2 *3, which shifts warfarin dose requirement slightly upward.",
+      "interpretation": "CYP4F2 clears vitamin K1, and the *3 allele slows that clearance, leaving more vitamin K available. Homozygotes therefore need a modestly higher warfarin dose, on the order of an extra milligram a day, to reach the same INR. This works in the opposite direction to VKORC1 and CYP2C9 sensitivity, which is why dosing algorithms combine all three rather than reading any one in isolation.",
+      "category": "PHARM",
+      "silo": "pre_prescription",
+      "topics": [
+        "warfarin",
+        "vitamin K"
+      ],
+      "medicines": [
+        "warfarin"
+      ],
+      "evidence": "CPIC Level A"
+    },
+    "dgs014": {
+      "aka": "CYP2C19 poor metaboliser",
+      "criteria": "or(rs4244285(A;A), rs4986893(A;A), rs28399504(G;G), rs41291556(C;C), and(rs4244285(A;G), rs4986893(A;G)), and(rs4244285(A;G), rs28399504(A;G)), and(rs4244285(A;G), rs41291556(C;T)), and(rs4986893(A;G), rs28399504(A;G)), and(rs4986893(A;G), rs41291556(C;T)), and(rs28399504(A;G), rs41291556(C;T)))",
+      "magnitude": 6.5,
+      "repute": "Bad",
+      "summary": "You carry two non-functional CYP2C19 alleles, making you a predicted poor metaboliser.",
+      "interpretation": "With no working copies of the enzyme, drugs that CYP2C19 activates fail and drugs it clears accumulate. Clopidogrel is the headline problem because it is a prodrug that will not be converted, so prasugrel or ticagrelor is preferred where the indication allows. Proton pump inhibitors, escitalopram, sertraline, voriconazole and some tricyclics need lower doses. Tell every prescriber; this is one of the most consequential pharmacogenomic results on the panel.",
+      "category": "PHARM",
+      "silo": "pre_prescription",
+      "topics": [
+        "CYP2C19",
+        "antiplatelet",
+        "PPI",
+        "antidepressant"
+      ],
+      "medicines": [
+        "clopidogrel",
+        "omeprazole",
+        "escitalopram",
+        "voriconazole",
+        "amitriptyline"
+      ],
+      "evidence": "CPIC Level A"
+    },
+    "dgs015": {
+      "aka": "CYP2C19 intermediate metaboliser",
+      "criteria": "and(not(dgs014), or(rs4244285(A), rs4986893(A), rs28399504(G), rs41291556(C)))",
+      "magnitude": 4.5,
+      "repute": "Bad",
+      "summary": "You carry one non-functional CYP2C19 allele, making you a predicted intermediate metaboliser.",
+      "interpretation": "One working copy gives roughly half-normal enzyme activity. Clopidogrel activation is measurably reduced and guidelines favour an alternative antiplatelet after coronary stenting or stroke. Proton pump inhibitor and SSRI exposure runs higher than average, which is often clinically helpful rather than harmful. Worth flagging before antiplatelet or antifungal therapy.",
+      "category": "PHARM",
+      "silo": "pre_prescription",
+      "topics": [
+        "CYP2C19",
+        "antiplatelet",
+        "PPI"
+      ],
+      "medicines": [
+        "clopidogrel",
+        "omeprazole",
+        "escitalopram",
+        "voriconazole"
+      ],
+      "evidence": "CPIC Level A"
+    },
+    "dgs016": {
+      "aka": "CYP2C19 normal metaboliser",
+      "criteria": "and(rs4244285(G;G), rs4986893(G;G), rs28399504(A;A), rs41291556(T;T), rs12248560(C;C))",
+      "magnitude": 1.0,
+      "repute": "Good",
+      "summary": "You carry two fully functional CYP2C19 alleles across every variant tested.",
+      "interpretation": "This is the normal metaboliser phenotype, so standard doses of clopidogrel, proton pump inhibitors, escitalopram and voriconazole are expected to behave as intended. Rarer CYP2C19 alleles are not covered by consumer arrays, so a clinically important discrepancy should still prompt confirmatory testing.",
+      "category": "PHARM",
+      "silo": "pre_prescription",
+      "topics": [
+        "CYP2C19"
+      ],
+      "medicines": [
+        "clopidogrel",
+        "omeprazole"
+      ],
+      "evidence": "CPIC Level A"
+    },
+    "dgs017": {
+      "aka": "CYP2C19 rapid metaboliser",
+      "criteria": "and(rs12248560(C;T), not(rs4244285(A), rs4986893(A), rs28399504(G), rs41291556(C)))",
+      "magnitude": 2.5,
+      "repute": "",
+      "summary": "You carry one CYP2C19 *17 increased-function allele and no loss-of-function alleles.",
+      "interpretation": "The *17 promoter variant raises transcription, so this predicts a rapid metaboliser. Proton pump inhibitors clear faster and may under-treat reflux at standard doses; escitalopram levels run lower than expected. Clopidogrel activation is slightly increased, which marginally raises bleeding risk rather than reducing efficacy.",
+      "category": "PHARM",
+      "silo": "pre_prescription",
+      "topics": [
+        "CYP2C19",
+        "PPI"
+      ],
+      "medicines": [
+        "omeprazole",
+        "escitalopram",
+        "clopidogrel"
+      ],
+      "evidence": "CPIC Level A"
+    },
+    "dgs018": {
+      "aka": "CYP2C19 ultrarapid metaboliser",
+      "criteria": "and(rs12248560(T;T), not(rs4244285(A), rs4986893(A), rs28399504(G), rs41291556(C)))",
+      "magnitude": 3.5,
+      "repute": "",
+      "summary": "You carry two CYP2C19 *17 alleles and no loss-of-function alleles: an ultrarapid metaboliser.",
+      "interpretation": "Two increased-function copies mean CYP2C19 substrates are cleared unusually fast. Proton pump inhibitor failure at standard dose is the most common practical consequence, and rabeprazole or a dose increase is the usual answer. Escitalopram and sertraline may under-perform. Mention this if a reflux or antidepressant regimen appears to be doing nothing.",
+      "category": "PHARM",
+      "silo": "pre_prescription",
+      "topics": [
+        "CYP2C19",
+        "PPI",
+        "antidepressant"
+      ],
+      "medicines": [
+        "omeprazole",
+        "rabeprazole",
+        "escitalopram",
+        "sertraline"
+      ],
+      "evidence": "CPIC Level A"
+    },
+    "dgs019": {
+      "aka": "",
+      "criteria": "or(dgs014, dgs015)",
+      "magnitude": 5.0,
+      "repute": "Bad",
+      "summary": "Your CYP2C19 genotype predicts reduced clopidogrel activation.",
+      "interpretation": "Clopidogrel is inactive until CYP2C19 converts it, so carrying any loss-of-function allele blunts platelet inhibition and raises the rate of stent thrombosis and recurrent ischaemic events. Prasugrel and ticagrelor do not depend on CYP2C19 and are the guideline-preferred substitutes after percutaneous coronary intervention. Do not stop clopidogrel on the strength of this result alone; take it to the cardiologist who prescribed it.",
+      "category": "PHARM",
+      "silo": "pre_prescription",
+      "topics": [
+        "clopidogrel",
+        "antiplatelet",
+        "stent"
+      ],
+      "medicines": [
+        "clopidogrel",
+        "prasugrel",
+        "ticagrelor"
+      ],
+      "evidence": "CPIC Level A"
+    },
+    "dgs020": {
+      "aka": "SLCO1B1 *5/*5",
+      "criteria": "rs4149056(C;C)",
+      "magnitude": 5.0,
+      "repute": "Bad",
+      "summary": "You carry two copies of SLCO1B1 *5, which strongly raises statin muscle-toxicity risk.",
+      "interpretation": "SLCO1B1 pumps statins out of the blood and into the liver. Two reduced-function copies leave several times more drug circulating in muscle, and the risk of myopathy on high-dose simvastatin is substantial. Simvastatin above 20 mg should be avoided; pravastatin, rosuvastatin at low dose, or fluvastatin are better tolerated. Report new muscle aching or dark urine promptly.",
+      "category": "PHARM",
+      "silo": "pre_prescription",
+      "topics": [
+        "statin",
+        "myopathy",
+        "cholesterol"
+      ],
+      "medicines": [
+        "simvastatin",
+        "atorvastatin",
+        "pravastatin",
+        "rosuvastatin"
+      ],
+      "evidence": "CPIC Level A"
+    },
+    "dgs021": {
+      "aka": "",
+      "criteria": "and(rs4149056(C), or(dgs005, dgs006))",
+      "magnitude": 5.5,
+      "repute": "Bad",
+      "summary": "You carry SLCO1B1 *5 together with APOE e4, combining statin intolerance risk with a strong reason to treat.",
+      "interpretation": "This is the awkward combination: APOE e4 raises LDL cholesterol and cardiovascular risk, so lipid lowering is clearly worthwhile, while SLCO1B1 *5 makes the most commonly prescribed statin more likely to cause muscle symptoms. The practical route is a hydrophilic statin such as pravastatin or low-dose rosuvastatin, escalated slowly, with ezetimibe added rather than pushing the statin dose. Do not simply avoid treatment.",
+      "category": "PHARM",
+      "silo": "pre_prescription",
+      "topics": [
+        "statin",
+        "myopathy",
+        "APOE",
+        "cholesterol"
+      ],
+      "medicines": [
+        "pravastatin",
+        "rosuvastatin",
+        "ezetimibe",
+        "simvastatin"
+      ],
+      "evidence": "CPIC Level A"
+    },
+    "dgs022": {
+      "aka": "",
+      "criteria": "and(rs4149056(C), not(dgs005, dgs006))",
+      "magnitude": 4.0,
+      "repute": "Bad",
+      "summary": "You carry SLCO1B1 *5 without an APOE e4 allele.",
+      "interpretation": "Statin exposure in muscle runs higher than average, so muscle aching is more likely, but you lack the extra APOE-driven lipid and vascular risk. If a statin is indicated, start low and prefer pravastatin or rosuvastatin over simvastatin. Creatine kinase measurement is worthwhile if symptoms appear rather than routinely.",
+      "category": "PHARM",
+      "silo": "pre_prescription",
+      "topics": [
+        "statin",
+        "myopathy"
+      ],
+      "medicines": [
+        "simvastatin",
+        "pravastatin",
+        "rosuvastatin"
+      ],
+      "evidence": "CPIC Level A"
+    },
+    "dgs023": {
+      "aka": "",
+      "criteria": "or(rs1142345(C;C), and(rs72549354(T), rs1142345(C)), and(rs72549354(T;T), rs1142345(T)))",
+      "magnitude": 8.0,
+      "repute": "Bad",
+      "summary": "Your TPMT genotype predicts markedly reduced thiopurine methyltransferase activity.",
+      "interpretation": "Thiopurines are broken down by TPMT, and with little or no enzyme the drug accumulates as toxic nucleotides in bone marrow. Conventional azathioprine or mercaptopurine dosing can cause life-threatening neutropenia within weeks. Guidelines call for a drastic dose reduction, often to around a tenth of standard, or an alternative immunosuppressant entirely, with weekly blood counts. This must reach the prescriber before the first tablet.",
+      "category": "PHARM",
+      "silo": "pre_prescription",
+      "topics": [
+        "thiopurine",
+        "myelosuppression",
+        "IBD",
+        "leukaemia"
+      ],
+      "medicines": [
+        "azathioprine",
+        "mercaptopurine",
+        "thioguanine"
+      ],
+      "evidence": "CPIC Level A"
+    },
+    "dgs024": {
+      "aka": "",
+      "criteria": "or(dgs023, rs116855232(T))",
+      "magnitude": 7.0,
+      "repute": "Bad",
+      "summary": "You carry a TPMT or NUDT15 variant that raises thiopurine myelosuppression risk.",
+      "interpretation": "TPMT and NUDT15 sit on independent arms of thiopurine metabolism, and a defect in either produces the same clinical picture of severe, sometimes abrupt bone-marrow suppression. NUDT15 deficiency is the dominant cause in people of East Asian, South Asian and Hispanic ancestry, where TPMT testing alone misses it. Dose reduction plus close blood-count monitoring is required; homozygotes generally need a different drug class.",
+      "category": "PHARM",
+      "silo": "pre_prescription",
+      "topics": [
+        "thiopurine",
+        "NUDT15",
+        "TPMT",
+        "myelosuppression"
+      ],
+      "medicines": [
+        "azathioprine",
+        "mercaptopurine",
+        "thioguanine"
+      ],
+      "evidence": "CPIC Level A"
+    },
+    "dgs025": {
+      "aka": "",
+      "criteria": "or(rs3918290(T;T), rs55886062(C;C), rs67376798(A;A))",
+      "magnitude": 9.0,
+      "repute": "Bad",
+      "summary": "You carry two defective DPYD alleles, predicting near-complete loss of fluoropyrimidine clearance.",
+      "interpretation": "DPD is the enzyme that disposes of about 80 percent of a 5-fluorouracil or capecitabine dose. With essentially no activity, standard chemotherapy dosing is life-threatening and produces severe mucositis, neutropenia and neurotoxicity. Fluoropyrimidines are contraindicated, and an alternative regimen should be chosen. This result belongs in the oncology record before any colorectal, breast or gastric chemotherapy decision.",
+      "category": "PHARM",
+      "silo": "pre_prescription",
+      "topics": [
+        "chemotherapy",
+        "DPYD",
+        "toxicity"
+      ],
+      "medicines": [
+        "fluorouracil",
+        "capecitabine",
+        "tegafur"
+      ],
+      "evidence": "CPIC Level A"
+    },
+    "dgs026": {
+      "aka": "",
+      "criteria": "and(not(dgs025), or(rs3918290(T), rs55886062(C), rs67376798(A)))",
+      "magnitude": 7.0,
+      "repute": "Bad",
+      "summary": "You carry one defective DPYD allele, predicting partial loss of fluoropyrimidine clearance.",
+      "interpretation": "Heterozygotes have roughly half-normal DPD activity and a several-fold higher rate of grade 3 or 4 toxicity on standard 5-FU or capecitabine dosing. Guidelines recommend starting at 25 to 50 percent of the usual dose with escalation guided by tolerance, which preserves efficacy while avoiding the worst reactions. Give this to the oncology team before treatment planning.",
+      "category": "PHARM",
+      "silo": "pre_prescription",
+      "topics": [
+        "chemotherapy",
+        "DPYD",
+        "toxicity"
+      ],
+      "medicines": [
+        "fluorouracil",
+        "capecitabine"
+      ],
+      "evidence": "CPIC Level A"
+    },
+    "dgs027": {
+      "aka": "UGT1A1 poor metaboliser",
+      "criteria": "or(rs887829(T;T), rs4148323(A;A), and(rs887829(C;T), rs4148323(A;G)))",
+      "magnitude": 5.0,
+      "repute": "Bad",
+      "summary": "Your UGT1A1 genotype predicts substantially reduced glucuronidation capacity.",
+      "interpretation": "UGT1A1 attaches sugar groups to bilirubin and to the active irinotecan metabolite so both can be excreted. Two reduced-function copies produce mild lifelong unconjugated hyperbilirubinaemia, the benign pattern usually labelled Gilbert syndrome, and they slow clearance of several drugs. The practical significance is mostly oncological, but it also explains harmless jaundice during fasting or illness.",
+      "category": "PHARM",
+      "silo": "pre_prescription",
+      "topics": [
+        "UGT1A1",
+        "bilirubin",
+        "Gilbert"
+      ],
+      "medicines": [
+        "irinotecan",
+        "atazanavir",
+        "nilotinib"
+      ],
+      "evidence": "CPIC Level A"
+    },
+    "dgs028": {
+      "aka": "",
+      "criteria": "or(dgs027, rs887829(T), rs4148323(A))",
+      "magnitude": 4.5,
+      "repute": "Bad",
+      "summary": "You carry a UGT1A1 reduced-function allele that raises irinotecan neutropenia risk.",
+      "interpretation": "Irinotecan's active metabolite SN-38 is cleared by UGT1A1, so reduced-function carriers reach higher SN-38 exposure and have more grade 3 or 4 neutropenia and diarrhoea on FOLFIRI. Guidelines support a lower irinotecan starting dose in homozygotes, with escalation if tolerated. Bring this to the oncology team; it changes starting dose rather than drug choice.",
+      "category": "PHARM",
+      "silo": "pre_prescription",
+      "topics": [
+        "irinotecan",
+        "neutropenia",
+        "chemotherapy"
+      ],
+      "medicines": [
+        "irinotecan"
+      ],
+      "evidence": "CPIC Level A"
+    },
+    "dgs029": {
+      "aka": "HFE C282Y/C282Y",
+      "criteria": "rs1800562(A;A)",
+      "magnitude": 8.0,
+      "repute": "Bad",
+      "summary": "You carry two copies of HFE C282Y, the classic hereditary haemochromatosis genotype.",
+      "interpretation": "C282Y homozygosity removes the brake on intestinal iron absorption, and iron gradually loads into liver, pancreas, heart and joints. Penetrance is incomplete, and many homozygotes never develop organ damage, but the condition is easy to detect and easy to treat if found early. Ask for serum ferritin and transferrin saturation now; if they are raised, therapeutic phlebotomy is curative for the iron loading. Avoid iron and high-dose vitamin C supplements and inform first-degree relatives, who each have a one-in-four chance of the same genotype.",
+      "category": "METAB",
+      "silo": "actionable",
+      "topics": [
+        "iron",
+        "haemochromatosis",
+        "liver",
+        "ferritin"
+      ],
+      "medicines": [],
+      "evidence": "OMIM"
+    },
+    "dgs030": {
+      "aka": "HFE C282Y/H63D compound heterozygote",
+      "criteria": "and(rs1800562(A;G), rs1799945(C;G))",
+      "magnitude": 4.0,
+      "repute": "Bad",
+      "summary": "You are a compound heterozygote for HFE C282Y and H63D.",
+      "interpretation": "One C282Y plus one H63D allele gives a modest increase in iron absorption. Most people with this combination keep normal iron studies for life, but a minority load iron, particularly alongside alcohol use, fatty liver disease or another liver insult. A one-off ferritin and transferrin saturation measurement settles the question, repeated every few years if either is borderline.",
+      "category": "METAB",
+      "silo": "actionable",
+      "topics": [
+        "iron",
+        "haemochromatosis",
+        "ferritin"
+      ],
+      "medicines": [],
+      "evidence": "OMIM"
+    },
+    "dgs031": {
+      "aka": "HFE H63D/H63D",
+      "criteria": "and(rs1799945(G;G), rs1800562(G;G))",
+      "magnitude": 2.0,
+      "repute": "",
+      "summary": "You carry two copies of HFE H63D and no C282Y allele.",
+      "interpretation": "H63D is a mild variant, and H63D homozygosity is common in many populations without causing clinical iron overload. On its own it is not a reason for surveillance. A single ferritin measurement is reasonable for reassurance, especially if there is unexplained fatigue, joint pain or abnormal liver enzymes.",
+      "category": "METAB",
+      "silo": "informational",
+      "topics": [
+        "iron",
+        "haemochromatosis"
+      ],
+      "medicines": [],
+      "evidence": "OMIM"
+    },
+    "dgs032": {
+      "aka": "Factor V Leiden heterozygote",
+      "criteria": "rs6025(C;T)",
+      "magnitude": 5.0,
+      "repute": "Bad",
+      "summary": "You carry one copy of Factor V Leiden, the most common inherited clotting-risk variant.",
+      "interpretation": "The variant makes factor V resistant to inactivation, so clotting continues longer than it should. Heterozygotes have roughly four to eight times the background risk of deep vein thrombosis, which is still a low absolute risk in ordinary life but climbs during pregnancy, after surgery, on long flights and on combined oestrogen contraception. Discuss contraception choices and surgical clot prophylaxis with a clinician; no treatment is needed while you are well.",
+      "category": "CARDIO",
+      "silo": "actionable",
+      "topics": [
+        "thrombosis",
+        "clotting",
+        "pregnancy",
+        "contraception"
+      ],
+      "medicines": [],
+      "evidence": "OMIM"
+    },
+    "dgs033": {
+      "aka": "Factor V Leiden homozygote",
+      "criteria": "rs6025(T;T)",
+      "magnitude": 8.0,
+      "repute": "Bad",
+      "summary": "You carry two copies of Factor V Leiden.",
+      "interpretation": "Homozygosity raises venous thrombosis risk far more than carrying one copy, into the range where unprovoked clots become genuinely likely over a lifetime. Combined oestrogen contraception is generally avoided, pregnancy warrants haematology input, and any surgery or immobility needs active clot prophylaxis. This result deserves a referral rather than self-management, and first-degree relatives should be told they may be carriers.",
+      "category": "CARDIO",
+      "silo": "actionable",
+      "topics": [
+        "thrombosis",
+        "clotting",
+        "pregnancy",
+        "surgery"
+      ],
+      "medicines": [],
+      "evidence": "OMIM"
+    },
+    "dgs034": {
+      "aka": "Prothrombin G20210A",
+      "criteria": "rs1799963(A)",
+      "magnitude": 4.0,
+      "repute": "Bad",
+      "summary": "You carry the prothrombin G20210A variant.",
+      "interpretation": "This variant raises circulating prothrombin, giving carriers roughly two to three times the background venous thrombosis risk. As with Factor V Leiden the absolute everyday risk stays low, and the variant matters mainly around pregnancy, oestrogen use, surgery and prolonged immobility. Mention it before any of those, and know the warning signs of calf swelling and unexplained breathlessness.",
+      "category": "CARDIO",
+      "silo": "actionable",
+      "topics": [
+        "thrombosis",
+        "clotting",
+        "pregnancy"
+      ],
+      "medicines": [],
+      "evidence": "OMIM"
+    },
+    "dgs035": {
+      "aka": "Factor V Leiden compound",
+      "criteria": "and(rs6025(T), rs1799963(A))",
+      "magnitude": 7.0,
+      "repute": "Bad",
+      "summary": "You carry both Factor V Leiden and prothrombin G20210A.",
+      "interpretation": "The two variants act on different steps of the clotting cascade, and their risks multiply rather than simply add, putting this combination well above either variant alone. Combined oestrogen contraception is best avoided, pregnancy should be managed with haematology involvement, and thromboprophylaxis is warranted for surgery, immobility and long-haul travel. A haematology review is appropriate even without a personal clot history.",
+      "category": "CARDIO",
+      "silo": "actionable",
+      "topics": [
+        "thrombosis",
+        "clotting",
+        "pregnancy",
+        "contraception"
+      ],
+      "medicines": [],
+      "evidence": "OMIM"
+    },
+    "dgs036": {
+      "aka": "Lactase persistence",
+      "criteria": "rs4988235(A)",
+      "magnitude": 1.5,
+      "repute": "Good",
+      "summary": "You carry the lactase persistence allele, so you most likely digest lactose as an adult.",
+      "interpretation": "A single copy of the persistence allele is usually enough to keep lactase switched on after weaning, which is why most people of northern European ancestry drink milk without trouble. If dairy still causes symptoms the cause is more likely a milk protein sensitivity, irritable bowel syndrome or small-intestinal bacterial overgrowth than lactose itself.",
+      "category": "METAB",
+      "silo": "informational",
+      "topics": [
+        "lactose",
+        "dairy",
+        "digestion"
+      ],
+      "medicines": [],
+      "evidence": "OMIM / replicated GWAS"
+    },
+    "dgs037": {
+      "aka": "Lactase non-persistence",
+      "criteria": "rs4988235(G;G)",
+      "magnitude": 2.0,
+      "repute": "",
+      "summary": "You carry two ancestral LCT alleles, the genotype for adult lactase non-persistence.",
+      "interpretation": "Lactase production falls after childhood in this genotype, which is the global majority pattern rather than a disease. Undigested lactose ferments in the colon and causes bloating, wind and loose stools in proportion to the dose. Fermented dairy such as hard cheese and yoghurt is usually well tolerated, and lactase tablets cover occasional exposure. Keep calcium and vitamin D intake up if you cut dairy substantially.",
+      "category": "METAB",
+      "silo": "informational",
+      "topics": [
+        "lactose",
+        "dairy",
+        "digestion",
+        "calcium"
+      ],
+      "medicines": [],
+      "evidence": "OMIM / replicated GWAS"
+    },
+    "dgs038": {
+      "aka": "ALDH2 alcohol flush",
+      "criteria": "rs671(A)",
+      "magnitude": 4.5,
+      "repute": "Bad",
+      "summary": "You carry the ALDH2 variant that causes the alcohol flushing reaction.",
+      "interpretation": "ALDH2 clears acetaldehyde, the first breakdown product of alcohol. The variant enzyme is close to inactive and behaves dominantly, so even one copy causes acetaldehyde to accumulate: facial flushing, a racing heart, nausea and headache after modest drinking. Acetaldehyde is a recognised carcinogen, and carriers who drink regularly have a markedly higher risk of oesophageal and head-and-neck cancer. Reducing or avoiding alcohol is the single most effective response.",
+      "category": "DETOX",
+      "silo": "actionable",
+      "topics": [
+        "alcohol",
+        "acetaldehyde",
+        "cancer risk"
+      ],
+      "medicines": [],
+      "evidence": "OMIM / replicated GWAS"
+    },
+    "dgs039": {
+      "aka": "",
+      "criteria": "and(rs671(A), rs1799807(C))",
+      "magnitude": 5.5,
+      "repute": "Bad",
+      "summary": "You carry the ALDH2 flushing variant together with the alcohol dehydrogenase variant on this panel.",
+      "interpretation": "Acetaldehyde is produced quickly and then cleared slowly, so exposure per drink is higher than with either variant alone. Epidemiological studies of this combination show the steepest alcohol-related risk of upper gastrointestinal cancer. Practical advice is unambiguous: treat alcohol as something to avoid rather than moderate, and take persistent swallowing difficulty or hoarseness seriously.",
+      "category": "DETOX",
+      "silo": "actionable",
+      "topics": [
+        "alcohol",
+        "acetaldehyde",
+        "oesophageal cancer"
+      ],
+      "medicines": [],
+      "evidence": "replicated GWAS"
+    },
+    "dgs040": {
+      "aka": "",
+      "criteria": "atleast(3, rs7903146(T), rs1801282(C;C), rs10811661(T), rs13266634(C), rs5219(T), rs780094(T), rs10830963(G))",
+      "magnitude": 2.5,
+      "repute": "Bad",
+      "summary": "You carry at least three of the seven type 2 diabetes risk variants on this panel.",
+      "interpretation": "Each of these variants nudges insulin secretion, insulin sensitivity or fasting glucose in the wrong direction, and their effects add up. Three or more puts you above average genetic susceptibility, which shifts risk by a modest amount rather than making diabetes inevitable. The response is ordinary but effective: keep an eye on HbA1c every few years, keep weight stable, and do regular resistance and aerobic exercise, which blunts most of this genetic effect.",
+      "category": "METAB",
+      "silo": "actionable",
+      "topics": [
+        "type 2 diabetes",
+        "insulin",
+        "HbA1c",
+        "polygenic"
+      ],
+      "medicines": [],
+      "evidence": "replicated GWAS"
+    },
+    "dgs041": {
+      "aka": "",
+      "criteria": "atleast(5, rs7903146(T), rs1801282(C;C), rs10811661(T), rs13266634(C), rs5219(T), rs780094(T), rs10830963(G))",
+      "magnitude": 4.0,
+      "repute": "Bad",
+      "summary": "You carry at least five of the seven type 2 diabetes risk variants on this panel.",
+      "interpretation": "This is a high common-variant burden, concentrated on beta-cell function rather than obesity, so risk can be raised even at a normal body weight. Annual or biennial HbA1c or fasting glucose is worthwhile from mid-life, and earlier if there is a family history or gestational diabetes. Structured lifestyle intervention has been shown to work at least as well in people with high genetic risk as in those without.",
+      "category": "METAB",
+      "silo": "actionable",
+      "topics": [
+        "type 2 diabetes",
+        "insulin",
+        "HbA1c",
+        "polygenic"
+      ],
+      "medicines": [
+        "metformin"
+      ],
+      "evidence": "replicated GWAS"
+    },
+    "dgs042": {
+      "aka": "",
+      "criteria": "atleast(3, rs9939609(A), rs1421085(C), rs8050136(A), rs17782313(C), rs1137101(G))",
+      "magnitude": 2.5,
+      "repute": "Bad",
+      "summary": "You carry at least three of the FTO, MC4R and leptin-receptor variants associated with higher body weight.",
+      "interpretation": "These variants act mainly through appetite and satiety signalling rather than metabolic rate, so the lived experience is feeling less full after a meal rather than burning fewer calories. Average effect sizes are small, a few kilograms across a population, and they are strongly modifiable. Higher-protein meals, adequate sleep and regular activity reliably reduce the measured effect of the FTO variants in particular.",
+      "category": "METAB",
+      "silo": "informational",
+      "topics": [
+        "obesity",
+        "appetite",
+        "FTO",
+        "MC4R",
+        "polygenic"
+      ],
+      "medicines": [],
+      "evidence": "replicated GWAS"
+    },
+    "dgs043": {
+      "aka": "",
+      "criteria": "atleast(2, rs1333049(C), rs10455872(G), rs6025(T), rs1799983(T))",
+      "magnitude": 3.5,
+      "repute": "Bad",
+      "summary": "You carry at least two of the coronary artery disease risk variants on this panel.",
+      "interpretation": "The 9p21 locus, lipoprotein(a), factor V Leiden and the eNOS variant raise coronary risk through independent mechanisms, so carrying more than one compounds the effect. None of them is deterministic, and conventional risk factors still dominate. Worth acting on: know your blood pressure and lipid numbers, ask whether a lipoprotein(a) measurement is indicated, and treat smoking cessation as the highest-value change available.",
+      "category": "CARDIO",
+      "silo": "actionable",
+      "topics": [
+        "coronary artery disease",
+        "cholesterol",
+        "polygenic"
+      ],
+      "medicines": [],
+      "evidence": "replicated GWAS"
+    },
+    "dgs044": {
+      "aka": "",
+      "criteria": "and(rs10455872(G), dgs043)",
+      "magnitude": 4.5,
+      "repute": "Bad",
+      "summary": "You carry the lipoprotein(a)-raising variant on top of a broader coronary risk burden.",
+      "interpretation": "Lipoprotein(a) is largely genetically fixed, is not lowered by statins or by diet, and is an independent driver of atherosclerosis and aortic valve calcification. Combined with other coronary risk variants it justifies measuring Lp(a) once, since a single result guides lifetime management. If it is high, the response is tighter LDL targets rather than any Lp(a)-specific drug, though targeted agents are in late-stage trials.",
+      "category": "CARDIO",
+      "silo": "actionable",
+      "topics": [
+        "lipoprotein(a)",
+        "coronary artery disease",
+        "aortic valve"
+      ],
+      "medicines": [
+        "statins",
+        "PCSK9 inhibitors"
+      ],
+      "evidence": "replicated GWAS"
+    },
+    "dgs045": {
+      "aka": "",
+      "criteria": "and(rs762551(C;C), rs553664(C;C))",
+      "magnitude": 3.0,
+      "repute": "Bad",
+      "summary": "You are a slow caffeine metaboliser who also carries the caffeine-sensitive adenosine receptor genotype.",
+      "interpretation": "CYP1A2 clears caffeine, and the slow genotype leaves it circulating for many hours; the ADORA2A genotype makes the receptor it acts on more likely to produce jitteriness and anxiety. Together they explain poor sleep from afternoon coffee and unpleasant rather than pleasant stimulation. Keeping intake below roughly 200 mg a day and stopping by early afternoon usually resolves both problems. Slow metabolisers also clear clozapine, olanzapine and theophylline more slowly.",
+      "category": "DETOX",
+      "silo": "actionable",
+      "topics": [
+        "caffeine",
+        "sleep",
+        "anxiety"
+      ],
+      "medicines": [
+        "clozapine",
+        "olanzapine",
+        "theophylline"
+      ],
+      "evidence": "replicated GWAS"
+    },
+    "dgs046": {
+      "aka": "",
+      "criteria": "and(rs4680(A;A), rs6265(T))",
+      "magnitude": 3.0,
+      "repute": "",
+      "summary": "You carry slow COMT together with at least one BDNF Met allele, a stress-sensitive combination.",
+      "interpretation": "Slow COMT leaves more dopamine in the prefrontal cortex, which helps cognition when calm but tips into overload under pressure. The BDNF Met allele reduces activity-dependent release of the growth factor that supports adapting to that pressure. The combination is associated with sharper performance in low-stress conditions and worse performance and mood under sustained stress. Aerobic exercise raises BDNF and is the best-evidenced counterweight.",
+      "category": "NEURO",
+      "silo": "informational",
+      "topics": [
+        "stress",
+        "dopamine",
+        "BDNF",
+        "cognition"
+      ],
+      "medicines": [],
+      "evidence": "replicated candidate-gene studies"
+    },
+    "dgs047": {
+      "aka": "",
+      "criteria": "and(rs4680(G;G), rs6265(C;C))",
+      "magnitude": 2.0,
+      "repute": "Good",
+      "summary": "You carry fast COMT together with two BDNF Val alleles, a stress-resilient combination.",
+      "interpretation": "Fast dopamine clearance plus normal activity-dependent BDNF release is associated with steadier performance under acute stress, at the cost of a slightly lower working-memory ceiling when conditions are calm. This is a trait pattern rather than a health risk, and effect sizes in individuals are small.",
+      "category": "NEURO",
+      "silo": "informational",
+      "topics": [
+        "stress",
+        "dopamine",
+        "BDNF",
+        "resilience"
+      ],
+      "medicines": [],
+      "evidence": "replicated candidate-gene studies"
+    },
+    "dgs048": {
+      "aka": "",
+      "criteria": "and(rs4680(A;A), rs1360780(T))",
+      "magnitude": 2.5,
+      "repute": "",
+      "summary": "You carry slow COMT together with the FKBP5 stress-reactivity variant.",
+      "interpretation": "FKBP5 regulates how quickly the cortisol response switches off, and the risk allele slows that shutdown; slow COMT independently amplifies the catecholamine side of the stress response. Together they are associated with longer physiological recovery after stressors and, in people with significant early-life adversity, higher rates of anxiety and post-traumatic symptoms. This is a susceptibility pattern, not a diagnosis, and it responds to the usual levers of sleep, exercise and trauma-informed therapy where relevant.",
+      "category": "NEURO",
+      "silo": "informational",
+      "topics": [
+        "stress",
+        "cortisol",
+        "HPA axis",
+        "anxiety"
+      ],
+      "medicines": [],
+      "evidence": "replicated candidate-gene studies"
+    },
+    "dgs049": {
+      "aka": "",
+      "criteria": "rs2187668(T)",
+      "magnitude": 4.0,
+      "repute": "Bad",
+      "summary": "You carry the HLA-DQ2.5 tag allele associated with celiac disease susceptibility.",
+      "interpretation": "Almost everyone with celiac disease carries HLA-DQ2 or DQ8, so this marker is the main genetic gate on the condition. Carrying it is common and most carriers never develop celiac disease, but the negative predictive value is what makes the test useful: without it, celiac disease is very unlikely. If you have unexplained anaemia, diarrhoea, weight loss or persistent bloating, ask for tissue transglutaminase IgA testing while still eating gluten, since a pre-emptive gluten-free diet invalidates the result.",
+      "category": "INFLAM",
+      "silo": "actionable",
+      "topics": [
+        "celiac",
+        "HLA",
+        "gluten",
+        "autoimmunity"
+      ],
+      "medicines": [],
+      "evidence": "OMIM / HLA typing"
+    },
+    "dgs050": {
+      "aka": "",
+      "criteria": "and(dgs049, rs231775(G))",
+      "magnitude": 4.0,
+      "repute": "Bad",
+      "summary": "You carry the celiac HLA risk marker together with the CTLA4 autoimmunity variant.",
+      "interpretation": "CTLA4 sets the threshold for T-cell activation, and its risk allele is associated with a cluster of autoimmune conditions including autoimmune thyroid disease, type 1 diabetes and celiac disease. Combined with HLA-DQ2.5 this suggests a general autoimmune predisposition rather than celiac disease specifically. Reasonable action is a low threshold for checking thyroid function and celiac serology if symptoms appear, not routine screening while well.",
+      "category": "INFLAM",
+      "silo": "actionable",
+      "topics": [
+        "celiac",
+        "autoimmunity",
+        "thyroid",
+        "HLA"
+      ],
+      "medicines": [],
+      "evidence": "replicated GWAS"
+    },
+    "dgs051": {
+      "aka": "",
+      "criteria": "atleast(2, rs1051730(A), rs1051740(C), rs1800497(A))",
+      "magnitude": 3.0,
+      "repute": "Bad",
+      "summary": "You carry at least two variants linked to nicotine dependence and reward sensitivity.",
+      "interpretation": "The nicotinic receptor variants in this cluster are among the most reproducible genetic predictors of how heavily someone smokes once they start, and the dopamine receptor variant adds general reward-seeking. This does not make cessation impossible, but it does predict a harder withdrawal and a higher relapse rate on willpower alone. Carriers do measurably better with pharmacotherapy, and varenicline outperforms nicotine replacement in this group.",
+      "category": "NEURO",
+      "silo": "actionable",
+      "topics": [
+        "nicotine",
+        "smoking",
+        "addiction",
+        "reward"
+      ],
+      "medicines": [
+        "varenicline",
+        "bupropion",
+        "nicotine replacement"
+      ],
+      "evidence": "replicated GWAS"
+    },
+    "dgs052": {
+      "aka": "",
+      "criteria": "and(rs1051730(A;A), rs1051740(C))",
+      "magnitude": 3.5,
+      "repute": "Bad",
+      "summary": "You carry the homozygous CHRNA3 risk genotype together with the CHRNA5 variant on this panel.",
+      "interpretation": "This is the heavier end of the nicotinic receptor risk spectrum: on average more cigarettes per day, earlier morning craving, and a higher smoking-attributable lung cancer risk than other smokers with the same pack-year history. The variant has no effect at all in people who never start. If you do smoke, combination pharmacotherapy plus behavioural support is the evidence-based route, and lung cancer screening eligibility is worth checking.",
+      "category": "NEURO",
+      "silo": "actionable",
+      "topics": [
+        "nicotine",
+        "smoking",
+        "lung cancer",
+        "addiction"
+      ],
+      "medicines": [
+        "varenicline",
+        "bupropion"
+      ],
+      "evidence": "replicated GWAS"
+    },
+    "dgs053": {
+      "aka": "",
+      "criteria": "and(or(rs1801133(A), rs1801131(G)), or(rs1805087(G), rs1801394(G)))",
+      "magnitude": 3.0,
+      "repute": "Bad",
+      "summary": "You carry reduced-function variants on both the folate and the B12 arms of the methylation cycle.",
+      "interpretation": "MTHFR supplies the methyl group and MTR with MTRR hand it on using vitamin B12. A variant on only one arm is usually well compensated; variants on both make the pathway more dependent on adequate intake of both nutrients. Check homocysteine and B12 rather than guessing, and if either is off, methylfolate plus methylcobalamin is the sensible combination. High-dose folic acid alone can mask a B12 deficiency and is best avoided here.",
+      "category": "NEURO",
+      "silo": "actionable",
+      "topics": [
+        "folate",
+        "B12",
+        "homocysteine",
+        "methylation"
+      ],
+      "medicines": [],
+      "evidence": "OMIM / replicated GWAS"
+    },
+    "dgs054": {
+      "aka": "",
+      "criteria": "and(rs1801133(A;A), rs601338(A))",
+      "magnitude": 3.5,
+      "repute": "Bad",
+      "summary": "You combine homozygous MTHFR C677T with the FUT2 non-secretor allele.",
+      "interpretation": "Slow folate activation raises the demand for B12-dependent remethylation, while FUT2 non-secretor status is associated with lower B12 absorption and a different gut microbiome. Together they make raised homocysteine more likely than either variant alone. Measure homocysteine and B12 once; if they are abnormal, methylcobalamin taken separately from meals plus methylfolate is the straightforward correction.",
+      "category": "METAB",
+      "silo": "actionable",
+      "topics": [
+        "B12",
+        "folate",
+        "homocysteine",
+        "microbiome"
+      ],
+      "medicines": [],
+      "evidence": "replicated GWAS"
+    },
+    "dgs055": {
+      "aka": "",
+      "criteria": "atleast(2, rs1695(G;G), rs4880(T;T), rs1800566(T))",
+      "magnitude": 2.5,
+      "repute": "Bad",
+      "summary": "You carry at least two reduced-capacity variants in the antioxidant and detoxification enzymes tested.",
+      "interpretation": "GSTP1, SOD2 and NQO1 handle different steps of neutralising reactive oxygen species and quinones. Reduced capacity across more than one of them is associated with greater sensitivity to smoking, air pollution and some occupational exposures rather than with any specific disease. The useful response is exposure reduction and a diet genuinely rich in vegetables, not high-dose antioxidant supplements, which have repeatedly failed in trials.",
+      "category": "DETOX",
+      "silo": "informational",
+      "topics": [
+        "oxidative stress",
+        "detoxification",
+        "pollution"
+      ],
+      "medicines": [],
+      "evidence": "replicated candidate-gene studies"
+    },
+    "dgs056": {
+      "aka": "",
+      "criteria": "rs1050828(T)",
+      "magnitude": 6.0,
+      "repute": "Bad",
+      "summary": "You carry the G6PD A- deficiency allele.",
+      "interpretation": "G6PD protects red cells from oxidative stress, and deficiency means certain drugs and foods can trigger acute haemolysis: rasburicase, dapsone, primaquine and tafenoquine, nitrofurantoin, methylene blue, high-dose aspirin and fava beans are the classic triggers. Because the gene is on the X chromosome, males with one copy are fully affected while females vary. Add G6PD deficiency to your medical record and mention it before antimalarials, urate-lowering therapy for tumour lysis, or treatment for a urinary infection.",
+      "category": "PHARM",
+      "silo": "pre_prescription",
+      "topics": [
+        "G6PD",
+        "haemolysis",
+        "antimalarial"
+      ],
+      "medicines": [
+        "rasburicase",
+        "dapsone",
+        "primaquine",
+        "nitrofurantoin",
+        "methylene blue"
+      ],
+      "evidence": "CPIC Level A"
+    },
+    "dgs057": {
+      "aka": "",
+      "criteria": "and(rs3135506(G), rs780094(T))",
+      "magnitude": 3.0,
+      "repute": "Bad",
+      "summary": "You carry both the APOA5 and GCKR variants associated with higher fasting triglycerides.",
+      "interpretation": "APOA5 slows triglyceride clearance and the GCKR variant pushes the liver toward converting sugar into fat, so the two act in the same direction. Carriers tend toward higher fasting triglycerides and a modestly higher chance of fatty liver, with severe hypertriglyceridaemia and pancreatitis possible at the extreme. Reducing alcohol, refined carbohydrate and fructose has a much larger effect here than reducing dietary fat; omega-3 at pharmacological dose is the usual add-on.",
+      "category": "METAB",
+      "silo": "actionable",
+      "topics": [
+        "triglycerides",
+        "fatty liver",
+        "pancreatitis"
+      ],
+      "medicines": [
+        "omega-3 ethyl esters",
+        "fibrates"
+      ],
+      "evidence": "replicated GWAS"
+    },
+    "dgs058": {
+      "aka": "",
+      "criteria": "and(rs174546(T;T), rs1799883(A))",
+      "magnitude": 2.5,
+      "repute": "",
+      "summary": "You carry the low-conversion FADS1 genotype together with the FABP2 fat-absorption variant.",
+      "interpretation": "FADS1 controls how efficiently plant-derived alpha-linolenic acid becomes EPA and DHA, and the low-activity genotype converts poorly; the FABP2 variant increases absorption of dietary fat. Practically, flaxseed and other plant omega-3 sources will not raise your EPA and DHA much, so oily fish or an algal or fish oil supplement is the more reliable route. Nothing here is harmful in itself.",
+      "category": "METAB",
+      "silo": "informational",
+      "topics": [
+        "omega-3",
+        "EPA",
+        "DHA",
+        "fat absorption"
+      ],
+      "medicines": [
+        "fish oil",
+        "algal DHA"
+      ],
+      "evidence": "replicated GWAS"
+    },
+    "dgs059": {
+      "aka": "",
+      "criteria": "and(rs2228570(T), rs11568818(G))",
+      "magnitude": 2.0,
+      "repute": "",
+      "summary": "You carry two vitamin D receptor variants associated with reduced receptor signalling.",
+      "interpretation": "These variants change how strongly tissues respond to a given blood level of vitamin D rather than how much you make or absorb. Carriers may need a level toward the upper part of the normal range to get the same effect on bone and immune function. Measure 25-hydroxyvitamin D rather than supplementing blind, and re-check after three months on a fixed dose.",
+      "category": "METAB",
+      "silo": "informational",
+      "topics": [
+        "vitamin D",
+        "bone health",
+        "immunity"
+      ],
+      "medicines": [
+        "cholecalciferol"
+      ],
+      "evidence": "replicated candidate-gene studies"
+    },
+    "dgs060": {
+      "aka": "",
+      "criteria": "atleast(3, rs1800795(G;G), rs1800629(A), rs1143627(C), rs1800896(A;A), rs2228145(C))",
+      "magnitude": 3.0,
+      "repute": "Bad",
+      "summary": "You carry at least three variants that shift your inflammatory set-point upward.",
+      "interpretation": "These variants raise pro-inflammatory cytokine output or reduce the anti-inflammatory brake, and carrying several together is associated with a higher baseline hsCRP. Chronic low-grade inflammation is a shared driver of cardiovascular, metabolic and depressive risk, and it is measurable and modifiable. Ask for an hsCRP; if it is raised without an obvious cause, the highest-yield changes are treating sleep apnoea and periodontal disease, regular exercise, and a Mediterranean-pattern diet.",
+      "category": "INFLAM",
+      "silo": "actionable",
+      "topics": [
+        "inflammation",
+        "hsCRP",
+        "cytokines"
+      ],
+      "medicines": [],
+      "evidence": "replicated GWAS"
+    },
+    "dgs061": {
+      "aka": "",
+      "criteria": "and(rs4343(G;G), rs5186(C))",
+      "magnitude": 2.0,
+      "repute": "",
+      "summary": "Your ACE and angiotensin receptor genotypes together describe a renin-angiotensin response profile.",
+      "interpretation": "The ACE genotype is associated with higher circulating enzyme activity and the AGTR1 variant with a more reactive receptor, so this combination is associated with salt-sensitive blood pressure and a good response to drugs that block the pathway. Evidence is not strong enough to choose a drug on genotype alone, but it is a reasonable tiebreaker if an ACE inhibitor or an angiotensin receptor blocker is already under consideration, and it strengthens the case for reducing dietary sodium.",
+      "category": "CARDIO",
+      "silo": "informational",
+      "topics": [
+        "blood pressure",
+        "renin-angiotensin",
+        "sodium"
+      ],
+      "medicines": [
+        "lisinopril",
+        "ramipril",
+        "losartan",
+        "valsartan"
+      ],
+      "evidence": "replicated candidate-gene studies"
+    },
+    "dgs062": {
+      "aka": "",
+      "criteria": "and(rs1801260(C), rs10830963(G))",
+      "magnitude": 2.5,
+      "repute": "Bad",
+      "summary": "You carry an evening-chronotype CLOCK variant together with the MTNR1B glucose variant.",
+      "interpretation": "The MTNR1B variant prolongs melatonin's suppression of insulin release, so eating while melatonin is high produces an exaggerated glucose rise; the CLOCK variant pushes your natural body clock later, which makes late eating more likely. The combination is a genuine gene-behaviour interaction and it is fixable by timing rather than by diet composition: finish the last substantial meal at least three hours before sleep and keep a consistent wake time.",
+      "category": "METAB",
+      "silo": "actionable",
+      "topics": [
+        "circadian rhythm",
+        "glucose",
+        "melatonin",
+        "meal timing"
+      ],
+      "medicines": [],
+      "evidence": "replicated GWAS"
+    },
+    "dgs063": {
+      "aka": "",
+      "criteria": "and(rs1799971(G), or(rs3892097(A), rs1065852(A)))",
+      "magnitude": 3.5,
+      "repute": "Bad",
+      "summary": "You carry the opioid receptor variant together with a reduced-function CYP2D6 allele.",
+      "interpretation": "Codeine and tramadol are prodrugs that CYP2D6 must convert into the active opioid, so a reduced-function allele can leave them ineffective for pain; the opioid receptor variant is separately associated with needing higher doses for the same analgesia. Together they predict poor response to codeine-type analgesics specifically. Morphine, oxycodone and non-opioid options are unaffected by the conversion step. Raise this before elective surgery or dental work.",
+      "category": "PHARM",
+      "silo": "pre_prescription",
+      "topics": [
+        "opioid",
+        "analgesia",
+        "CYP2D6",
+        "surgery"
+      ],
+      "medicines": [
+        "codeine",
+        "tramadol",
+        "morphine",
+        "oxycodone"
+      ],
+      "evidence": "CPIC Level A"
+    },
+    "dgs064": {
+      "aka": "",
+      "criteria": "and(or(dgs032, dgs033), dgs043)",
+      "magnitude": 5.5,
+      "repute": "Bad",
+      "summary": "You carry Factor V Leiden on top of a broader coronary and vascular risk burden.",
+      "interpretation": "Venous and arterial thrombosis have different mechanisms, but carrying a strong venous thrombophilia alongside multiple arterial risk variants raises the overall vascular burden and makes situational risks such as surgery, immobility, oestrogen therapy and pregnancy more consequential. This combination is worth a single consolidated conversation with a clinician covering contraception, perioperative prophylaxis and cardiovascular prevention rather than treating each result separately.",
+      "category": "CARDIO",
+      "silo": "actionable",
+      "topics": [
+        "thrombosis",
+        "coronary artery disease",
+        "surgery"
+      ],
+      "medicines": [],
+      "evidence": "replicated GWAS"
+    },
+    "dgs065": {
+      "aka": "",
+      "criteria": "not(dgs010, dgs014, dgs020, dgs023, dgs025, dgs027, dgs056)",
+      "magnitude": 1.5,
+      "repute": "Good",
+      "summary": "None of the high-impact pharmacogenomic risk genosets on this panel are present.",
+      "interpretation": "You do not carry the tested variants for warfarin hypersensitivity, CYP2C19 poor metabolism, SLCO1B1 statin myopathy, TPMT deficiency, DPYD deficiency, UGT1A1 poor glucuronidation or G6PD deficiency. Standard dosing of the drugs affected by those genes is expected to behave normally. This is reassurance about a specific list, not a clean bill of pharmacogenomic health: consumer arrays miss rare alleles and do not cover CYP2D6 copy number, so clinical judgement still leads.",
+      "category": "PHARM",
+      "silo": "pre_prescription",
+      "topics": [
+        "pharmacogenomics",
+        "drug safety"
+      ],
+      "medicines": [],
+      "evidence": "CPIC Level A"
+    }
+  }
+}

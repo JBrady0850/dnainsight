@@ -17,7 +17,7 @@ import datetime
 from datetime import timezone
 from pathlib import Path
 
-REFERENCE_VERSION = "1.2.0"
+REFERENCE_VERSION = "2.0.0"
 
 # ---------------------------------------------------------------------------
 # Master SNP reference table
@@ -98,7 +98,7 @@ REFERENCE = [
     ("rs1800644",  "ADRB2",   "METAB",  "drug response",  "ADRB2 Arg16Gly: beta-2 receptor variant influencing fat mobilization, asthma medication response, and metabolic rate."),
     ("rs1042713",  "ADRB2",   "PHARM",  "drug response",  "ADRB2 variant: influences response to asthma medications (albuterol, salmeterol) and cardiovascular beta-agonists."),
     ("rs1042714",  "ADRB2",   "PHARM",  "drug response",  "ADRB2 Glu27Gln: affects metabolic rate and exercise-induced fat burning. Common in obesity resistance."),
-    ("rs1800544",  "ADRB3",   "METAB",  "risk factor",    "ADRB3 Trp64Arg variant: associated with abdominal fat storage and reduced basal metabolic rate in some ethnic groups."),
+    ("rs1800544",  "ADRA2A",  "METAB",  "risk factor",    "ADRA2A -1291C>G promoter variant: alpha-2A adrenergic receptor expression, associated with insulin secretion, abdominal fat distribution and basal metabolic rate. Note: this variant is frequently mislabelled as ADRB3 Trp64Arg in consumer reports; ADRB3 Trp64Arg is rs4994, a different variant."),
     ("rs7501331",  "BCMO1",   "METAB",  "risk factor",    "BCMO1 variant: reduced beta-carotene to vitamin A conversion. Increased dietary preformed vitamin A (retinol) may be needed."),
     ("rs601338",   "FUT2",    "METAB",  "risk factor",    "FUT2 secretor status: non-secretors have reduced gut B12 absorption and altered microbiome composition. Monitor B12; consider methylcobalamin supplementation."),
     ("rs1799883",  "FABP2",   "METAB",  "risk factor",    "FABP2 Ala54Thr: Thr allele associated with higher postprandial fat absorption and insulin resistance."),
@@ -128,7 +128,7 @@ REFERENCE = [
     ("rs1800450",  "MBL2",    "INFLAM", "risk factor",    "MBL2 (mannose-binding lectin): innate immune defense variant. Low MBL2 associated with increased infection susceptibility."),
     ("rs4586",     "CCL2",    "INFLAM", "risk factor",    "CCL2 (MCP-1) variant: monocyte chemoattractant protein influencing vessel inflammation and atherosclerosis risk."),
     ("rs2228145",  "IL6R",    "INFLAM", "drug response",  "IL-6 receptor Asp358Ala: reduced IL-6 receptor shedding. Predictive marker for tocilizumab (IL-6 blocker) response in rheumatoid arthritis."),
-    ("rs30187",    "CRP",     "INFLAM", "risk factor",    "CRP variant: baseline systemic inflammation predictor. Elevated values correlate with cardiovascular and metabolic risk."),
+    ("rs30187",    "ERAP1",   "INFLAM", "risk factor",    "ERAP1 Lys528Arg: endoplasmic reticulum aminopeptidase 1, trims peptides for MHC class I presentation. Replicated association with ankylosing spondylitis (in HLA-B27 positive individuals), psoriasis and Behcet disease. Note: this variant is often mislabelled as a CRP variant in consumer reports; it is not in or near CRP."),
     ("rs2187668",  "HLA-DQA1","INFLAM", "risk factor",    "HLA-DQA1 rs2187668 (DQ2.5 haplotype marker): associated with celiac disease susceptibility. HLA-DQ2 haplotype carriers have ~3-5% lifetime celiac risk; risk rises with first-degree relatives affected. Negative result substantially reduces celiac likelihood. If symptomatic: serum tTG-IgA testing and gastroenterology referral recommended."),
 
     # NEUROLOGICAL
@@ -183,16 +183,51 @@ def find_duplicates() -> list[str]:
 
 
 def build_reference() -> dict:
+    """Build the rsID-keyed reference dict, merging in the evidence overlay.
+
+    The curated tuple table supplies gene, category, ClinVar significance word
+    and the plain-English interpretation. evidence_overlay.py supplies the
+    fields the scorer needs in order to rank anything: risk_allele (which makes
+    carrier-aware scoring possible offline), cpic_level, review_stars,
+    publications, topics and medicines.
+
+    Without the overlay every finding scored the same base of 1.0, so a CPIC
+    Level A variant such as DPYD *2A ranked alongside a background trait. The
+    overlay is what makes the magnitude number mean something.
+    """
+    try:
+        from evidence_overlay import get_evidence
+    except ImportError:
+        try:
+            from data.evidence_overlay import get_evidence
+        except ImportError:
+            def get_evidence(_rsid):
+                return {"risk_allele": "", "cpic_level": "", "review_stars": 0,
+                        "publications": 0, "topics": [], "medicines": []}
+
     ref = {}
     for rsid, gene, category, clinical_sig, interpretation in REFERENCE:
-        if rsid not in ref:
-            ref[rsid] = {
-                "gene":          gene,
-                "category":      category,
-                "clinical_sig":  clinical_sig,
-                "interpretation": interpretation,
-                "conditions":    interpretation,
-            }
+        if rsid in ref:
+            continue
+        ev = get_evidence(rsid)
+        # First sentence doubles as the one-line summary the cards show.
+        summary = interpretation.split(". ")[0].strip()
+        if summary and not summary.endswith("."):
+            summary += "."
+        ref[rsid] = {
+            "gene":           gene,
+            "category":       category,
+            "clinical_sig":   clinical_sig,
+            "interpretation": interpretation,
+            "conditions":     interpretation,
+            "summary":        summary,
+            "risk_allele":    ev["risk_allele"],
+            "cpic_level":     ev["cpic_level"],
+            "review_stars":   ev["review_stars"],
+            "publications":   ev["publications"],
+            "topics":         ev["topics"],
+            "medicines":      ev["medicines"],
+        }
     return ref
 
 

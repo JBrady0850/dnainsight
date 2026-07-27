@@ -27,6 +27,12 @@ from backend.database import init_db
 
 
 def create_app() -> Flask:
+    # Ensure the schema exists here rather than only in main(). init_db is
+    # idempotent, and doing it at app-construction time means any WSGI host,
+    # test client or embedded use gets a working database instead of failing on
+    # the first query with "no such table: profiles".
+    init_db()
+
     app = Flask(__name__, static_folder=str(BASE_DIR / "frontend"))
 
     # Global request-size ceiling: Flask/Werkzeug aborts oversized requests
@@ -38,8 +44,17 @@ def create_app() -> Flask:
         mb = MAX_UPLOAD_BYTES // (1024 * 1024)
         return jsonify({"error": f"Upload exceeds the {mb} MB limit."}), 413
 
-    # Register API blueprint
+    # Register API blueprints. v1 first so its behaviour is authoritative for
+    # every path it already owns; v2 adds the new surface described in
+    # docs/API_V2.md without altering any existing endpoint.
     app.register_blueprint(api)
+    try:
+        from backend.routes_v2 import api_v2
+        app.register_blueprint(api_v2)
+    except Exception as exc:  # pragma: no cover
+        # A missing v2 data file must degrade to a working v1 app, never a
+        # server that will not boot.
+        print(f"  WARNING: v2 API unavailable ({exc}). v1 endpoints still active.")
 
     # Serve frontend SPA
     @app.route("/")
@@ -60,9 +75,7 @@ def main():
     parser.add_argument("--host", default="127.0.0.1", help="Host to bind (default: 127.0.0.1)")
     args = parser.parse_args()
 
-    # Initialize database
-    init_db()
-
+    # create_app() initialises the database, so no separate call is needed here.
     app = create_app()
 
     url = f"http://{args.host}:{args.port}"

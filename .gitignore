@@ -4,6 +4,8 @@ dnainsight.db
 dnainsight.db-journal
 *.db
 *.db-journal
+*.db-wal
+*.db-shm
 __pycache__/
 *.pyc
 *.pyo
@@ -22,3 +24,35 @@ desktop.ini
 *.swp
 launch.bat
 launch.sh
+
+# --- v2.0 additions ---
+
+# Developer scratch and verification harnesses. _build/audit.py, repair.py and
+# assemble.py encode the append-fault workaround described in
+# docs/HANDOFF_V2.md; keep a copy if you move them into a committed tools/ dir.
+_build/
+_p_*.txt
+_assemble.py
+_append_probe.txt
+
+# Backups left by _build/repair.py when it collapses a duplicated file.
+*.bak
+
+# Tier 2 full-array reference. Built locally by data/build_full_reference.py
+# from ClinVar, the GWAS Catalog and CPIC. Far too large for GitHub, which
+# rejects files over 100 MB, and it is fully reproducible from the builder.
+data/reference.db
+data/reference.db-wal
+data/reference.db-shm
+data/*.txt.gz
+data/*.tsv.gz
+data/_cache/
+data/_build_freq.log
+
+# The local SNPedia cache must NEVER be committed. SNPedia is
+# CC-BY-NC-SA-3.0-US, so redistributing a harvested copy would relicense this
+# repository. The harvester writes to ~/.dnainsight/ deliberately, outside the
+# tree, but these patterns are a second line of defence.
+snpedia_cache.db
+*snpedia_cache*
+.dnainsight/

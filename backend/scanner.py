@@ -421,6 +421,16 @@ def annotate_bundled(snps: list[dict]) -> list[dict]:
         gene     = entry.get("gene", "")
         category = entry.get("category", "")
 
+        # Carrier awareness offline. The bundled reference now stores the risk
+        # allele on the GRCh37 plus strand, which is the strand consumer arrays
+        # report, so copies can be counted with no flip. This is what turns an
+        # allele-general finding into a carrier-aware one without any network
+        # call, and it is what lets the scorer down-weight a non-carrier instead
+        # of alarming them about a variant they do not have.
+        risk_allele = str(entry.get("risk_allele") or "").strip().upper()
+        copies = (carries_allele(snp["allele1"], snp["allele2"], risk_allele)
+                  if risk_allele else None)
+
         findings.append({
             "rsid":         rsid,
             "gene":         gene,
@@ -433,9 +443,20 @@ def annotate_bundled(snps: list[dict]) -> list[dict]:
             "clinical_sig": entry.get("clinical_sig", "drug response"),
             "conditions":   entry.get("conditions", ""),
             "interpretation": interp,
+            "summary":      entry.get("summary", ""),
             "category":     category,
             "silo":         classify_silo(interp),
             "sources":      ["bundled_reference"],
+            # Evidence fields from data/evidence_overlay.py, merged in at build
+            # time. Absent for a reference built before v2, hence the defaults.
+            "risk_allele":   risk_allele,
+            "variant_allele": risk_allele,
+            "variant_copies": copies,
+            "cpic_level":    entry.get("cpic_level", ""),
+            "review_stars":  entry.get("review_stars", 0),
+            "publications":  entry.get("publications", 0),
+            "topics":        list(entry.get("topics", []) or []),
+            "medicines":     list(entry.get("medicines", []) or []),
         })
 
     return findings

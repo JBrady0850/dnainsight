@@ -266,23 +266,51 @@ def generate_report(pid: int):
     body        = request.get_json(silent=True) or {}
     report_type = body.get("type", "genetic")
 
-    if report_type not in ("genetic", "doctor"):
-        return jsonify({"error": "type must be 'genetic' or 'doctor'"}), 400
+    if report_type not in ("genetic", "doctor", "interactive"):
+        return jsonify({
+            "error": "type must be 'genetic', 'doctor' or 'interactive'"
+        }), 400
 
     findings = db.get_findings(pid)
     if not findings:
         return jsonify({"error": "No findings yet. Run a scan first."}), 400
 
+    # The v1.2 findings table holds only the v1.2 columns, so every v2 field the
+    # upgraded generators render (magnitude, repute, carrier, frequency, strand
+    # flags, provenance) would be absent if these rows were used as they are.
+    # _findings_for returns the richer scan payload when a v2 scan has run, and
+    # scores the database rows when one has not, so both reports get the full
+    # field set either way. A failure here must not fail the report, so it falls
+    # back to the plain rows.
+    extras: dict = {}
+    try:
+        from .routes_v2 import _findings_for
+        rich, extras = _findings_for(pid)
+        if rich:
+            findings = rich
+    except Exception:
+        extras = {}
+
+    # The interactive report is a v2 artifact and needs the richer per-finding
+    # fields, so it is delegated to the v2 blueprint rather than reimplemented
+    # here. Delegating keeps one code path and means the v1 endpoint keeps
+    # working for callers that already POST to it.
+    if report_type == "interactive":
+        from .routes_v2 import interactive_report as _v2_interactive
+        return _v2_interactive(pid)
+
     safe_name = "".join(c for c in profile["name"] if c.isalnum() or c in " _-").strip().replace(" ", "_")
-    from datetime import datetime
-    ts = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
-    filename = f"{safe_name}_{report_type}_report_{ts}.html"
+    # Collision-safe naming. A second-granular timestamp let two reports
+    # generated in the same second share one path, so the second write clobbered
+    # the first and the earlier report id served the later content.
+    from .routes_v2 import _unique_report_name
+    filename = _unique_report_name(safe_name, report_type)
     filepath = REPORTS_DIR / filename
 
     if report_type == "genetic":
-        html = generate_genetic_report(profile, findings)
+        html = generate_genetic_report(profile, findings, extras)
     else:
-        html = generate_doctor_report(profile, findings)
+        html = generate_doctor_report(profile, findings, extras)
 
     with open(filepath, "w", encoding="utf-8") as f:
         f.write(html)
