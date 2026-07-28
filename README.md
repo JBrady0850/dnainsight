@@ -6,6 +6,8 @@ DNAInsight v2.0.0
 ![Genosets](https://img.shields.io/badge/Genosets-65-orange)
 ![Tests](https://img.shields.io/badge/Tests-1929_passing-brightgreen)
 
+![DNAInsight dashboard showing a scanned profile with findings, risk categories and next steps](DNAInsight.png)
+
 Personal DNA analysis that runs entirely on your own computer. Read your raw DNA
 file from any major provider, annotate it against curated clinical evidence,
 explore the results with real filters, and generate reports you can print, keep
