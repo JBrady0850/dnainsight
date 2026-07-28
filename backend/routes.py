@@ -40,10 +40,18 @@ MAX_UPLOAD_BYTES   = 64 * 1024 * 1024
 
 api = Blueprint("api", __name__)
 
-UPLOAD_DIR  = Path(__file__).parent.parent / "uploads"
-REPORTS_DIR = Path(__file__).parent.parent / "reports_output"
-UPLOAD_DIR.mkdir(exist_ok=True)
-REPORTS_DIR.mkdir(exist_ok=True)
+import os as _os
+# See backend/database.py's DNAINSIGHT_DB_PATH override and
+# tools/isolated_db.py for why these exist: every verification harness
+# that boots the real app used to write real files into the real
+# uploads/ and reports_output/ directories, indistinguishable from a
+# user's own data. An explicit override is trusted as given, no probing.
+UPLOAD_DIR  = Path(_os.environ.get("DNAINSIGHT_UPLOAD_DIR")
+                   or Path(__file__).parent.parent / "uploads")
+REPORTS_DIR = Path(_os.environ.get("DNAINSIGHT_REPORTS_DIR")
+                   or Path(__file__).parent.parent / "reports_output")
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+REPORTS_DIR.mkdir(parents=True, exist_ok=True)
 
 
 # Longest filename component this project will ever create. Every mainstream

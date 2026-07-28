@@ -32,11 +32,13 @@ from .routes import _bounded_upload_path
 
 api_v2 = Blueprint("api_v2", __name__)
 
+import os as _os
 BASE = Path(__file__).parent.parent
-UPLOAD_DIR = BASE / "uploads"
-REPORTS_DIR = BASE / "reports_output"
-UPLOAD_DIR.mkdir(exist_ok=True)
-REPORTS_DIR.mkdir(exist_ok=True)
+# Same override as backend/routes.py -- see that file's comment.
+UPLOAD_DIR = Path(_os.environ.get("DNAINSIGHT_UPLOAD_DIR") or BASE / "uploads")
+REPORTS_DIR = Path(_os.environ.get("DNAINSIGHT_REPORTS_DIR") or BASE / "reports_output")
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+REPORTS_DIR.mkdir(parents=True, exist_ok=True)
 
 ALLOWED_EXTENSIONS = {".txt", ".csv", ".tsv"}
 VALID_ROLES = ("self", "mother", "father", "mate", "child", "sibling",

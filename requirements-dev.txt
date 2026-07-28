@@ -3,9 +3,9 @@
 # Install with:
 #     pip install -r requirements.txt -r requirements-dev.txt
 #
-# Not needed to RUN the application. The 1866-test suite, the source-integrity
+# Not needed to RUN the application. The 1929-test suite, the source-integrity
 # auditor and the release gate need only pytest on top of the runtime deps;
-# everything else under _build/ uses the standard library.
+# everything else under tools/ uses the standard library.
 
 -r requirements.txt
 

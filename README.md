@@ -4,7 +4,7 @@ DNAInsight v2.0.0
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Bundled SNPs](https://img.shields.io/badge/Bundled_SNPs-122_curated-orange)
 ![Genosets](https://img.shields.io/badge/Genosets-65-orange)
-![Tests](https://img.shields.io/badge/Tests-1866_passing-brightgreen)
+![Tests](https://img.shields.io/badge/Tests-1929_passing-brightgreen)
 
 Personal DNA analysis that runs entirely on your own computer. Read your raw DNA
 file from any major provider, annotate it against curated clinical evidence,
@@ -33,7 +33,7 @@ it, and is honest about what it cannot establish.
 | Traits and blood type | none | 18 traits plus ABO and RhD, refusing to guess when uncertain |
 | Filtering | search box and a gene dropdown | server-side engine, sliders, facets, 20 sort orders, query grammar |
 | Reports | 2 static | 3, including a self-contained offline interactive report |
-| Tests | 138 | 1866 |
+| Tests | 138 | 1929 |
 
 ---
 
@@ -294,9 +294,9 @@ dnainsight/
 │   └── DATA_SOURCES.md        licence record for every source
 ├── frontend/index.html        the single page app
 ├── docs/
-│   ├── API_V2.md              the authoritative API contract
-│   └── HANDOFF_V2.md          engineering notes and known hazards
-└── tests/                     1866 tests
+│   └── API_V2.md              the authoritative API contract
+├── tests/                     1929 tests
+└── tools/                     release gate and verification harnesses (dev-only)
 ```
 
 ---
@@ -320,16 +320,18 @@ python -m pytest tests -q
 Before opening a pull request, run the full release gate:
 
 ```
-pwsh -File _build/gate2.ps1
+python tools/golive.py
 ```
 
 It rebuilds every derived artifact, audits every source file for duplication,
 runs the module smoke tests, the strand regression, the pipeline contract check,
 the filter engine check, a 42-endpoint API sweep, the interactive report
-verification and the full test suite.
+verification, the GitHub Actions runtime check, the lint gate, a clean-clone CI
+simulation, the harness isolation guard and the full test suite.
 
-`docs/HANDOFF_V2.md` documents the design decisions that should not be quietly
-reversed, and one real tooling hazard worth reading before you edit anything.
+`CONTRIBUTING.md` documents the design decisions that should not be quietly
+reversed and the data-source parsing traps worth reading before you touch the
+reference builders.
 
 ---
 

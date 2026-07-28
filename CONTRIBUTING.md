@@ -96,6 +96,45 @@ grok/           AI analysis prompt
 
 ---
 
+## Architecture Notes
+
+These constraints exist because a fix once made the mistake explicit. Read them before touching the affected code.
+
+### Pipeline stage order
+
+`backend/pipeline.py` runs merge, then bundled and API annotation, then orientation, frequency, snpedia, scoring, then genosets, traits and polygenic scores. Two adjacencies are load-bearing, not stylistic:
+
+- Strand resolution must precede frequency lookup, or minus-strand frequencies silently return `unavailable`.
+- Frequency must precede scoring, or the rarity adjustment has nothing to read and every magnitude flattens toward the default of 1.0.
+
+### Tier 2 reference builder parsing traps
+
+`data/build_full_reference.py` produces the gitignored, locally-built `data/reference.db` from ClinVar, the GWAS Catalog and CPIC. Known traps, verified against the live files:
+
+- The ClinVar rsID column is literally `RS# (dbSNP)`, with a space and a hash.
+- The gene column differs between ClinVar tables: `variant_summary.txt.gz` calls it `GeneSymbol`, `gene_specific_summary.txt` calls it `#Symbol`. The builder resolves every column by name, never by position. `PhenotypeIDS` ends in a capital S.
+- Use `PositionVCF`, not `Start`/`Stop`, which are right-shifted.
+- Filter to `Assembly == "GRCh37"`. `na` and NCBI36 rows exist. A `-1` rsID means no dbSNP mapping.
+- Review status: the docs describe "no classification for the individual variant" but the data emits `single`. Code against the data string; the full mapping is `REVIEW_STATUS_STARS` in `backend/scoring.py`.
+- GWAS `P-VALUE` underflows to 0 for thousands of rows; use `PVALUE_MLOG`. The sign of beta is in the `95% CI (TEXT)` column, not the numeric one.
+- The GWAS Catalog's documented download endpoint has intermittently returned 404 in favour of `gwas-catalog-associations_ontology-annotated-full.zip` on its FTP mirror. The builder tries the documented URL first, then falls through to the FTP mirror, so a restored primary endpoint is picked up automatically.
+- CPIC is CC0 and safe to bundle, but never copy the `clinpgxlevel` or `pgxtesting` columns out of the CPIC dump. They arrive inside a CC0 file, which makes them look safe, but they are PharmGKB-sourced and carry a no-commercial-sale clause. They are excluded at the wire level by `CPIC_SELECT`, not filtered afterward.
+
+### Design decisions that should not be quietly reversed
+
+1. **No SNPedia-derived data or PharmGKB/ClinPGx bulk data ships in this repository.** See the Licensing section of `CHANGELOG.md` for why.
+2. **No `localStorage`, `sessionStorage` or any browser storage API** in the frontend or the interactive report. UI state lives in a plain object.
+3. **No personal genetic data in the repository.** Never commit `uploads/` content or any `.db` file.
+4. **Conflicting pooled calls from multiple DNA files are both retained.** No voting, no winner.
+5. **A missing SNP evaluates false in a genoset**, and the genoset is reported as not testable rather than absent.
+6. **Traits and polygenic scores never get a repute.** A trait is not good or bad.
+7. **Non-carriers are down-weighted and their repute cleared.** A ClinVar classification describes an allele, not a position.
+8. **Palindromic A/T and C/G sites are flagged, not guessed**, and capped at magnitude 2.
+9. **`0.0` frequency and `null` frequency are different facts** and must render differently.
+10. **A null magnitude sorts and filters as 1**, not 0.
+
+---
+
 ## Reporting Bugs
 
 Open a GitHub Issue with:

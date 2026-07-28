@@ -162,7 +162,7 @@ foreclose commercial use of DNAInsight. So:
   probe now opens an existing database read-only and verifies it with a
   `PRAGMA schema_version` round trip, touching nothing; writability is proved
   against a separate pid-suffixed throwaway file which is the only path ever
-  unlinked. Guarded by `tests/test_database.py` and `_build/vdbloss.py`, which
+  unlinked. Guarded by `tests/test_database.py` and `tools/vdbloss.py`, which
   writes a canary profile and asserts it survives both a bare import and a full
   `create_app()`.
 - **Report filenames collided.** The generated name carried a one-second
@@ -182,14 +182,14 @@ foreclose commercial use of DNAInsight. So:
   `actions/setup-python@v5` both bundle Node 20, which GitHub deprecated on
   2025-09-19 and now force-runs on Node 24 while printing a warning on every job.
   Bumped to `actions/checkout@v5` and `actions/setup-python@v6`, the releases that
-  declare Node 24 natively. `_build/vactions.py` now fails the gate on any Node 20
+  declare Node 24 natively. `tools/vactions.py` now fails the gate on any Node 20
   action pin, so this cannot silently return.
 - **The CI lint job would have failed on a clean clone.** The go-live gate ran
   pytest but never ran flake8, so thirteen findings were invisible locally while
   they would have turned the `lint` job red. Cleared all thirteen. Two were real
   defects rather than formatting, and both are listed below. Added
-  `_build/vlint.py`, which runs the lint job's own command, and
-  `_build/vci.py`, which copies exactly the files `git ls-files` would publish
+  `tools/vlint.py`, which runs the lint job's own command, and
+  `tools/vci.py`, which copies exactly the files `git ls-files` would publish
   into a temp tree and runs the workflow's steps there. A green local run proves
   nothing about a fresh clone, because the working tree holds gitignored
   artifacts a clone will not have.
@@ -218,22 +218,39 @@ foreclose commercial use of DNAInsight. So:
   one run was one of their own artifacts. That is what drove the filename growth
   above, and it meant the gate's result depended on how many times it had been
   run: it passed while names were short and failed three stages at once when they
-  were not. Selection now uses `_build/sample.py`, which picks the SHORTEST name.
+  were not. Selection now uses `tools/sample.py`, which picks the SHORTEST name.
   A derived artifact is strictly longer than its source, because derivation only
   prepends, so the shortest name can never be output derived from itself. No
   prefix blacklist is used, because a blacklist stops working the moment someone
   adds a harness and forgets to update it.
+
+- **Verification harnesses wrote into the real database and uploads folder.**
+  `backend/database.py`'s highest-priority DB_PATH candidate, and
+  `backend/routes.py` / `routes_v2.py`'s `UPLOAD_DIR` and `REPORTS_DIR`, are the
+  exact locations the installed app itself uses. Six `tools` harnesses booted
+  the real Flask app to verify endpoints and reports, so they wrote real rows
+  and real files there: `DURABILITY CANARY`, `Report Verify`, `Collision Test`,
+  `Static Report Verify` and `V2 Verify` profiles, plus 99 files in `uploads/`.
+  Nothing distinguishes a harness row from a real one in `list_profiles()`, so
+  these appeared in the app's own UI indistinguishable from user data. Added an
+  explicit `DNAINSIGHT_DB_PATH` / `DNAINSIGHT_UPLOAD_DIR` / `DNAINSIGHT_REPORTS_DIR`
+  environment override, checked before each hardcoded default, and
+  `tools/isolated_db.py`, which every harness now calls before importing `app`
+  to redirect all three to a throwaway per-run directory. `tools/vdbisolation.py`
+  proves it: runs all six harnesses and asserts the real database's row count and
+  mtime, and the real `uploads/` file count, are unchanged. Cleared the harness
+  rows and files already present.
 
 ### Testing
 
 - 1929 tests passing, up from 138. New suites for scoring, filters,
   pipeline, orientation, genosets, frequency, prs, merge, traits, snpedia
   and database path resolution.
-- Verification harnesses under `_build/`: a structural auditor, a Markdown
+- Verification harnesses under `tools/`: a structural auditor, a Markdown
   duplicate detector, a repair pass, a pipeline contract check, a filter
   engine check, an interactive-report check, a static-report check, a
   frontend contract check, a data-loss canary and a 42-check API sweep.
-- `python _build/golive.py` runs every check above and prints one verdict.
+- `python tools/golive.py` runs every check above and prints one verdict.
 
 ### Known build hazard, documented for future sessions
 
@@ -242,9 +259,50 @@ writes and `edit_block` replacements**: `rewrite(A)` followed by `append(B)`
 lands on disk as `A+B+B`, and a single `edit_block` can insert its replacement
 twice. This silently duplicated seven source files and one Markdown file. Duplicated Python still imports cleanly
 because later definitions shadow earlier ones, so the corruption is invisible at
-runtime and must be detected structurally. `_build/audit.py` detects it and
-`_build/repair.py` reverses it losslessly. Never use append mode against this
+runtime and must be detected structurally. `tools/audit.py` detects it and
+`tools/repair.py` reverses it losslessly. Never use append mode against this
 repository from that bridge.
+
+### Repository cleanup for public release
+
+- **`_build/` reorganized into a committed `tools/` directory.** Twenty-six
+  scripts that are permanent regression guards or part of the release gate
+  (`golive.py` and everything it calls, `audit.py` / `repair.py` / `assemble.py`,
+  `isolated_db.py`, `sample.py`) are now tracked source instead of developer
+  scratch. Roughly ninety one-off patch scripts, ad-hoc diagnostics, a separate
+  project's leftover files, and stale logs and backups were deleted rather than
+  moved. `_build/` remains gitignored for future one-off scratch, and `golive.py`
+  gained a new stage that runs `tools/vdbisolation.py`, so a harness that starts
+  writing into the real database or `uploads/` again fails the gate.
+- **`docs/HANDOFF_V2.md` retired.** It was an internal engineering handoff note,
+  not user or contributor documentation, and it pointed at `_build/` paths that
+  no longer exist. Its durable content — pipeline stage ordering, the Tier 2
+  reference builder's parsing traps, and the design decisions that should not be
+  quietly reversed — is now in `CONTRIBUTING.md` under Architecture Notes.
+- **`frontend/index.html.v1-backup` removed.** The v1.2 frontend is preserved in
+  git history; keeping a redundant static copy in the working tree served no
+  purpose once v2 shipped.
+- **Working-directory test artifacts cleared.** `uploads/`, `reports_output/`,
+  and the local `dnainsight.db` are gitignored but accumulate real files across
+  development and gate runs. Cleared all three so the working tree matches what
+  a fresh clone starts with.
+- **The release gate depended on stray leftover files it never created.**
+  Clearing `uploads/` above broke six end-to-end harnesses
+  (`vpipe.py`, `vfilters.py`, `vreport.py`, `vreport2.py`, `vserver.py`,
+  `vreports.py`): each needs a raw-DNA file to POST, and had always silently
+  relied on whatever manually-uploaded file happened to be sitting in
+  `uploads/` from an earlier session. A genuinely fresh clone would fail the
+  same way on its first run. Added `tests/fixtures/sample_23andme.txt`, a
+  synthetic file built from the bundled reference's own rsIDs (no real
+  person's genetic data, so it is safe to track) with a deliberate subset of
+  rsIDs omitted so some multi-SNP genosets stay genuinely not-testable. New
+  `tools/sample.py:ensure_fixture()` seeds it into `uploads/` on first use;
+  every harness that needs an upload now calls it instead of assuming one
+  exists. `tools/vdbisolation.py` also crashed on a missing `dnainsight.db`
+  (it read `list_profiles()` without initialising the schema first); it now
+  calls `init_db()`, which is idempotent, before reading. `tools/vcomplete.py`
+  still required the now-deleted `docs/HANDOFF_V2.md`; its required-files list
+  is updated to match the current tree.
 
 ## [1.2.0] - 2026-07-03
 

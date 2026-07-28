@@ -27,16 +27,21 @@ launch.sh
 
 # --- v2.0 additions ---
 
-# Developer scratch and verification harnesses. _build/audit.py, repair.py and
-# assemble.py encode the append-fault workaround described in
-# docs/HANDOFF_V2.md; keep a copy if you move them into a committed tools/ dir.
+# Developer scratch. Reusable verification harnesses (audit.py, repair.py,
+# assemble.py, golive.py and the rest of the release gate) live in the
+# committed tools/ directory; this stays for one-off scratch and diagnostics.
 _build/
 _p_*.txt
 _assemble.py
 _append_probe.txt
 
-# Backups left by _build/repair.py when it collapses a duplicated file.
+# Backups left by tools/repair.py when it collapses a duplicated file.
 *.bak
+
+# Extracted JS that tools/vfrontend.py and tools/vreport.py regenerate on
+# every run to node --check it; not source, nothing to track.
+tools/app.js
+tools/report_app.js
 
 # Tier 2 full-array reference. Built locally by data/build_full_reference.py
 # from ClinVar, the GWAS Catalog and CPIC. Far too large for GitHub, which

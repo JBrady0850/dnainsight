@@ -169,7 +169,7 @@ COL_REVIEW_STATUS = "ReviewStatus"
 # Accepted spellings per logical field, most-expected first.
 #
 # CORRECTION, VERIFIED AGAINST THE LIVE FILE ON 2026-07-27. The handoff note in
-# the "Tier 2 reference builder" traps list in docs/HANDOFF_V2.md recorded the
+# the "Tier 2 reference builder" traps list in CONTRIBUTING.md recorded the
 # gene column as "#Symbol" before this was checked against the live file. That is
 # true of ClinVar's gene_specific_summary.txt, but variant_summary.txt.gz
 # publishes the gene as "GeneSymbol" in a 43 column header whose only hashed

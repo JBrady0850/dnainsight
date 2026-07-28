@@ -90,6 +90,17 @@ def _resolve_db_path() -> Path:
                 except Exception:
                     pass
 
+    import os as _os
+    _env = _os.environ.get("DNAINSIGHT_DB_PATH")
+    if _env:
+        # An explicit override, used by every tools/ verification harness so it
+        # never resolves to the same file the installed app writes to. Trusted
+        # as given: no candidate probing, because the caller already knows this
+        # path is theirs alone.
+        _p = Path(_env)
+        _p.parent.mkdir(parents=True, exist_ok=True)
+        return _p
+
     candidates = [
         Path(__file__).parent.parent / "dnainsight.db",
         Path.home() / ".dnainsight" / "dnainsight.db",
