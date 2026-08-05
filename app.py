@@ -33,6 +33,21 @@ def create_app() -> Flask:
     # the first query with "no such table: profiles".
     init_db()
 
+    # v3.0 schema. Both are idempotent and additive: they CREATE TABLE IF NOT
+    # EXISTS and never touch a table they did not create. Wrapped defensively
+    # so that a v3 module missing from a partial checkout degrades to a working
+    # v1 and v2 application rather than a server that will not boot.
+    try:
+        from backend.ledger import init_ledger
+        init_ledger()
+    except Exception as exc:  # pragma: no cover
+        print(f"  WARNING: reclassification ledger unavailable ({exc}).")
+    try:
+        from backend.provenance import init_provenance
+        init_provenance()
+    except Exception as exc:  # pragma: no cover
+        print(f"  WARNING: provenance store unavailable ({exc}).")
+
     app = Flask(__name__, static_folder=str(BASE_DIR / "frontend"))
 
     # Global request-size ceiling: Flask/Werkzeug aborts oversized requests
@@ -55,6 +70,13 @@ def create_app() -> Flask:
         # A missing v2 data file must degrade to a working v1 app, never a
         # server that will not boot.
         print(f"  WARNING: v2 API unavailable ({exc}). v1 endpoints still active.")
+    try:
+        from backend.routes_v3 import api_v3
+        app.register_blueprint(api_v3)
+    except Exception as exc:  # pragma: no cover
+        # Same rule one level up. v3 adds ancestry, haplogroups, imputation and
+        # the rest; none of it is required for a working v1 or v2 install.
+        print(f"  WARNING: v3 API unavailable ({exc}). v1 and v2 still active.")
 
     # Serve frontend SPA
     @app.route("/")

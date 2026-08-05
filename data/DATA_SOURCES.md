@@ -3,7 +3,7 @@
 Every external dataset DNAInsight touches, what it is used for, and what may
 legally be done with it. Referenced from `CHANGELOG.md`.
 
-Last reviewed: 2026-07-27.
+Last reviewed: 2026-08-04.
 
 ## The project's position, in one paragraph
 
@@ -33,23 +33,52 @@ good intentions:
    defence for the cache filenames anyway, because one careless `git add -A` is
    all it takes.
 
+v3.0 adds a third rule, which came out of HGDP and is genuinely new:
+
+3. **A consent objection is not answered by accepting a licence.** A dataset can
+   be legally open and still carry an unresolved question about what its
+   participants agreed to. Those sit behind a SECOND opt-in that is separate
+   from the licence gate, because clicking "I accept the terms" does not address
+   an objection that was never about terms. Section 13 is the live case.
+
+Rule 1 is now enforced at runtime as well as at build time.
+`backend/provenance.py` carries `SOURCES`, a machine-readable mirror of this
+document, and `licence_audit()` checks every declared bundled artefact against
+it. `GET /api/v3/licence-audit` returns the result. A document nobody re-reads
+drifts; this one is checked by the application it governs.
+
 ## Summary
 
 | Source | Licence | In repo? | Used for |
 |---|---|---|---|
 | CPIC | CC0-1.0 | Bundled | Pharmacogenomic actionability levels |
+| CPIC allele definition tables | CC0-1.0 | Fetched locally | Star-allele definitions, reconciliation |
 | ClinVar | US public domain | Bundled and fetched | Clinical significance, review stars |
 | gnomAD | CC0-1.0 | Bundled | Population allele frequencies |
 | 1000 Genomes via Ensembl | Open, no restriction | Bundled | Per-population frequencies |
+| 1000 Genomes phase 3 genotypes | Open, no restriction | Fetched locally | Reference panel for ancestry, phasing, imputation |
+| SGDP public tier, 279 samples | Unrestricted | Fetched locally | Reference panel breadth |
+| SGDP restricted tier, 21 samples | Signed agreement, non-commercial | **Never fetched** | Nothing, excluded by construction |
+| HGDP-CEPH | Open, but consent contested | **Second opt-in only** | Optional panel breadth |
+| Allen Ancient DNA Resource | Unread at review time | **Not used** | Nothing |
 | GWAS Catalog | EMBL-EBI terms | Fetched locally | Replicated trait associations |
 | PGS Catalog | EMBL-EBI terms, per-score overrides | Fetched locally, filtered | Polygenic score definitions |
 | MyVariant.info | Apache-2.0 code, mixed data | Live API, not stored | On-demand annotation |
 | SNPedia | CC-BY-NC-SA-3.0-US | **Never bundled**, opt-in only | Optional local enrichment |
 | ClinPGx / PharmGKB | CC-BY-SA-4.0 plus extra clause | **Not used** | Nothing |
+| PhyloTree, ISOGG, YFull | Varies, not assessed | **Not used** | Nothing yet, the verification target |
+| UCSC chain files | Open, UCSC terms | User-supplied | Optional liftover |
+| Local language models via Ollama | Per-model, varies | User-installed | Optional grounded assistant |
 
 "Bundled" means the data, or a derived table, is committed to this repository.
 "Fetched locally" means the user's own machine downloads it into a gitignored
-path at build time.
+path at build time. "User-supplied" means DNAInsight never fetches it at all and
+the user brings their own copy.
+
+External programs are not data and are recorded separately, in
+`docs/EXTERNAL_TOOLS.md`. The rule there is the same rule as here, applied to
+executables: nothing whose licence forbids redistribution or commercial use is
+bundled, and the subprocess boundary is the licence boundary.
 
 ## 1. CPIC
 
@@ -228,9 +257,158 @@ path at build time.
   significance, and FDA drug label tiers for pharmacogenomic labelling. Between
   them the coverage loss is small and the licence position is clean.
 
+## 10. CPIC allele definition tables
+
+- **Name:** CPIC allele definition tables, the star-allele half of the CPIC
+  database
+- **URL:** https://api.cpicpgx.org/v1/ , the `allele_definition` and
+  `allele_location_value` resources
+- **Used for:** `data/build_pgx_alleles.py` builds `data/pgx_alleles.json` and
+  reconciles it against the hand-written allele table in
+  `backend/diplotype.py`. The reconciliation report is embedded in the output.
+- **Licence identifier:** `CC0-1.0`, same as section 1, and the same column
+  caveat applies. `clinpgxlevel` and `pgxtesting` are never requested.
+- **In repo:** No. `data/pgx_alleles.json` is a local build artefact.
+- **Three parsing traps, verified on 2026-08-04:**
+  - **CPIC positions are GRCh38. `backend/diplotype.py` records GRCh37.** The
+    builder therefore compares **bases only and never positions**. Comparing
+    positions across builds would produce a wall of false conflicts and bury the
+    real ones.
+  - **CPIC uses IUPAC ambiguity codes in `variantallele`.** An ambiguity code is
+    never treated as a match. "R matches A" is how a reconciliation tool talks
+    itself into agreement it does not have.
+  - Both sides state the **positive chromosomal strand**, so a base
+    disagreement is a genuine conflict rather than a convention difference. The
+    2026-08-04 run found three. They are recorded in `docs/KNOWN_GAPS.md` and
+    neither file was edited to hide them.
+- **Redistribution constraint:** None. CC0.
+
+## 11. 1000 Genomes phase 3 genotypes, for the reference panel
+
+- **Name:** 1000 Genomes Project phase 3, full genotype callset
+- **URL:** IGSR at https://ftp.1000genomes.ebi.ac.uk/ , and the Beagle-hosted
+  phase 3 v5a distribution at https://bochet.gcc.biostat.washington.edu/beagle/
+- **Used for:** the reference panel behind ancestry, phasing and imputation,
+  built by `data/build_panel.py` into `~/.dnainsight/panels/`.
+- **Licence identifier:** No formal SPDX identifier. **Open with no restriction
+  on use**, per the project's data reuse statement. Commercial use permitted,
+  citation requested.
+- **In repo:** No, and it never will be. The panel is tens of GB and is built on
+  the user's own machine.
+- **The trap that decided the default, verified on 2026-08-04:** the IGSR
+  20130502 release genotype VCFs publish `ID` as `.` for **every record**,
+  confirmed across all 1,103,547 chr22 records. An rsID-keyed feature gets
+  nothing from them, which means `--array-file` matches nothing and
+  `informative_markers.tsv` cannot be written. `build_panel.py` therefore
+  defaults to `--onekg-source beagle`, the same phase 3 v5a callset with IDs
+  populated. `igsr` remains selectable and prints the caveat.
+
+## 12. Simons Genome Diversity Project
+
+- **Name:** SGDP, Simons Genome Diversity Project
+- **URL:** https://reichdata.hms.harvard.edu/pub/datasets/sgdp/
+- **Used for:** population breadth in the reference panel, alongside 1000
+  Genomes.
+- **Licence identifier:** No SPDX identifier. **Two tiers with different terms,
+  and the split is the whole point of this entry.**
+  - The **279-sample public tier is unrestricted** and is what DNAInsight uses.
+  - The **21-sample restricted tier** sits behind a signed agreement whose terms
+    include "I will not use the data for any commercial purposes".
+- **In repo:** No. Fetched into `~/.dnainsight/panels/` at build time.
+- **Redistribution constraint:** **The restricted tier is excluded by
+  construction.** The builder does not fetch it, does not offer a flag to fetch
+  it, and there is no consent path that enables it. A non-commercial term inside
+  a bundled panel is the same failure as a non-commercial term inside `data/`.
+- **Known unverified detail:** the per-sample VCF filename template is
+  **assumed, not verified**, because the Harvard host's certificate chain did not
+  validate at review time. `--sgdp-vcf-template`, `--sgdp-dir` and
+  `--sgdp-metadata` all override it. Recorded in `docs/KNOWN_GAPS.md`.
+
+## 13. HGDP-CEPH
+
+- **Name:** Human Genome Diversity Project, CEPH panel, accessed via IGSR
+- **URL:** https://www.internationalgenome.org/data-portal/data-collection/hgdp
+- **Used for:** optional additional population breadth in the reference panel.
+  Off by default.
+- **Licence identifier:** No SPDX identifier. **Open access under the Fort
+  Lauderdale Principles. The licence is not the problem.**
+- **Why it is gated anyway:** two published events, both recorded with dates so
+  the decision can be re-examined rather than inherited.
+  - **Nature Genetics, 24 November 2025** concluded that broad reuse of HGDP may
+    diverge from what participants consented to.
+  - **The PRIMED Consortium voted on 21 August 2024** to keep permitting its
+    use, while acknowledging "failure to obtain informed consent consistent with
+    current standards from many participants".
+  Those two facts are recorded together because they point in opposite
+  directions and a reader is entitled to both.
+- **In repo:** No, and not in the default panel either.
+- **How it is offered instead:** a **second opt-in**, separate from the licence
+  gate. `data/build_panel.py --include-hgdp` is refused unless
+  `--accept-consent-caveat` is also passed, and `--accept-terms` does not imply
+  it. This is rule 3 in practice: accepting a licence does not answer a consent
+  objection, so the two acknowledgements are not allowed to be the same click.
+
+## 14. Allen Ancient DNA Resource
+
+- **Name:** AADR, Allen Ancient DNA Resource
+- **Used for:** **nothing.** Listed so the exclusion is a recorded decision.
+- **Licence identifier:** Unknown. **The terms were not readable at review time**
+  and the compendium aggregates many datasets, each carrying its own upstream
+  terms.
+- **In repo:** No, and it is not fetchable through any flag.
+- **Why:** an unread licence is not a permissive licence. The honest state is
+  "excluded until read", not "probably fine". If someone reads the terms and the
+  per-dataset terms underneath them, this section can be rewritten with an
+  answer rather than an absence.
+
+## 15. PhyloTree, ISOGG and YFull
+
+- **Name:** PhyloTree mtDNA build, the ISOGG Y-DNA haplogroup tree, YFull YTree
+- **Used for:** **nothing yet, and that is a defect rather than a policy.**
+  `backend/haplogroups.py` ships a backbone tree of 49 Y markers and 28 mtDNA
+  nodes that was written from recall and **not machine-checked against any of
+  these three**. Every Y marker and 11 of the 28 mtDNA nodes are flagged
+  `verified: false`, `unverified_markers()` returns the audit list, and
+  `verified_only=true` refuses them all.
+- **Licence identifier:** Not assessed. Each has its own terms and none has been
+  read against the five questions below.
+- **In repo:** No data from any of them.
+- **What has to happen before they can be used:** answer the questions in
+  "Adding a new source" for each tree, in this file, then verify the backbone
+  row by row and flip each `verified` flag with the source recorded. Until then
+  the haplogroup call ships flagged provisional rather than shipping wrong and
+  silent. See `docs/KNOWN_GAPS.md`.
+
+## 16. UCSC chain files
+
+- **Name:** UCSC liftOver chain files, for example hg38ToHg19.over.chain.gz
+- **URL:** https://hgdownload.soe.ucsc.edu/goldenPath/
+- **Used for:** optional coordinate liftover in `backend/sequencing.py`. The
+  chain parser is DNAInsight's own and is MIT; only the chain data is external.
+- **Licence identifier:** UCSC genome data is free for all uses; the Genome
+  Browser software itself carries a separate licence which DNAInsight does not
+  use or ship.
+- **In repo:** No. **User-supplied.** DNAInsight never downloads a chain file.
+  Drop one into `~/.dnainsight/panels/chains/`.
+- **Behaviour without one:** `liftover()` returns the standard unavailable
+  payload. It does **not** pass coordinates through untranslated, which would
+  produce a file that is wrong at every position while looking converted.
+
+## 17. Local language models via Ollama
+
+- **Name:** whatever model the user pulls, for example `llama3.1:8b`
+- **Used for:** the optional grounded assistant in `backend/assistant.py`.
+- **Licence identifier:** **Per model, and DNAInsight asserts nothing about
+  any of them.** Ollama itself is MIT. Model weights carry their own terms,
+  several of which are neither open source nor commercial-use-clean.
+- **In repo:** No weights, no model files, no prompt caches, nothing.
+- **Redistribution constraint:** falls entirely on the user who pulls the model.
+  DNAInsight sends it finding text and citations over loopback and stores none
+  of its output as a bundled artefact.
+
 ## Adding a new source
 
-Before committing any new dataset, answer all five in writing in this file:
+Before committing any new dataset, answer all six in writing in this file:
 
 1. What is the **exact** licence identifier, and does the accompanying data use
    agreement add terms the identifier does not carry? Section 9 exists because
@@ -242,3 +420,13 @@ Before committing any new dataset, answer all five in writing in this file:
    no, it is a local opt-in fetch, not a bundled file.
 5. Is the derived artefact under 100 MB? If not it is gitignored and rebuilt by a
    script, regardless of licence.
+6. Is there an **objection to reuse that the licence does not settle**, such as
+   a documented consent problem? Sections 12, 13 and 14 exist because of that.
+   A tiered dataset gets only its clean tier, a contested one gets a second
+   opt-in of its own, and one whose terms nobody has read gets excluded until
+   somebody reads them.
+
+Then add it to `SOURCES` in `backend/provenance.py` with the same answers, and
+list any bundled artefact it feeds in `BUNDLED_ARTEFACTS`. An artefact fed by a
+source id that is not in `SOURCES` is a licence audit **violation**, not a
+warning, because an unassessed source is exactly how contamination enters.

@@ -61,3 +61,52 @@ data/_build_freq.log
 snpedia_cache.db
 *snpedia_cache*
 .dnainsight/
+
+# --- v3.0 additions ---
+
+# External tools and reference panels. backend/external.py installs both into
+# ~/.dnainsight/, deliberately outside this tree, so that a GPL-3.0 binary or a
+# non-redistributable panel can never attach its terms to this MIT repository.
+# These patterns exist for the same reason the SNPedia ones above do: the
+# out-of-tree location is the design, and this is the second line of defence
+# for the day somebody runs a builder with the wrong working directory.
+tools_root/
+panels/
+*.vcf.gz
+*.vcf.bgz
+*.bcf
+*.bam
+*.cram
+*.crai
+*.bai
+panel.map
+informative_markers.tsv
+q_columns.tsv
+
+# Reference panel build scratch. data/build_panel.py streams gigabytes through
+# here and the outputs are fully reproducible from the builder.
+data/_panel_scratch/
+data/_panel_build.log
+data/_pgx_build.log
+
+# The CPIC allele table IS committed: it is CC0-1.0 and small. The
+# reconciliation report is not, because it is a build artefact.
+data/pgx_reconciliation.json
+
+# Signed report manifests and the HMAC key that signs them. The key is a local
+# secret: committing it would let anyone forge a manifest that claims to have
+# been produced by this installation.
+#
+# The manifest pattern is SCOPED to the output directory on purpose. An
+# unanchored *_manifest.json also swallowed data/tools_manifest.json, which is
+# CC0 metadata that has to ship: it is the first file a licence auditor reads,
+# and tests/test_builders_v3.py compares it against backend/external.py. A
+# fresh clone would have failed that test with no obvious cause.
+manifest.key
+reports_output/*_manifest.json
+reports_output/*_addendum_*.html
+!data/tools_manifest.json
+
+# Transfer scaffolding. Used once to move a release onto a workstation that has
+# no direct file channel from the build environment. Safe to delete.
+_xfer/

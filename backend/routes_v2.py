@@ -315,6 +315,23 @@ def scan_v2(pid: int):
                     db.upsert_finding(pid, uid, finding)
                 except Exception:
                     continue
+
+            # v3.0: record a ledger snapshot so the next scan can say what
+            # changed FOR THIS PERSON rather than only that the databases moved.
+            # Imported and called defensively: a ledger failure must never turn
+            # a completed scan into a failed one, because the findings are
+            # already written and the user has what they came for.
+            try:
+                from . import ledger as _ledger
+                from . import provenance as _prov
+                _ledger.init_ledger()
+                _ledger.snapshot(pid, result["findings"],
+                                 db_versions=_prov.database_versions(),
+                                 label="scan/v2")
+                _ledger.prune_snapshots(pid)
+            except Exception:
+                pass
+
             with _lock:
                 _scan_progress[pid] = {
                     "running": False, "done": True, "phase": "complete",

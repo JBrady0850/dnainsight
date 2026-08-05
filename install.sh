@@ -60,7 +60,7 @@ echo "[OK] $PYVER detected."
 # STEP 1: Check / Auto-install pip
 # ============================================================
 echo ""
-echo "[1/4] Checking pip..."
+echo "[1/5] Checking pip..."
 
 if ! python3 -m pip --version &>/dev/null; then
     echo "[AUTO] pip not found. Installing..."
@@ -82,7 +82,7 @@ echo "[OK] pip ready."
 # STEP 2: Install Python dependencies
 # ============================================================
 echo ""
-echo "[2/4] Installing Python dependencies..."
+echo "[2/5] Installing Python dependencies..."
 
 # Use --break-system-packages if needed (PEP 668 distros: Ubuntu 23.04+, Debian 12+)
 if python3 -m pip install -r requirements.txt --quiet 2>/dev/null; then
@@ -102,7 +102,7 @@ fi
 # STEP 3: Build bundled SNP reference
 # ============================================================
 echo ""
-echo "[3/4] Building bundled SNP reference database..."
+echo "[3/5] Building bundled SNP reference database..."
 
 mkdir -p data uploads reports_output db
 
@@ -117,7 +117,7 @@ echo "[OK] SNP reference ready."
 # STEP 4: Create launcher script
 # ============================================================
 echo ""
-echo "[4/4] Creating launch script..."
+echo "[4/5] Creating launch script..."
 
 if [ -n "$VENV_PYTHON" ]; then
     cat > launch.sh << EOF
@@ -135,6 +135,40 @@ fi
 
 chmod +x launch.sh
 
+# ============================================================
+# STEP 5: Verify the install
+#
+# An installer that reports success without importing anything is a guess.
+# Three checks, cheap enough to run every time: the backend package imports,
+# the Flask app object actually builds (which is where a missing data file or
+# a broken blueprint really surfaces), and the bundled reference parses.
+# A failure here is worth more than a green banner.
+#
+# set -e is deliberately suspended around this block so the failure is
+# reported with an actionable next step rather than the script vanishing.
+# ============================================================
+echo ""
+echo "[5/5] Verifying install..."
+
+VERIFY_PY="import json, backend; from app import create_app; create_app(); json.load(open('data/snp_reference.json')); print('[OK] DNAInsight v' + backend.APP_VERSION + ' verified.')"
+
+set +e
+if [ -n "$VENV_PYTHON" ]; then
+    $VENV_PYTHON -c "$VERIFY_PY"
+else
+    python3 -c "$VERIFY_PY"
+fi
+VERIFY_STATUS=$?
+set -e
+
+if [ "$VERIFY_STATUS" -ne 0 ]; then
+    echo ""
+    echo "[ERROR] Verification failed. DNAInsight installed but will not start."
+    echo "        Run this to see the full error:"
+    echo "            python3 app.py"
+    exit 1
+fi
+
 echo ""
 echo "============================================================"
 echo "  Installation Complete!"
@@ -147,6 +181,13 @@ echo "Opens in your browser at http://127.0.0.1:5050"
 echo ""
 echo "TIP: Open DNAInsight and use Settings > Database to update"
 echo "     ClinVar annotations monthly for the best results."
+echo ""
+echo "OPTIONAL, v3.0: ancestry, imputation, haplogroup calling and IBD need"
+echo "     separate third-party programs that are NOT installed here. They"
+echo "     carry their own licences, so DNAInsight ships only the adapters"
+echo "     and you install the tools yourself into ~/.dnainsight/tools/."
+echo "     Everything else runs offline with no further downloads."
+echo "     See docs/EXTERNAL_TOOLS.md."
 echo ""
 
 read -r -p "Launch DNAInsight now? (y/N): " LAUNCH

@@ -256,4 +256,19 @@ if __name__ == "__main__":
     }
     with open(out, "w", encoding="utf-8") as f:
         json.dump(payload, f, indent=2)
-    print(f"Built bundled reference v{REFERENCE_VERSION}: {len(ref)} SNPs -> {out}")
+    # Print both versions, because they are different facts and printing only
+    # the first one made a v3.0.0 install announce "Built bundled reference
+    # v2.0.0", which reads like the installer built the wrong release. The
+    # artefact version tracks the DATA, which has not changed since 2.0, and
+    # deliberately does not follow the application version. See the note in
+    # backend/provenance.py: an artefact semver says nothing about which
+    # upstream release is inside it.
+    try:
+        import sys as _sys
+        from pathlib import Path as _Path
+        _sys.path.insert(0, str(_Path(__file__).parent.parent))
+        from backend import APP_VERSION as _app_version
+    except Exception:
+        _app_version = "unknown"
+    print(f"Built bundled reference: {len(ref)} SNPs -> {out}")
+    print(f"  data version {REFERENCE_VERSION}, DNAInsight v{_app_version}")

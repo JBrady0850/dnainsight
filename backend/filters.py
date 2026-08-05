@@ -143,10 +143,11 @@ _REGION_RE = re.compile(
     r"(?::(\d+)(?:\s*([-+])\s*(\d+))?)?$",
     re.IGNORECASE,
 )
-_OP_RE = re.compile(r"/(clnsig|stars|mag|count|freq)\s*(>=|<=|>|<|=)\s*([\d.,]+)",
+_OP_RE = re.compile(r"/(clnsig|stars|mag|count|freq|dr2)\s*(>=|<=|>|<|=)\s*([\d.,]+)",
                     re.IGNORECASE)
-_FLAG_RE = re.compile(r"/(dubious|flipped|ambiguous|conflict|carrier|nocall)",
-                      re.IGNORECASE)
+_FLAG_RE = re.compile(
+    r"/(dubious|flipped|ambiguous|conflict|carrier|nocall|imputed|typed|provisional)",
+    re.IGNORECASE)
 
 
 def parse_query(raw: Any) -> dict:
@@ -223,7 +224,41 @@ def matches_query(finding: dict, parsed: dict) -> bool:
     if "nocall" in flags and finding.get("zygosity") != "no_call":
         return False
 
+    # v3.0 imputation flags.
+    #
+    # /typed must match a finding that carries no "imputed" key at all, because
+    # every v1 and v2 finding predates imputation and every one of them was
+    # typed. Treating a missing key as "unknown" would hide the entire bundled
+    # reference from its own filter.
+    if "imputed" in flags and finding.get("imputed") is not True:
+        return False
+    if "typed" in flags and finding.get("imputed") is True:
+        return False
+    if "provisional" in flags and finding.get("provisional") is not True:
+        return False
+
     for name, (operator, values) in (parsed.get("ops") or {}).items():
+        if name == "dr2":
+            # A finding with no DR2 must never match a DR2 comparison. Treating
+            # a missing DR2 as zero would make /dr2<0.5 return every typed call
+            # in the file, which is the opposite of what the user asked for.
+            actual = _numeric(finding.get("dr2"), None)
+            if actual is None:
+                return False
+            target = parse_float(values[0])
+            if target is None:
+                return False
+            if operator == ">=" and not actual >= target:
+                return False
+            if operator == "<=" and not actual <= target:
+                return False
+            if operator == ">" and not actual > target:
+                return False
+            if operator == "<" and not actual < target:
+                return False
+            if operator == "=" and not abs(actual - target) < 1e-9:
+                return False
+            continue
         if name == "clnsig":
             code = finding.get("clinvar_sig_code")
             wanted = {parse_int(v) for v in values}
