@@ -7,9 +7,14 @@ import sys
 
 TARGET = os.path.join('frontend', 'index.html')
 APPJS = os.path.join('tools', 'app.js')
-EXP_LINES = 2421
-EXP_BYTES = 108961
-EXP_MD5 = 'c9f59788377b6f353debee3f1dfd9ffc'
+# Repinned for v3.0.0. The dashboard capability table was hardcoded to the
+# five v2 subsystems, so a v3 build advertised none of its own work; it now
+# lists all sixteen with three states rather than two. The page title also
+# lost its stale "v2". Any OTHER movement in these three numbers is
+# unreviewed drift and the gate should keep failing on it.
+EXP_LINES = 2447
+EXP_BYTES = 111072
+EXP_MD5 = '68089515dd4d679b0319ae91aab3080c'
 
 fails = []
 infos = []

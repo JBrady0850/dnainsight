@@ -92,6 +92,14 @@ _KEEP = (
     "count", "labels", "conflict", "calls", "comparison", "topics",
     "medicines", "criteria", "matched_rsids", "coverage", "percentile",
     "band", "reliable", "caveats", "partial_coverage", "name",
+    # v3.0. Imputation quality has to survive the trip into the offline report,
+    # because an imputed call that loses its DR2 on the way out is exactly the
+    # opaque number this project refuses to ship. Provenance and conflicts
+    # travel for the same reason: the report is the artefact a clinician holds,
+    # so it is the artefact that has to carry its own evidence.
+    "imputed", "dr2", "imputation_quality_band", "imputation_capped",
+    "magnitude_ceiling", "provenance", "source_ids", "conflicts",
+    "provisional", "residual_risk", "diplotype", "phenotype",
 )
 
 

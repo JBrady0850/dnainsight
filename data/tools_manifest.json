@@ -1,0 +1,389 @@
+{
+  "schema": "dnainsight.tools_manifest/1",
+  "generated_from": "backend/external.py",
+  "generated_for": "DNAInsight v3.0",
+  "project_licence": "MIT",
+  "policy": "DNAInsight is MIT licensed and bundles only CC0 and US public domain data, so the repository stays redistributable and the MIT grant survives for every downstream user, including anyone who sells a service built on it. External tools are never vendored, imported or linked: they are installed by the user into ~/.dnainsight/tools/, outside the repository tree, on explicit consent, and invoked as separate processes across a licence boundary. Reference panels follow the same rule and are built into ~/.dnainsight/panels/. Any tool whose licence forbids redistribution or commercial use is permanently BLOCKED and cannot be installed even on explicit consent; those entries are listed here with a reason and a replacement so the exclusion is a recorded decision rather than an oversight. Licence strings were read at source and each carries the date it was verified. An absent spdx value is itself information: it means the project publishes no machine-readable licence and the terms had to be read by hand.",
+  "offline": "No tool and no panel is contacted over the network by the running application. Installation and panel builds are the user's own actions, performed outside the running application by data/build_panel.py and the documented install steps.",
+  "roots": {
+    "tools": "~/.dnainsight/tools/",
+    "panels": "~/.dnainsight/panels/",
+    "note": "Both are deliberately outside the repository tree, the same pattern backend/snpedia.py uses for its CC-BY-NC-SA cache."
+  },
+  "counts": {
+    "tools": 11,
+    "blocked": 5,
+    "panels": 2
+  },
+  "tools": [
+    {
+      "id": "beagle",
+      "name": "Beagle 5.5",
+      "purpose": "Phasing and genotype imputation",
+      "capability": "imputation",
+      "licence": "GNU General Public License v3.0 or later",
+      "spdx": "GPL-3.0-or-later",
+      "homepage": "https://faculty.washington.edu/browning/beagle/beagle.html",
+      "composable_with_mit": false,
+      "commercial_ok": true,
+      "redistributable": true,
+      "verified": "2026-08-04",
+      "kind": "jar",
+      "requires": [
+        "java"
+      ],
+      "install_to": "~/.dnainsight/tools/beagle",
+      "expected_files": [
+        "beagle.jar",
+        "beagle.27Feb25.75f.jar"
+      ],
+      "notes": "Emits DR2 per variant. DR2 is carried through as a first-class field."
+    },
+    {
+      "id": "cladefinder",
+      "name": "Clade Finder",
+      "purpose": "Y clade determination from positive and negative SNP calls",
+      "capability": "haplogroup_y_second_opinion",
+      "licence": "MIT License",
+      "spdx": "MIT",
+      "homepage": "https://github.com/hprovyn/clade-finder",
+      "composable_with_mit": true,
+      "commercial_ok": true,
+      "redistributable": true,
+      "verified": "2026-08-04",
+      "kind": "python",
+      "requires": [],
+      "install_to": "~/.dnainsight/tools/cladefinder",
+      "expected_files": [
+        "cladefinder",
+        "cladefinder.py"
+      ],
+      "notes": "Used as an independent second opinion against Yleaf."
+    },
+    {
+      "id": "fastmixture",
+      "name": "fastmixture",
+      "purpose": "Global ancestry estimation, supervised and projection modes",
+      "capability": "ancestry_global",
+      "licence": "GNU General Public License v3.0",
+      "spdx": "GPL-3.0-only",
+      "homepage": "https://github.com/Rosemeis/fastmixture",
+      "composable_with_mit": false,
+      "commercial_ok": true,
+      "redistributable": true,
+      "verified": "2026-08-04",
+      "kind": "python",
+      "requires": [],
+      "install_to": "~/.dnainsight/tools/fastmixture",
+      "expected_files": [
+        "fastmixture"
+      ],
+      "notes": "Run in --projection mode against a fixed reference panel, which is the same shape as a DIY admixture calculator without inheriting an unlicensed community model file."
+    },
+    {
+      "id": "flare",
+      "name": "FLARE",
+      "purpose": "Local ancestry inference (per-segment ancestry assignment)",
+      "capability": "ancestry_local",
+      "licence": "Apache License 2.0",
+      "spdx": "Apache-2.0",
+      "homepage": "https://github.com/browning-lab/flare",
+      "composable_with_mit": true,
+      "commercial_ok": true,
+      "redistributable": true,
+      "verified": "2026-08-04",
+      "kind": "jar",
+      "requires": [
+        "java"
+      ],
+      "install_to": "~/.dnainsight/tools/flare",
+      "expected_files": [
+        "flare.jar"
+      ],
+      "notes": "Requires phased study VCF, phased reference VCF, a population map file and a PLINK-format cM genetic map. Preprocess with Beagle."
+    },
+    {
+      "id": "hap_ibd",
+      "name": "hap-ibd",
+      "purpose": "IBD segment detection on phased data",
+      "capability": "ibd_phased",
+      "licence": "Apache License 2.0",
+      "spdx": "Apache-2.0",
+      "homepage": "https://github.com/browning-lab/hap-ibd",
+      "composable_with_mit": true,
+      "commercial_ok": true,
+      "redistributable": true,
+      "verified": "2026-08-04",
+      "kind": "jar",
+      "requires": [
+        "java"
+      ],
+      "install_to": "~/.dnainsight/tools/hap_ibd",
+      "expected_files": [
+        "hap-ibd.jar"
+      ],
+      "notes": "Requires phased VCF with no missing alleles plus a cM map."
+    },
+    {
+      "id": "haplogrep",
+      "name": "HaploGrep 3",
+      "purpose": "mtDNA haplogroup classification against PhyloTree",
+      "capability": "haplogroup_mt",
+      "licence": "MIT License",
+      "spdx": "MIT",
+      "homepage": "https://github.com/genepi/haplogrep3",
+      "composable_with_mit": true,
+      "commercial_ok": true,
+      "redistributable": true,
+      "verified": "2026-08-04",
+      "kind": "binary",
+      "requires": [
+        "java"
+      ],
+      "install_to": "~/.dnainsight/tools/haplogrep",
+      "expected_files": [
+        "haplogrep3",
+        "haplogrep3.exe",
+        "haplogrep3.jar"
+      ],
+      "notes": "Tree catalogue is separate from the binary. Record which tree version produced a call: a haplogroup is meaningless without it."
+    },
+    {
+      "id": "ibis",
+      "name": "IBIS",
+      "purpose": "IBD segment detection without phasing",
+      "capability": "ibd_unphased",
+      "licence": "GNU General Public License v3.0",
+      "spdx": "GPL-3.0-only",
+      "homepage": "https://github.com/williamslab/ibis",
+      "composable_with_mit": false,
+      "commercial_ok": true,
+      "redistributable": true,
+      "verified": "2026-08-04",
+      "kind": "binary",
+      "requires": [],
+      "install_to": "~/.dnainsight/tools/ibis",
+      "expected_files": [
+        "ibis",
+        "ibis.exe"
+      ],
+      "notes": "Phase-free, so it runs on raw array data with no imputation step. That is what makes household IBD possible in Wave 3 rather than Wave 4."
+    },
+    {
+      "id": "ollama",
+      "name": "Ollama",
+      "purpose": "Local language model runtime for the grounded assistant",
+      "capability": "assistant",
+      "licence": "MIT License",
+      "spdx": "MIT",
+      "homepage": "https://ollama.com/",
+      "composable_with_mit": true,
+      "commercial_ok": true,
+      "redistributable": true,
+      "verified": "2026-08-04",
+      "kind": "binary",
+      "requires": [],
+      "install_to": "~/.dnainsight/tools/ollama",
+      "expected_files": [
+        "ollama",
+        "ollama.exe"
+      ],
+      "notes": "Reached over loopback only. Genotypes never leave the process; the assistant sends finding text and citations, never raw calls."
+    },
+    {
+      "id": "samtools",
+      "name": "SAMtools",
+      "purpose": "Targeted pileup extraction from BAM and CRAM alignments",
+      "capability": "sequencing_pileup",
+      "licence": "MIT License",
+      "spdx": "MIT",
+      "homepage": "https://www.htslib.org/",
+      "composable_with_mit": true,
+      "commercial_ok": true,
+      "redistributable": true,
+      "verified": "2026-08-04",
+      "kind": "binary",
+      "requires": [],
+      "install_to": "/root/.dnainsight/tools/samtools",
+      "expected_files": [
+        "samtools",
+        "samtools.exe"
+      ],
+      "notes": "Used for targeted extraction at the reference positions DNAInsight already cares about, never for full variant calling. A 30x BAM is 100 to 200 GB and re-calling it locally would be a different product."
+    },
+    {
+      "id": "shapeit",
+      "name": "SHAPEIT5",
+      "purpose": "Haplotype phasing",
+      "capability": "phasing",
+      "licence": "MIT License",
+      "spdx": "MIT",
+      "homepage": "https://github.com/odelaneau/shapeit",
+      "composable_with_mit": true,
+      "commercial_ok": true,
+      "redistributable": true,
+      "verified": "2026-08-04",
+      "kind": "binary",
+      "requires": [],
+      "install_to": "~/.dnainsight/tools/shapeit",
+      "expected_files": [
+        "phase_common",
+        "phase_rare",
+        "shapeit5"
+      ],
+      "notes": "Alternative to Beagle for the phasing step, and MIT rather than GPL.",
+      "superseded_url": "https://github.com/odelaneau/shapeit5 (disabled by GitHub staff)"
+    },
+    {
+      "id": "yleaf",
+      "name": "Yleaf",
+      "purpose": "Y chromosome haplogroup calling",
+      "capability": "haplogroup_y",
+      "licence": "GNU General Public License v3.0",
+      "spdx": "GPL-3.0-only",
+      "homepage": "https://github.com/genid/Yleaf",
+      "composable_with_mit": false,
+      "commercial_ok": true,
+      "redistributable": true,
+      "verified": "2026-08-04",
+      "kind": "python",
+      "requires": [],
+      "install_to": "~/.dnainsight/tools/yleaf",
+      "expected_files": [
+        "Yleaf",
+        "yleaf"
+      ],
+      "notes": "Chosen over every alternative for one reason: it accepts PLINK and SNP-array input directly, which is the only format a consumer array user actually has. --tree selects YFull, ISOGG or FTDNA."
+    }
+  ],
+  "blocked": [
+    {
+      "id": "admixture",
+      "name": "ADMIXTURE",
+      "purpose": "Global ancestry estimation",
+      "capability": null,
+      "licence": "Academic use only. No LICENSE file exists in the repository; Bioconda labels it 'Free for Academic Use' and the v1.4 manual contains no licence section at all.",
+      "spdx": null,
+      "homepage": null,
+      "composable_with_mit": false,
+      "commercial_ok": false,
+      "redistributable": false,
+      "verified": "2026-08-04",
+      "reason": "Binary-only distribution under academic terms. Shipping it, or instructing users to install it as part of a redistributable product, would attach terms this project cannot honour. Use fastmixture, which is GPL-3.0 and permits commercial use.",
+      "replacement": "fastmixture"
+    },
+    {
+      "id": "diydodecad",
+      "name": "DIYDodecad and the community admixture calculators",
+      "purpose": "Admixture estimation using Eurogenes, Dodecad, MDLP and HarappaWorld model files",
+      "capability": null,
+      "licence": "DIYDodecad is published free of charge for non-commercial use. The Eurogenes, MDLP and HarappaWorld model files publish no licence at all.",
+      "spdx": null,
+      "homepage": null,
+      "composable_with_mit": false,
+      "commercial_ok": false,
+      "redistributable": false,
+      "verified": "2026-08-04",
+      "reason": "The stevenliuyi/admix runner is GPL-3.0, but its author states plainly that the model files are the property of their authors and are not covered by that licence. Unlicensed is not permissive. Build the panel from 1000 Genomes and the public SGDP tier instead, where the terms are actually known.",
+      "replacement": "panel:onekg_sgdp"
+    },
+    {
+      "id": "rfmix",
+      "name": "RFMix v2",
+      "purpose": "Local ancestry inference",
+      "capability": null,
+      "licence": "Academic research use only. Commercial users must contact Stanford's Office of Technology Licensing.",
+      "spdx": null,
+      "homepage": null,
+      "composable_with_mit": false,
+      "commercial_ok": false,
+      "redistributable": false,
+      "verified": "2026-08-04",
+      "reason": "Explicit academic-only grant. Use FLARE, which is Apache-2.0 and carries no such restriction.",
+      "replacement": "flare"
+    },
+    {
+      "id": "yallhap",
+      "name": "yallHap",
+      "purpose": "Y haplogroup calling",
+      "capability": null,
+      "licence": "PolyForm Noncommercial License 1.0.0",
+      "spdx": "PolyForm-Noncommercial-1.0.0",
+      "homepage": null,
+      "composable_with_mit": false,
+      "commercial_ok": false,
+      "redistributable": false,
+      "verified": "2026-08-04",
+      "reason": "Non-commercial. Same reasoning as yhaplo. Use Yleaf.",
+      "replacement": "yleaf"
+    },
+    {
+      "id": "yhaplo",
+      "name": "yhaplo",
+      "purpose": "Y haplogroup calling",
+      "capability": null,
+      "licence": "Non-commercial use only, per LICENSE.txt in the 23andMe repository. ISOGG independently describes it as free for non-commercial use.",
+      "spdx": null,
+      "homepage": null,
+      "composable_with_mit": false,
+      "commercial_ok": false,
+      "redistributable": false,
+      "verified": "2026-08-04",
+      "reason": "A non-commercial term would strip the right to sell anything built on DNAInsight, which is exactly the outcome the SNPedia exclusion exists to prevent. Use Yleaf.",
+      "replacement": "yleaf"
+    }
+  ],
+  "panels": [
+    {
+      "id": "hgdp_optional",
+      "name": "HGDP-CEPH, optional second opt-in",
+      "purpose": "Broader population coverage for global ancestry",
+      "capability": null,
+      "licence": "Open access via IGSR under Fort Lauderdale Principles.",
+      "spdx": null,
+      "homepage": null,
+      "composable_with_mit": null,
+      "commercial_ok": true,
+      "redistributable": null,
+      "verified": "2026-08-04",
+      "kind": "data",
+      "build_to": "~/.dnainsight/panels/hgdp_optional",
+      "files": [
+        "hgdp.vcf.gz",
+        "hgdp_populations.tsv"
+      ],
+      "builder": "data/build_panel.py",
+      "ethics_gate": true,
+      "excluded": {},
+      "notes": "Requires a separate acknowledgement beyond the licence gate, because the objection to HGDP is a consent objection and not a licence objection. Accepting the licence does not answer it."
+    },
+    {
+      "id": "onekg_sgdp",
+      "name": "1000 Genomes phase 3 plus the public SGDP tier",
+      "purpose": "Reference panel for global ancestry, phasing and imputation",
+      "capability": null,
+      "licence": "1000 Genomes is open with no restriction on use, distributed via IGSR under EMBL-EBI terms; citation requested. The 279-sample public tier of the Simons Genome Diversity Project is unrestricted.",
+      "spdx": null,
+      "homepage": null,
+      "composable_with_mit": null,
+      "commercial_ok": true,
+      "redistributable": null,
+      "verified": "2026-08-04",
+      "kind": "data",
+      "build_to": "~/.dnainsight/panels/onekg_sgdp",
+      "files": [
+        "panel.vcf.gz",
+        "panel.map",
+        "populations.tsv"
+      ],
+      "builder": "data/build_panel.py",
+      "ethics_gate": false,
+      "excluded": {
+        "sgdp_restricted": "The 21-sample restricted SGDP tier sits behind a signed agreement whose terms include 'I will not use the data for any commercial purposes'. It is excluded by construction and the builder refuses to fetch it.",
+        "hgdp": "HGDP is legally open but ethically contested. Nature Genetics, 24 November 2025, concluded broad reuse may diverge from what participants consented to. The PRIMED Consortium voted on 21 August 2024 to keep permitting it while acknowledging 'failure to obtain informed consent consistent with current standards from many participants'. Available only behind an explicit second opt-in, never by default.",
+        "aadr": "Allen Ancient DNA Resource terms were not readable at review time and the compendium aggregates datasets each carrying their own upstream terms. Excluded until read."
+      },
+      "notes": "Reference panels are ancestry-biased. Non-European ancestries are under-represented in every openly licensed panel that exists, so every result derived from this panel carries a coverage figure and the UI states the limitation rather than hiding it."
+    }
+  ]
+}

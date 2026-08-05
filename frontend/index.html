@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DNAInsight v2, Personal DNA Analysis</title>
+<title>DNAInsight, Personal DNA Analysis</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 <style>
   :root {
@@ -993,18 +993,44 @@ async function renderHome(main) {
     '<div class="card"><h2 style="margin-top:0">What this build can do</h2>' +
       '<div id="caps-list"></div></div>';
 
+  /* Three states, not two.
+   *
+   * "not built" and "needs a separate tool" are different problems with
+   * different fixes, and collapsing them would tell a user to run a builder
+   * that does not exist for that feature. The distinction is the same one the
+   * genoset engine draws between a rule that was checked and found absent and
+   * a rule that was never testable, so the interface should draw it too.
+   *
+   * The fourth element is the kind: 'built' means DNAInsight ships it, 'tool'
+   * means it needs a third-party program you install yourself under a separate
+   * licence. See docs/EXTERNAL_TOOLS.md.
+   */
   const caps = [
-    ['frequency', 'Population frequency', 'How common your exact genotype is, in 16 populations'],
-    ['genosets', 'Genosets', 'Rules that combine several positions, such as the APOE pairs'],
-    ['traits', 'Traits and blood type', 'Well established trait calls, reported honestly when uncertain'],
-    ['prs', 'Polygenic risk scores', 'Additive scores with mandatory caveats'],
-    ['snpedia', 'Local SNPedia cache', 'Optional, you fetch it yourself, never bundled here'],
+    ['frequency', 'Population frequency', 'How common your exact genotype is, in 16 populations', 'built'],
+    ['genosets', 'Genosets', 'Rules that combine several positions, such as the APOE pairs', 'built'],
+    ['traits', 'Traits and blood type', 'Well established trait calls, reported honestly when uncertain', 'built'],
+    ['prs', 'Polygenic risk scores', 'Additive scores with mandatory caveats', 'built'],
+    ['sequencing', 'Sequencing ingest', 'VCF, gVCF, BAM and CRAM, with the genome build checked not guessed', 'built'],
+    ['diplotype', 'Star allele diplotypes', 'CPIC phenotypes, with the array blind spots stated plainly', 'built'],
+    ['carrier', 'Carrier screening', 'Reports the residual risk the tested variants leave behind', 'built'],
+    ['ledger', 'Reclassification ledger', 'What changed for you since your last scan, not just in the databases', 'built'],
+    ['provenance', 'Signed report manifest', 'Every database version behind a report, verifiable months later', 'built'],
+    ['snpedia', 'Local SNPedia cache', 'Optional, you fetch it yourself, never bundled here', 'built'],
+    ['tool_ancestry_global', 'Ancestry and admixture', 'Needs fastmixture plus a reference panel you build', 'tool'],
+    ['tool_haplogroup_y', 'Y-DNA haplogroup', 'Needs Yleaf. Your array resolution ceiling is reported either way', 'tool'],
+    ['tool_haplogroup_mt', 'mtDNA haplogroup', 'Needs HaploGrep 3', 'tool'],
+    ['tool_imputation', 'Imputation', 'Needs Beagle. Every imputed call carries its own DR2 quality', 'tool'],
+    ['tool_ibd_unphased', 'Household relatedness', 'Needs IBIS. Compares only the DNA files you load here', 'tool'],
+    ['tool_assistant', 'Local assistant', 'Needs Ollama. Answers only from your findings, on your machine', 'tool'],
   ];
-  el('caps-list').innerHTML = '<table>' + caps.map(([k, name, desc]) => {
-    const on = S.caps[k];
+  const capBadge = (on, kind) => {
+    if (on) return '<span class="badge" style="background:#e6f7ec;color:#14663a">available</span>';
+    if (kind === 'tool') return '<span class="badge" style="background:#fdf1dc;color:#7a5210">separate tool</span>';
+    return '<span class="badge">not built</span>';
+  };
+  el('caps-list').innerHTML = '<table>' + caps.map(([k, name, desc, kind]) => {
     return '<tr><td style="width:190px"><strong>' + esc(name) + '</strong></td>' +
-      '<td>' + (on ? '<span class="badge" style="background:#e6f7ec;color:#14663a">available</span>'
-                   : '<span class="badge">not built</span>') + '</td>' +
+      '<td style="width:110px">' + capBadge(S.caps[k], kind) + '</td>' +
       '<td class="muted">' + esc(desc) + '</td></tr>';
   }).join('') + '</table>';
   updatePills();

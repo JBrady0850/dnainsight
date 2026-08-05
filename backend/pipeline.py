@@ -108,6 +108,35 @@ def available_subsystems() -> dict[str, bool]:
             out["snpedia"] = bool(_snpedia.cache_status().get("available"))
         except Exception:
             out["snpedia"] = False
+
+    # v3.0 subsystems.
+    #
+    # Two different kinds of availability are reported here and conflating them
+    # would mislead the UI. A module flag means the CODE is present and works
+    # offline with no external help. A capability flag from backend.external
+    # means a THIRD-PARTY TOOL the user installed themselves is present and its
+    # licence has been accepted. Ancestry has both: the code always loads, but
+    # it can only produce an answer when fastmixture and a panel exist.
+    for name in ("ledger", "provenance", "sequencing", "haplogroups",
+                 "relatedness", "imputation", "ancestry", "diplotype",
+                 "carrier", "assistant"):
+        out[name] = _try(name) is not None
+
+    try:
+        from . import external as _external
+        # PREFIXED, and this is not cosmetic. Beagle's capability is literally
+        # named "imputation" and Ollama's is "assistant", which are also the
+        # names of the DNAInsight modules that drive them. An unprefixed update
+        # silently overwrote the module flag with the tool flag, so a user
+        # without Beagle installed was told DNAInsight's imputation module was
+        # missing. That is the exact conflation this map exists to prevent, and
+        # it was caught by the test that asserts the two namespaces stay apart.
+        for name, ready in _external.capability_report().items():
+            out[f"tool_{name}"] = ready
+    except Exception:
+        # A missing or broken external registry must leave the offline
+        # subsystems reporting truthfully rather than blanking the whole map.
+        pass
     return out
 
 

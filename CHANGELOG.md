@@ -3,6 +3,415 @@
 All notable changes to DNAInsight are documented here. This project follows
 [Semantic Versioning](https://semver.org/).
 
+## [3.1.0] - 2026-08-04
+
+### Added
+- Installer verification. `install.bat` and `install.sh` both gained a fifth
+  step that imports the backend, builds the Flask app and parses the bundled
+  reference before declaring success. Building the app is the load-bearing
+  check: a missing data file or a broken blueprint surfaces there and nowhere
+  earlier. Failure is fatal and names the command that shows the real error.
+- `tests/test_install_scripts.py`, 47 tests locking both installers to reality.
+  Referenced paths must exist, the two scripts must agree on builders and
+  requirements, step counters must be contiguous, PEP 668 escape hatches must
+  be present, and the installers' own three checks run in-process. All static,
+  so a Linux runner can test the Windows batch file.
+- Three states in the dashboard capability table instead of two: available,
+  not built, and needs a separate tool. The table also lists all sixteen
+  subsystems rather than the five it was hardcoded to in v2.
+
+### Fixed
+- `install.bat` contained `echo ... Settings > Database to update`. The `>` is
+  a redirect, so the tip printed truncated and a file literally named
+  `Database` was created in every Windows install directory. Shipped in v1 and
+  v2, found by running the installer rather than reading it.
+- The install banner lost its exclamation mark to `EnableDelayedExpansion`.
+  Removed rather than escaped: the first fix used `^!`, which the parser still
+  ate, and the test guarding it checked the input instead of the output.
+- `install.bat` called bare `pip`. A machine can have `python.exe` on PATH
+  without `pip.exe`, and it then failed two steps after python was proven to
+  work. Now `python -m pip` throughout.
+- `data/build_reference.py` announced "Built bundled reference v2.0.0" during a
+  v3 install. It now prints the data version and the application version
+  separately, because they are different facts.
+- `requirements-dev.txt` pinned `pytest>=8.0,<9.0`, which fails on any current
+  environment and had done since before v3.0, so a clean checkout could not run
+  its own release gate. Raised to `>=8.4,<10.0` after verifying the full suite
+  on 9.1.1.
+- flake8 was commented out of the dev requirements as optional while CI runs it
+  as a job and `tools/golive.py` treats it as a blocker. Now a real dependency.
+- Duplicated blocks in `backend/ancestry.py`, `backend/haplogroups.py`,
+  `backend/provenance.py` and `backend/routes_v3.py`. Three were genuine
+  copy-paste and were factored into named helpers. The provenance case was the
+  opposite, two parallel licence-table literals where the columns are the
+  point, so it moved to a keyword-only constructor with no defaults: omitting a
+  field is now a TypeError at import rather than an unstated licence claim.
+- One flake8 E131 in `backend/imputation.py`.
+- `tests/test_install_scripts.py` ran `bash -n` against a Windows path on
+  Windows, where `shutil.which` finds the WSL launcher. Skipped on Windows,
+  where the check would be testing the developer's WSL setup rather than this
+  repository.
+
+### Changed
+- `tools/vfrontend.py` integrity pin updated for the capability table change,
+  with a comment recording why. Any other movement in those three numbers is
+  unreviewed drift and should keep failing.
+- `DNAInsight.png` regenerated from a running instance against a 640,000 marker
+  export, palettised from 425 KB to 156 KB, and de-identified: the previous
+  capture carried a real name and date of birth into an image that ships in a
+  public repository.
+- Page title dropped its stale "v2".
+- `tools/golive.py` closing suggestion no longer tells you to branch for v2.0.
+
+### Known
+- VERSION CONSISTENCY reports the bundled data artefacts at 2.0.0 against an
+  application at 3.1.0. That is correct and deliberate. The data did not
+  change, and `backend/provenance.py` documents why an artefact version must
+  not track the application version.
+
+## [3.0.0] - 2026-08-04
+
+Ten capabilities, delivered in five waves: a reclassification ledger, a
+provenance graph with signed manifests, sequencing ingest, haplogroups,
+household IBD, imputation, ancestry, star-allele pharmacogenomics, carrier
+screening with residual risk, and a grounded local assistant.
+
+Six of the ten need a tool DNAInsight cannot legally bundle. That constraint,
+not the algorithms, is what shaped this release.
+
+### Licensing position, decided first because it shapes everything else
+
+v2.0 established that nothing SNPedia-derived ships in this repository. v3.0
+extends the same rule from data to executables.
+
+The best available tools for global ancestry, imputation, phasing and Y
+haplogroup calling are GPL-3.0, and several of the obvious alternatives are
+academic-only or non-commercial. Vendoring a GPL-3.0 binary would relicense
+DNAInsight by copyleft. Reimplementing four published algorithms badly would be
+worse than not shipping them.
+
+- **DNAInsight ships only the adapter, which is MIT.** The tool is installed by
+  the user, on explicit consent, into `~/.dnainsight/tools/`, deliberately
+  outside this repository tree. **The subprocess boundary IS the licence
+  boundary.** No external tool is ever imported, linked or vendored, and every
+  invocation goes through the single `external.run` function so that boundary is
+  auditable in one place.
+- This is the pattern `backend/snpedia.py` already used for CC-BY-NC-SA data, so
+  there is one rule to understand rather than two.
+- **Five tools are permanently blocked and cannot be installed even on
+  consent**, each with a recorded reason and a named replacement: ADMIXTURE,
+  RFMix v2, yhaplo, yallHap, and DIYDodecad with the Eurogenes, Dodecad, MDLP
+  and HarappaWorld model files. Naming them makes the exclusion a decision
+  somebody made on a date rather than an oversight, exactly as
+  `data/DATA_SOURCES.md` section 9 does for PharmGKB.
+- **The offline contract is unchanged.** The running application makes zero
+  network calls. Builders and tool installers may download, but only when the
+  user runs them, and both builders dry-run by default until `--accept-terms` is
+  passed.
+- `docs/EXTERNAL_TOOLS.md` is the full architecture and install guide.
+
+### Added: the reclassification ledger
+
+- **`backend/ledger.py`** records an insert-only snapshot of every finding's
+  comparable clinical state after each scan, and diffs consecutive snapshots
+  into **15 classified change kinds**. `vus_resolved_pathogenic` ranks highest
+  in the system by design: a variant of uncertain significance that became
+  pathogenic **and that this person carries** is the highest-value event in
+  personal genomics, and no consumer product surfaces it as an event.
+- Every change record names the field, both values, and whether the move was
+  up, down or lateral. "Changed" on its own is useless to a reader deciding
+  whether to worry.
+- The fingerprint deliberately excludes prose. Interpretation text churns
+  constantly, and a naive whole-record diff would report a hundred clinically
+  identical findings and bury the one real reclassification.
+- **Addenda are dated and additive.** `supersedes` is always None and no code
+  path in the module writes to a prior snapshot or a prior report. A clinician
+  who acted on the January report must be able to see exactly what the January
+  report said, because their decision is only defensible against the evidence
+  that existed at the time.
+- `routes_v2`'s scan now records a ledger snapshot on completion, defensively,
+  so a ledger failure can never turn a successful scan into a failed one.
+
+### Added: provenance, the signed manifest and a runtime licence audit
+
+- **`backend/provenance.py`** carries `SOURCES`, a machine-readable mirror of
+  `data/DATA_SOURCES.md`, and `licence_audit()`, which checks every declared
+  bundled artefact against the rules that document states. That turns
+  `DATA_SOURCES.md` from prose somebody has to remember into an enforced runtime
+  contract, exposed at `GET /api/v3/licence-audit`.
+- **Signed reproducible report manifests.** HMAC-SHA256 over the canonical
+  manifest, keyed by a secret generated on and stored only on this machine. The
+  scope is stated in the payload: this proves the report was not altered after
+  generation **on this machine**. It is not a public-key attestation and does
+  not prove authorship to a third party. Overclaiming that would be worse than
+  not signing.
+- `verify_manifest` returns a structured verdict naming the field that drifted,
+  never a bare boolean. "Verification failed" tells a clinician nothing they can
+  act on.
+- **Conflict detection displays disagreement and never resolves it.** Every
+  conflict record carries both positions with `verdict` None and `resolved`
+  False, mirroring how `backend/merge.py` already treats two pooled files that
+  disagree at a position.
+
+### Added: sequencing ingest
+
+- **`backend/sequencing.py`** reads VCF, gVCF and gzipped input by streaming,
+  so a whole-genome file does not have to fit in memory.
+- **Genome build is detected from contig LENGTHS**, which is the only header
+  field that cannot quietly disagree with the coordinates in the body of the
+  file. An `assembly=` tag is a claim, a `##reference` line is frequently a
+  stale path, and a `chr` prefix is evidence about the distributor rather than
+  the assembly. Lengths from both builds produce `None` with confidence
+  `conflict`, because such a file is either concatenated or hand-edited and
+  neither is safe to annotate.
+- **`BuildMismatch` refuses the file rather than annotating it.** Mixing builds
+  is the most common way this class of tool produces confidently wrong answers,
+  and it now gets the same loudness the project already gives strand ambiguity.
+- A **UCSC chain-format liftover**. With no chain file present it returns the
+  standard unavailable payload rather than passing coordinates through
+  untranslated. Where a chain maps to the minus strand the alleles are
+  complemented, because moving a coordinate while leaving a plus-strand allele
+  alone produces a genotype that is wrong at a position that is right.
+- **Targeted BAM and CRAM pileup extraction via samtools**, at the reference
+  positions DNAInsight already cares about, never full variant calling. A 30x
+  BAM is 100 to 200 GB and re-calling it locally would be a different product.
+- Skipped records are reported with all five reasons, zero-valued when nothing
+  was skipped. A user who uploads a four-million-record gVCF and gets 600,000
+  calls is owed the arithmetic.
+
+### Added: haplogroups
+
+- **`backend/haplogroups.py`** ships bundled backbone trees: **49 Y markers and
+  28 mtDNA nodes**, callable with no external tool installed.
+- A **tri-state marker call**: derived, ancestral, or `NOT_ON_ARRAY`. The third
+  state is the point. An array that never read a marker has not shown the marker
+  is ancestral.
+- A **computed resolution ceiling**, not a stored constant. It describes this
+  array and this person, and it says in one plain sentence where their data runs
+  out.
+- Adapters for **Yleaf**, **HaploGrep 3** and **Clade Finder**. Where two tools
+  disagree the disagreement is surfaced, not reconciled.
+- **Tree versioning on every response.** A haplogroup is meaningless without the
+  tree that produced it.
+- The bundled backbone is provisional and every response says so. See
+  `docs/KNOWN_GAPS.md`; `verified_only=true` refuses every unverified marker and
+  yields an unresolved call, which is the honest state.
+
+### Added: household genomics
+
+- **`backend/relatedness.py`** implements IBS-based IBD detection in pure
+  Python, with an **IBIS** adapter for users who install it.
+- **Relationships are returned as RANGES, never one answer.** A half sibling, a
+  grandparent and an aunt all share about a quarter of their DNA and no total
+  separates them. Returning one of the three would be inventing certainty.
+- **Every centimorgan figure is flagged `cm_estimated`.** The genetic map is
+  approximate whole-chromosome averages, and a number derived from it must not
+  read as a measurement.
+- **Role-disagreement detection.** A declared sibling sharing about 1,700 cM is
+  a half sibling, and the person deserves to be told that rather than shown a
+  number and left to work it out.
+- Parental phasing where the trio makes it determinable, ambiguous where it does
+  not, plus chromosome browser data shaped for the offline report's SVG.
+- **This is deliberately not a matching service.** GEDmatch's profile count is a
+  network effect, not a software moat. Only kits loaded on this machine are
+  compared, which needs no database and is immune to the opt-out circumvention
+  documented at GEDmatch in 2023 and at MyHeritage in 2025. The response says so
+  in `scope`, so the limitation is never mistaken for a bug.
+
+### Added: imputation
+
+- **`backend/imputation.py`** adapts Beagle 5.5 and carries **DR2 as a
+  first-class, filterable field** rather than a footnote.
+- **`IMPUTED_MAGNITUDE_CAP` is 3.0** below the DR2 threshold, and even a
+  perfectly imputed call ceilings at 9.5 against a typed ceiling of 10.0. **An
+  imputed call can never reach parity with a typed one**, and that property is
+  a structural guarantee asserted in the tests, not a convention.
+- **The cap is written into the magnitude audit trail as a named step**, and the
+  step is appended even when the cap did not bind. "The ceiling was considered
+  and did not bind" is information; a silent no-op would leave the reader unable
+  to tell the rule ran at all.
+- **`assert_no_imputed_pathogenic_without_quality`** is invariant 1 of this
+  project, "do not alarm a non-carrier", restated for imputation. Imputation
+  multiplies that risk by volume, so it is a checked guarantee with its own
+  endpoint rather than a comment somebody wrote once.
+- `filters.py` gained `/imputed`, `/typed`, `/provisional` and `/dr2>=N`. A
+  finding with no DR2 never matches a DR2 comparison, and a missing `imputed`
+  key means typed rather than unknown.
+
+### Added: ancestry
+
+- **`backend/ancestry.py`** adapts fastmixture in projection mode for global
+  ancestry and FLARE for local ancestry, plus chromosome painting.
+- **A population the array cannot resolve is reported NOT RESOLVABLE with a null
+  proportion, never as zero percent.** Zero percent is a measurement: it says we
+  looked and found none. Not resolvable says we could not look. Reporting one as
+  the other is how every incumbent turns a model artefact into an apparent fact
+  about a person.
+- **Confidence intervals always carry the method that produced them.** With
+  bootstrap replicates at the default of 0 the intervals are Wilson
+  approximations from marker counts and are labelled as such, because presenting
+  an approximation as a bootstrap is a quiet overclaim.
+- **Per-population marker coverage** on every result.
+- **`panel_manifest` publishes the model**: populations, per-population sample
+  counts, source, licence, build, marker count and a content hash. An incumbent
+  that says "4,500 regions" cannot produce that dict for its own product.
+- FLARE requires phased input. Unphased input is caught and reported as
+  `input_not_phased` with the fix, rather than silently producing a picture that
+  looks like a painted chromosome without being one.
+
+### Added: star-allele pharmacogenomics
+
+- **`backend/diplotype.py`** calls CPIC star alleles for **9 genes**: CYP2C19,
+  CYP2C9, VKORC1, SLCO1B1, TPMT, NUDT15, DPYD, UGT1A1 and CYP2D6.
+- **Indeterminate is the default, not Normal.** It is returned whenever a
+  chromosome was filled with the reference allele while some allele of that gene
+  was untestable, whenever an activity value is unknown, and whenever nothing
+  could be called. Defaulting to Normal is how this class of tool tells somebody
+  they metabolise a drug fine when nobody checked. The cost of Indeterminate is
+  a user who has to ask a pharmacist; the cost of a wrong Normal is a user who
+  does not.
+- Alleles carry a tri-state: present, absent, or **untestable**. An array that
+  does not carry rs4244285 has not shown CYP2C19\*2 is absent, it has shown
+  nothing.
+- **CYP2D6 is always provisional.** Arrays cannot see copy number or hybrid
+  alleles, so \*2xN duplications and \*5 whole-gene deletions are invisible.
+- **The prescription guard names banned imperative language and a test
+  enforces it.** No output string may instruct anyone to begin, continue or
+  change a medicine. `audit_language` exists so that claim is testable rather
+  than believed.
+
+### Added: carrier screening with residual risk
+
+- **`backend/carrier.py`** implements the residual risk arithmetic
+  `f(1-DR)/(1-f*DR)`, derived from Bayes in the module docstring, for an
+  11-gene panel.
+- **The bare phrase "not a carrier" is forbidden in code**, along with
+  "non-carrier", "no risk", "rules out" and five others. The answer is always
+  "not a carrier for the N variants tested", where N is the number this file
+  could actually read. CFTR alone has thousands of catalogued variants and a
+  consumer array reads a few dozen.
+- **When a detection rate is unknown, `residual_risk` returns None with a
+  reason** rather than borrowing a plausible-looking number from a neighbouring
+  population. A guess that looks like the honest feature is worse than nothing.
+- **Every residual risk is flagged `is_lower_bound`**, because published
+  detection rates belong to clinical panels that read more positions than
+  DNAInsight does.
+- **Joint reproductive risk** for autosomal recessive and X-linked recessive
+  inheritance, returned as a range rather than a number, because the inputs are
+  unverified population figures and false precision here would be worse than an
+  honest interval.
+- **ACMG secondary-findings coverage is reported honestly as near zero.** For an
+  array the answer is zero in nearly every gene, and the report says zero in
+  words rather than rendering an empty row a reader could mistake for a clean
+  result. Carrying probes for three BRCA founder variants is not BRCA testing.
+
+### Added: the grounded local assistant
+
+- **`backend/assistant.py`** is refusal-first. Retrieval is limited to this
+  profile's own findings, every claim must cite a finding id that was actually
+  in the context, and a response citing anything else is rejected and replaced
+  with the refusal.
+- **Genotypes are stripped before anything leaves the process**, and the
+  assembled prompt is re-scanned for genotype strings afterward. If any
+  survived, nothing is sent.
+- **It fails closed.** A rejected response returns the refusal text, never the
+  model output alongside a warning, because that would put the hallucination on
+  screen.
+- Ollama is reached over loopback only, and like every other external tool it is
+  unavailable until installed and licence-accepted.
+- `GET /api/v3/assistant/contract` publishes the grounding contract, the refusal
+  text, the redacted fields and the banned phrases. A safety rule nobody can
+  read is a safety rule nobody can check.
+
+### Added: the external tool registry and the v3 endpoint surface
+
+- **`backend/external.py`** is the registry, licence gate and runner: 11 tools,
+  5 permanently blocked entries, 2 reference panels, a three-state licence
+  workflow and one `unavailable()` payload shape used by every adapter.
+- **`available: False` plus `not_attempted: True` is the load-bearing pair.**
+  "We looked and found nothing" and "we could not look at all" are different
+  claims, and collapsing them is the exact failure this project already refuses
+  for not-testable genosets, unverifiable strands and no-calls.
+- **`backend/routes_v3.py`** adds 31 paths across 32 method bindings, registered
+  as a third blueprint so a v3 subsystem that fails to import cannot take the v1
+  or v2 application down with it. A missing subsystem returns 501, not 404: the
+  path exists and the capability is real, it is this installation that cannot
+  serve it.
+- **`data/build_panel.py`** builds the 1000 Genomes plus public-tier SGDP
+  reference panel, refusing the restricted SGDP tier by construction and placing
+  HGDP behind a second opt-in that is separate from the licence gate.
+- **`data/build_pgx_alleles.py`** reconciles `backend/diplotype.py` against the
+  CPIC allele definition tables and writes the reconciliation report into its
+  own output.
+- **`data/tools_manifest.json`** is generated from `external.py` and checked
+  against it by a test, so the published manifest cannot drift from the registry
+  that actually gates execution.
+
+### Changed
+
+- Version 2.0.0 to 3.0.0.
+- `backend/filters.py` gained the `/imputed`, `/typed`, `/provisional` flags and
+  the `/dr2` comparison operator.
+- `backend/interactive_report.py`'s `_KEEP` list carries the v3 fields into the
+  offline file: `imputed`, `dr2`, `imputation_quality_band`,
+  `imputation_capped`, `magnitude_ceiling`, `provenance`, `source_ids`,
+  `conflicts`, `provisional`, `residual_risk`, `diplotype` and `phenotype`. An
+  imputed call that loses its DR2 on the way out is exactly the opaque number
+  this project refuses to ship, and the report is the artefact a clinician
+  holds, so it is the artefact that has to carry its own evidence.
+- `pipeline.available_subsystems()` reports the ten new modules plus every
+  external tool capability under a `tool_` prefix.
+- `app.py` registers the v3 blueprint and initialises the ledger and provenance
+  schemas. Both are `CREATE TABLE IF NOT EXISTS` plus additive column migration,
+  and both are wrapped defensively so a partial checkout degrades to a working
+  v1 and v2 application rather than a server that will not boot.
+
+### Fixed
+
+- **External tool capability names collided with DNAInsight module names in
+  `available_subsystems()`.** Beagle's capability is literally called
+  `imputation` and Ollama's is `assistant`, which are also the names of the two
+  DNAInsight modules that drive them. The first wiring attempt merged the tool
+  capabilities into the subsystem map unprefixed, so the tool flag overwrote the
+  module flag and **a user without Beagle installed was told DNAInsight's own
+  imputation module was missing.** That is precisely the conflation the map
+  exists to prevent: an absent optional tool was reported as a broken install.
+  Every tool capability is now prefixed `tool_`, keeping the two namespaces
+  apart. Caught by a test written for exactly that risk before the bug appeared,
+  and the test now pins the prefix so the collision cannot return.
+
+### Testing
+
+- 3220 tests passing, up from 1929. New suites for ledger, provenance,
+  sequencing, haplogroups, relatedness, imputation, ancestry, diplotype,
+  carrier, assistant and the v3 builders.
+- The builders suite compares `data/tools_manifest.json` against
+  `backend/external.py` field by field, so the two cannot drift.
+- Behavioural guarantees with their own tests rather than their own comments:
+  an imputed call never reaches typed parity, no output path emits the bare
+  phrase "not a carrier", no prescription-guard string contains imperative
+  dosing language, and the `tool_` prefix keeps the two capability namespaces
+  separate.
+
+### Known gaps, listed rather than hidden
+
+`docs/KNOWN_GAPS.md` is new and is the most important document in this release.
+Everything in it is shipped and working, and every item rests on a figure that
+was not machine-checked at source: all 49 Y markers, 15 of the 28 mtDNA nodes,
+17 star alleles, 22 of 23 carrier variant mappings, all 25 carrier frequencies,
+all 6 detection rates, the genetic map, the relationship bands, and every
+external tool argument form, none of which has been executed against an
+installed binary.
+
+One defect is unresolved and named there rather than quietly carried:
+`data/evidence_overlay.py` files **rs28371706 under CYP2C9** while the same
+rsID is widely reported as the **CYP2D6\*17** defining variant c.1023C>T. Both
+attributions cannot be correct. Separately, the CPIC builder run on 2026-08-04
+found three direct base disagreements against `backend/diplotype.py`, both
+sides stating the positive chromosomal strand, so they are genuine conflicts
+rather than convention differences. Neither file was edited. Resolve at source
+before relying on those calls.
+
 ## [2.0.0] - 2026-07-26
 
 Feature parity with the Promethease and SNPedia model, built entirely from CC0
@@ -276,9 +685,9 @@ repository from that bridge.
   writing into the real database or `uploads/` again fails the gate.
 - **`docs/HANDOFF_V2.md` retired.** It was an internal engineering handoff note,
   not user or contributor documentation, and it pointed at `_build/` paths that
-  no longer exist. Its durable content — pipeline stage ordering, the Tier 2
+  no longer exist. Its durable content, pipeline stage ordering, the Tier 2
   reference builder's parsing traps, and the design decisions that should not be
-  quietly reversed — is now in `CONTRIBUTING.md` under Architecture Notes.
+  quietly reversed, is now in `CONTRIBUTING.md` under Architecture Notes.
 - **`frontend/index.html.v1-backup` removed.** The v1.2 frontend is preserved in
   git history; keeping a redundant static copy in the working tree served no
   purpose once v2 shipped.

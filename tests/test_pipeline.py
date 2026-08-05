@@ -1365,6 +1365,71 @@ class TestAvailableSubsystems:
         finally:
             pipeline_module._traits = saved
 
-    def test_the_report_has_exactly_the_five_pipeline_subsystems(self):
-        assert set(available_subsystems()) == {"frequency", "genosets",
-                                              "traits", "prs", "snpedia"}
+    def test_the_report_still_carries_the_five_v2_pipeline_subsystems(self):
+        # v3.0 widened this map. The original assertion was an exact set
+        # equality, which was the right test while the five were the whole
+        # story and the wrong test the moment a sixth subsystem existed.
+        #
+        # What actually needs protecting is that the five v2 keys never
+        # disappear or change name, because the frontend and every v2 client
+        # read them by name. So: subset, not equality, plus an explicit check
+        # that each one is still a boolean rather than a richer object.
+        report = available_subsystems()
+        v2_keys = {"frequency", "genosets", "traits", "prs", "snpedia"}
+        assert v2_keys <= set(report)
+        for key in v2_keys:
+            assert isinstance(report[key], bool)
+
+    def test_v3_subsystem_flags_are_reported_as_booleans(self):
+        report = available_subsystems()
+        for key in ("ledger", "provenance", "sequencing", "haplogroups",
+                    "relatedness", "imputation", "ancestry", "diplotype",
+                    "carrier", "assistant"):
+            assert key in report
+            assert isinstance(report[key], bool)
+
+    def test_external_capabilities_are_separate_keys_from_subsystems(self):
+        # A subsystem flag means DNAInsight's own code is present. A capability
+        # flag means a third-party tool the user installed is present and its
+        # licence is accepted. Collapsing the two would make an uninstalled
+        # Beagle look like a broken DNAInsight module.
+        report = available_subsystems()
+        assert report.get("imputation") is True
+        assert report.get("ancestry") is True
+        # Tool capabilities carry a tool_ prefix. Beagle's capability is named
+        # "imputation" and Ollama's is "assistant", which collide head-on with
+        # the module names above. Without the prefix an uninstalled Beagle
+        # overwrites the module flag and the UI reports DNAInsight's own code
+        # as missing.
+        assert report.get("tool_imputation") is False
+        assert report.get("tool_assistant") is False
+        assert "tool_ancestry_global" in report
+        assert "tool_haplogroup_y" in report
+
+    def test_every_tool_capability_appears_only_under_the_tool_prefix(self):
+        # The invariant, stated precisely: a capability name may coincide with a
+        # module name, and two of them do, so the guarantee cannot be "these
+        # names never overlap". It has to be "the tool value is only ever
+        # written under tool_<name>". Then a shared name is harmless because the
+        # two values live in two keys.
+        from backend import external as external_mod
+        report = available_subsystems()
+        capabilities = external_mod.capability_report()
+        for name, ready in capabilities.items():
+            assert f"tool_{name}" in report
+            assert report[f"tool_{name}"] == ready
+
+    def test_a_shared_name_keeps_the_module_value_unprefixed(self):
+        # Beagle's capability and DNAInsight's module are both called
+        # "imputation". The bare key must report the module, which is present,
+        # and never the tool, which is not installed on a normal machine.
+        from backend import external as external_mod
+        report = available_subsystems()
+        shared = set(external_mod.capability_report()) & {
+            "ledger", "provenance", "sequencing", "haplogroups", "relatedness",
+            "imputation", "ancestry", "diplotype", "carrier", "assistant",
+        }
+        assert shared, "Expected at least one name to be shared, or this guard is dead code."
+        for name in shared:
+            assert report[name] is True
+            assert report[f"tool_{name}"] is False

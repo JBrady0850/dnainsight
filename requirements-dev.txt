@@ -3,13 +3,21 @@
 # Install with:
 #     pip install -r requirements.txt -r requirements-dev.txt
 #
-# Not needed to RUN the application. The 1929-test suite, the source-integrity
-# auditor and the release gate need only pytest on top of the runtime deps;
-# everything else under tools/ uses the standard library.
+# Not needed to RUN the application. The test suite, the source-integrity
+# auditor and the release gate need pytest and flake8 on top of the runtime
+# deps; everything else under tools/ uses the standard library.
 
 -r requirements.txt
 
-pytest>=8.0,<9.0
+# Ceiling raised to the next major in v3.0. The old <9.0 ceiling predated
+# pytest 9 and made a current environment fail the DEPENDENCIES gate on a
+# clean checkout of main, which is a pin nobody re-verified rather than a
+# real incompatibility: the full suite passes on 9.1.1. Same policy as
+# requirements.txt, floor at the version this release was tested against.
+pytest>=8.4,<10.0
 
-# Optional, only if you want lint parity with the repository's .flake8 config.
-# flake8>=7.0,<8.0
+# NOT optional. .github/workflows/ci.yml runs flake8 as its own job, and
+# tools/golive.py treats a missing flake8 as a blocker precisely so that the
+# local gate cannot pass something CI will reject. Leaving it commented out
+# meant a fresh clone could not run its own release gate.
+flake8>=7.0,<9.0
