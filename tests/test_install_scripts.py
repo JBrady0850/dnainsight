@@ -402,3 +402,93 @@ def test_no_echo_line_loses_a_bang_to_delayed_expansion(bat_text):
 def test_the_installer_creates_no_stray_files_named_after_a_word(bat_text):
     # Direct regression guard for the exact file the old bug produced.
     assert "Settings > Database" not in bat_text
+
+
+# ---------------------------------------------------------------------------
+# Getting the code at all
+#
+# The Install section assumes you already have the repository on disk. For
+# somebody who has never used GitHub that is the hardest step, and it was
+# missing entirely until v3.1. These tests keep it there.
+# ---------------------------------------------------------------------------
+
+README = ROOT / "README.md"
+
+REPO_URL = "https://github.com/JBrady0850/dnainsight"
+ARCHIVE_URL = REPO_URL + "/archive/refs/heads/main.zip"
+
+
+@pytest.fixture(scope="module")
+def readme_text() -> str:
+    return README.read_text(encoding="utf-8", errors="replace")
+
+
+def test_the_readme_names_the_repository(readme_text):
+    assert REPO_URL in readme_text, "a reader cannot find the project without the URL"
+
+
+def test_the_readme_gives_the_direct_zip_link(readme_text):
+    assert ARCHIVE_URL in readme_text
+
+
+def test_the_zip_link_belongs_to_the_repository_it_names(readme_text):
+    # Guards the copy-paste failure where the repo is renamed and the archive
+    # link keeps pointing at the old one, which 404s only for new users.
+    for line in readme_text.splitlines():
+        if "/archive/refs/heads/" in line:
+            assert line.strip().startswith(REPO_URL), (
+                f"archive link does not match the named repository: {line.strip()}"
+            )
+
+
+def test_the_readme_explains_the_download_zip_button(readme_text):
+    # The button path is what a non-technical user actually takes.
+    assert "Download ZIP" in readme_text
+    assert "Code" in readme_text
+
+
+def test_the_readme_warns_about_the_windows_mark_of_the_web(readme_text):
+    # Windows marks anything downloaded from the internet, and an unblocked
+    # archive produces a blocked installer with no useful explanation.
+    lowered = readme_text.lower()
+    assert "unblock" in lowered
+
+
+def test_the_readme_warns_about_running_from_inside_the_zip(readme_text):
+    # Windows previews a ZIP like a folder. A script launched from that preview
+    # cannot find its own files, and the error blames the wrong thing.
+    lowered = readme_text.lower()
+    assert "extract" in lowered
+    assert "install.bat" in readme_text
+
+
+def test_the_readme_mentions_smartscreen(readme_text):
+    # A blue "Windows protected your PC" box stops most first-time users dead.
+    assert "SmartScreen" in readme_text
+
+
+def test_the_readme_offers_a_git_clone_alternative(readme_text):
+    assert "git clone" in readme_text
+
+
+def test_download_instructions_come_before_install(readme_text):
+    lines = readme_text.splitlines()
+    download = next((i for i, l in enumerate(lines) if l.strip() == "Download"), None)
+    install = next((i for i, l in enumerate(lines) if l.strip() == "Install"), None)
+    assert download is not None, "no Download section"
+    assert install is not None, "no Install section"
+    assert download < install, "Install appears before Download, which is the wrong order"
+
+
+def test_the_readme_still_documents_both_installer_entry_points(readme_text):
+    assert "install.bat" in readme_text
+    assert "install.sh" in readme_text
+
+
+def test_the_readme_documents_the_manual_install_route(readme_text):
+    assert "pip install -r requirements.txt" in readme_text
+    assert "python app.py" in readme_text
+
+
+def test_the_readme_states_the_local_address(readme_text):
+    assert "127.0.0.1:5050" in readme_text
