@@ -258,3 +258,36 @@ def test_no_referenced_image_needs_git_lfs():
         if "filter: lfs" in result.stdout:
             needs_lfs.append(str(target.relative_to(ROOT)))
     assert not needs_lfs, "image is routed through git-lfs:\n  " + "\n  ".join(needs_lfs)
+
+
+# ---------------------------------------------------------------------------
+# The support link
+#
+# It is the one element in this README that exists to be clicked, so a typo in
+# it fails silently: the badge still renders and the link still looks right.
+# ---------------------------------------------------------------------------
+
+SUPPORT_URL = "https://buymeacoffee.com/jbrady2852"
+
+
+def test_the_readme_carries_the_support_link():
+    readme = (ROOT / "README.md").read_text(encoding="utf-8", errors="replace")
+    assert SUPPORT_URL in readme
+
+
+def test_the_support_link_sits_in_the_badge_block_at_the_top():
+    # Above the screenshot, so it is visible without scrolling on any screen.
+    lines = (ROOT / "README.md").read_text(encoding="utf-8", errors="replace").splitlines()
+    link_line = next(i for i, l in enumerate(lines) if SUPPORT_URL in l)
+    shot_line = next(i for i, l in enumerate(lines) if "DNAInsight.png" in l)
+    assert link_line < shot_line, "support link fell below the screenshot"
+    assert link_line < 15, f"support link drifted to line {link_line + 1}, expected the badge block"
+
+
+def test_the_support_badge_is_a_clickable_link_not_a_bare_image():
+    # ![alt](badge) renders the badge and goes nowhere. The wrapping [ ]( ) is
+    # the entire point, and it is easy to lose when reordering badges.
+    readme = (ROOT / "README.md").read_text(encoding="utf-8", errors="replace")
+    line = next(l for l in readme.splitlines() if SUPPORT_URL in l)
+    assert line.startswith("[!["), f"support badge is not wrapped in a link: {line[:40]}"
+    assert line.rstrip().endswith(f"({SUPPORT_URL})"), "link target is not the support URL"
