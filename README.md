@@ -1,10 +1,10 @@
-DNAInsight v3.2.0
+DNAInsight v3.2.1
 
 ![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Bundled SNPs](https://img.shields.io/badge/Bundled_SNPs-122_curated-orange)
 ![Genosets](https://img.shields.io/badge/Genosets-65-orange)
-![Tests](https://img.shields.io/badge/Tests-3376_passing-brightgreen)
+![Tests](https://img.shields.io/badge/Tests-3401_passing-brightgreen)
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy_Me_a_Coffee-support_this_project-FFDD00?logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/jbrady2852)
 
 ![DNAInsight dashboard showing a sample profile with findings, risk categories and next steps](DNAInsight.png)
@@ -37,7 +37,7 @@ that meaning CHANGES, where your data runs out, and what it could not check.
 | Assistant | none | grounded local model, refusal-first, genotypes never leave the process |
 | Cross-vendor comparison (v3.2) | none | which two of your own kits disagree, out of how many shared positions, with strand artifacts and palindromic sites counted apart from real disagreement |
 | Endpoints | 20 | plus 32 v3 paths |
-| Tests | 1929 | 3376 |
+| Tests | 1929 | 3401 |
 
 `CHANGELOG.md` has the full history, including the v3.1 installer and interface
 fixes and the v3.2 concordance endpoint.

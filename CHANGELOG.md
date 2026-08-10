@@ -3,6 +3,56 @@
 All notable changes to DNAInsight are documented here. This project follows
 [Semantic Versioning](https://semver.org/).
 
+## [3.2.1] - 2026-08-10
+
+### Added
+- `tools/audit_y_dbsnp.py` and `docs/Y_BACKBONE_AUDIT.md`. The Y backbone audit
+  the v3.1.1 notes said was needed, actually run, against NCBI dbSNP, which is
+  a US Government work and public domain.
+
+  **`Y_BACKBONE` is unchanged. Every row remains `verified: false`.** The audit
+  reports; it does not correct. Two of its findings need a schema decision and a
+  primary source respectively before anything can be written back.
+- `tests/test_y_dbsnp_audit.py`, 25 tests, covering the classification logic
+  offline against real dbSNP records captured on the run date.
+
+### Findings
+- **M17 is an indel, not a base substitution.** dbSNP rs3908 reports
+  `snp_class: delins`, SPDI `NC_000024.10:19571278:GGGG:GGG`, HGVS
+  `g.19571282del`, `SEQ=[G/-]`. `Y_BACKBONE["R1a1a"]` records ancestral G,
+  derived A. There is no A allele at that site.
+
+  M17 defines R1a1a, so a genotyping rule expecting a G or A base call cannot
+  fire against a deletion and that node is currently unreachable by the logic
+  meant to reach it. This is the first of the four indel leads corroborated
+  against a citable accession rather than recall.
+- **M20 conflicts with dbSNP on the allele pair.** rs3911 carries A/G,
+  single-allelic. `Y_BACKBONE["L"]` records ancestral A, derived C. There is no
+  C allele and complementing does not reconcile the two. One of them is wrong
+  and the audit cannot say which.
+- **The reference Y carries the derived allele at 10 of 17 determinable nodes.**
+  The v3.1.1 entry argued that mapping `ref` onto `ancestral` "would have
+  inverted roughly half the tree with the entire suite still green". That was an
+  argument. It is now a measurement: 59 percent. `ref_carries` stays in force.
+- **Coverage is 18 of 49 markers, and the other 31 are reported as unaudited.**
+  They carry no rsID, and dbSNP does not index marker names: `esearch` for M91,
+  M175 and M267 each returns zero hits. M91, M60, M175 and M267 all sit in that
+  unreachable set, so the retracted audit's claims about them remain
+  unsupported. Karafet 2008 Supplemental Table 1 is still the missing artifact.
+
+### Notes on the implementation
+- `parse_spdi` exists as its own tested function because the dbSNP `spdi` field
+  is a comma-separated list when a site is multi-allelic. A first draft split on
+  ":" and expected four parts, which blanked the allele pair for M45, M343, M269
+  and P312 and reported all four as conflicts against named markers. Every one
+  was fine, with the recorded pair a subset of a larger observed set. That draft
+  was discarded before it was acted on and the parsing is now pinned by test.
+- `CONFLICT` is the residue of the classification, never its default. Class
+  errors, multi-allelic subsets and strand differences are each ruled out first,
+  for the same reason `backend/concordance.py` orders its verdicts that way: the
+  bucket that becomes a published claim about real data is the one nothing else
+  accounted for.
+
 ## [3.2.0] - 2026-08-10
 
 ### Added
