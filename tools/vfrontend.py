@@ -12,9 +12,16 @@ APPJS = os.path.join('tools', 'app.js')
 # lists all sixteen with three states rather than two. The page title also
 # lost its stale "v2". Any OTHER movement in these three numbers is
 # unreviewed drift and the gate should keep failing on it.
-EXP_LINES = 2447
-EXP_BYTES = 111072
-EXP_MD5 = '68089515dd4d679b0319ae91aab3080c'
+#
+# Repinned again for v3.4.0, one line. The capability table had never listed
+# `concordance`, so cross-vendor agreement shipped in v3.2.0 and the dashboard
+# advertised nothing about it for three releases: an endpoint existed, the
+# subsystem reported available, and the only surface that tells a user what the
+# build can do stayed silent. Found while re-capturing the README screenshot,
+# which is the point of re-capturing it.
+EXP_LINES = 2448
+EXP_BYTES = 111204
+EXP_MD5 = '3aa4dab28f75914b19f0bfedcf05eb7d'
 
 fails = []
 infos = []

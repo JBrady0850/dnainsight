@@ -1,13 +1,13 @@
-DNAInsight v3.4.0
+DNAInsight v3.4.1
 
 ![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Bundled SNPs](https://img.shields.io/badge/Bundled_SNPs-122_curated-orange)
 ![Genosets](https://img.shields.io/badge/Genosets-65-orange)
-![Tests](https://img.shields.io/badge/Tests-3425_passing-brightgreen)
+![Tests](https://img.shields.io/badge/Tests-3500_passing-brightgreen)
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy_Me_a_Coffee-support_this_project-FFDD00?logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/jbrady2852)
 
-![DNAInsight dashboard showing a sample profile with findings, risk categories and next steps](DNAInsight.png)
+![DNAInsight dashboard for a synthetic sample profile: finding counts by category, next-step actions, and the capability table showing which features ship, which need a builder run and which need a separate tool](DNAInsight.png)
 
 Personal DNA analysis that runs entirely on your own computer. Read your raw DNA
 file from any major provider, annotate it against curated clinical evidence,
@@ -30,24 +30,39 @@ that meaning CHANGES, where your data runs out, and what it could not check.
 | Input formats | consumer array exports | plus VCF, gVCF, BAM and CRAM, with the genome build detected and mismatches refused |
 | Ancestry | none | global proportions, local ancestry, chromosome painting |
 | Haplogroups | none | bundled Y and mtDNA backbones, both naming systems reported, with optional tools for depth |
+| Y marker provenance (v3.4) | none | 35 of 49 backbone markers carry an rsID from a primary source, four are recorded as length polymorphisms rather than substitutions, and two irreconcilable conflicts are held rather than guessed |
 | Relatives | trio checks on loaded files | IBD across loaded kits, relationship ranges, parental phasing, chromosome browser |
 | Imputation | none | DR2 as a first-class field, imputed calls structurally capped below typed ones |
 | Pharmacogenomics | CPIC level per variant | star-allele diplotypes for 9 genes, Indeterminate by default, prescription guard |
 | Carrier screening | risk allele per variant | 11-gene panel with residual risk arithmetic |
 | Assistant | none | grounded local model, refusal-first, genotypes never leave the process |
 | Cross-vendor comparison (v3.2) | none | which two of your own kits disagree, out of how many shared positions, with strand artifacts and palindromic sites counted apart from real disagreement |
-| Endpoints | 20 | plus 32 v3 paths |
-| Tests | 1929 | 3425 |
+| Endpoints | 20 | plus 33 v3 paths |
+| Tests | 1929 | 3500 |
 
-`CHANGELOG.md` has the full history, including the v3.1 installer and interface
-fixes and the v3.2 concordance endpoint.
+---
+
+Since v3.0
+
+The 3.x line has been about making the data underneath the features as honest as
+the features themselves. `CHANGELOG.md` has the full history.
+
+| Release | What it changed |
+|---|---|
+| 3.1 | installer and interface fixes; `ref_carries` added so a backbone row cannot claim verification without recording which state the reference carries |
+| 3.2.0 | cross-vendor concordance: which two of your own kits disagree, out of how many shared positions |
+| 3.2.1 | `tools/audit_y_dbsnp.py`, a read-only audit of the Y backbone against NCBI dbSNP |
+| 3.2.2 | reclassification ledger timestamps made strictly increasing; a microsecond FORMAT is not microsecond RESOLUTION, and on Windows the clock advances in 15.6 ms steps, so tied snapshots were reporting real reclassifications as no change |
+| 3.3.0 | M17 and M91 identified as length polymorphisms rather than base substitutions; `untypeable_markers()` added |
+| 3.4.0 | the Karafet et al. 2008 supplement folded in as a separate source layer: 18 rsIDs resolved, M20 corrected, three allele pairs transposed back, M60 and M175 found to be two more indels, M31 and M429 held |
 
 ---
 
 The honesty features, which are the point
 
-Most consumer DNA tools fail in the same four ways. DNAInsight addresses each one
-directly, and these behaviours are covered by tests so they cannot regress.
+Most consumer DNA tools fail in the same handful of ways. DNAInsight addresses
+each one directly, and these behaviours are covered by tests so they cannot
+regress.
 
 **1. It will not alarm you about a variant you do not carry.**
 A ClinVar classification describes an ALLELE, not a position. Showing
@@ -69,7 +84,24 @@ them, the rule cannot be evaluated at all. Those appear in a separate section
 headed "not testable on your array", never mixed in with rules that were checked
 and found absent.
 
-**4. It never labels a trait good or bad.**
+**4. It will not compare your genotype against a base that does not exist.**
+New in v3.3 and extended in v3.4. Four markers on the bundled Y backbone are
+length polymorphisms, not base substitutions: M17 is a four-base G homopolymer
+losing one base, M91 a nine-base T run losing one, M60 a single-base insertion,
+M175 a five-base deletion. All four had been recorded as substitutions with an
+ancestral and derived BASE, which cannot be right, because an array reports two
+base calls at a position and a deletion is not a base.
+
+Nothing failed while that was wrong. The data was internally consistent and
+externally false, which is the failure mode this project exists to catch. Those
+rows now carry whole sequences, their single-base fields are cleared, and the
+constructor REFUSES to build one that carries both. The nodes they define are
+reported as untypeable, which is a structural ceiling no amount of coverage
+lifts, and `untypeable_markers()` reports them separately from unverified ones.
+An unverified marker might be right and nobody checked; an untypeable one can
+never be answered from array data at all.
+
+**5. It never labels a trait good or bad.**
 Traits and polygenic scores always render neutral grey. Eye colour is not a
 verdict. A no-call scores exactly zero, because a failed probe is not a finding.
 
@@ -330,9 +362,21 @@ filtered to the positions your array actually reads. It is gitignored because it
 is large and fully reproducible.
 
 **What is not verified.** `docs/KNOWN_GAPS.md` lists every figure in this release
-that was not machine-checked at source: the bundled Y and mtDNA markers, 17 star
+that was not machine-checked at source: the bundled mtDNA markers, 17 star
 alleles, and the carrier frequencies. Everything in it ships and works. That is
 exactly why it is written down.
+
+The Y backbone is the one part of that list actively shrinking, and it is worth
+being precise about how far it has got. 35 of its 49 markers now carry an rsID
+from a primary source, and `docs/Y_BACKBONE_AUDIT.md` records every dated run of
+`tools/audit_y_dbsnp.py` against NCBI dbSNP. **Not one Y row is marked
+`verified`, and that is deliberate.** dbSNP reports REFERENCE over ALTERNATE
+while the backbone records ANCESTRAL over DERIVED, and on the Y those routinely
+disagree: the reference carries the DERIVED allele at 10 of the 30 markers the
+audit can determine. A builder who mapped one onto the other would invert a third
+of the tree and every test would still pass. So `verified` additionally requires
+the assembly and the reference orientation, and a citation alone does not grant
+it.
 
 ---
 
@@ -400,8 +444,10 @@ dnainsight/
 │   ├── filters.py             filtering, sorting, faceting
 │   ├── database.py            SQLite access
 │   ├── external.py            tool registry, licence gate, subprocess runner
+│   ├── updater.py             version check against the published release
 │   ├── ledger.py              reclassification snapshots and addenda
 │   ├── provenance.py          source graph, signed manifests, licence audit
+│   ├── concordance.py         cross-vendor agreement, conflicts classified
 │   ├── haplogroups.py         Y and mtDNA backbones plus adapters
 │   ├── relatedness.py         IBD, cM estimation, relationship ranges
 │   ├── imputation.py          Beagle adapter, DR2, the magnitude cap
@@ -427,9 +473,13 @@ dnainsight/
 ├── docs/
 │   ├── API_V2.md, API_V3.md   the API contracts
 │   ├── EXTERNAL_TOOLS.md      licence architecture and install guide
-│   └── KNOWN_GAPS.md          every figure this release did not verify
-├── tests/                     3280 tests
+│   ├── KNOWN_GAPS.md          every figure this release did not verify
+│   ├── SCREENSHOT.md          what the README image shows and how to re-capture
+│   └── Y_BACKBONE_AUDIT.md    dated dbSNP audit runs over the Y backbone
+├── tests/                     3500 tests
 └── tools/                     release gate and verification harnesses (dev-only)
+    ├── audit_y_dbsnp.py       reads the Y backbone, writes nothing back
+    └── capture_screenshot.py  regenerates the image at the top of this file
 ```
 
 ---
@@ -458,9 +508,17 @@ python tools/golive.py
 
 It rebuilds every derived artifact, audits every source file for duplication,
 runs the module smoke tests, the strand regression, the pipeline contract check,
-the filter engine check, a 42-endpoint API sweep, the interactive report
-verification, the GitHub Actions runtime check, the lint gate, a clean-clone CI
-simulation, the harness isolation guard and the full test suite.
+the filter engine check, an in-process sweep of every API endpoint, the
+interactive report verification, the GitHub Actions runtime check, the lint gate,
+a clean-clone CI simulation, the harness isolation guard and the full test suite.
+
+**This README is part of the build, not documentation about it.** Every release
+updates it, and `tests/test_readme_currency.py` fails the suite when it drifts:
+the version, every count it states, every backend module and doc it lists, and
+the screenshot's own version banner are all checked against the repository rather
+than trusted. A README that quietly describes the previous release is the same
+class of defect as a stale timestamp or an invented allele, and it is caught the
+same way.
 
 `CONTRIBUTING.md` documents the design decisions that should not be quietly
 reversed and the data-source parsing traps worth reading before you touch the
@@ -472,6 +530,14 @@ lives in. Confirming one Y marker against ISOGG, one mtDNA position against
 PhyloTree, one star allele against the CPIC tables, or one carrier frequency
 against a citable source, and flipping its `verified` flag, is worth more than a
 new feature. Bring the source with the pull request.
+
+For the Y backbone specifically, run `python tools/audit_y_dbsnp.py` first. It
+tells you which rows dbSNP can and cannot reach, and the 14 it cannot are the
+ones where a human reading ISOGG or YFull is the only way forward. Two of those,
+M31 and M429, are HELD: the stored allele pair and the Karafet 2008 supplement
+disagree in a way no strand or direction operation reconciles, exactly one side
+is wrong, and nothing available says which. Arbitrating either one with a named
+source would close a question that has been open across four releases.
 
 Any new external tool must permit commercial use and redistribution, or it goes
 in `BLOCKED` with a reason and a named replacement. It is invoked through

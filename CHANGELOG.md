@@ -3,6 +3,66 @@
 All notable changes to DNAInsight are documented here. This project follows
 [Semantic Versioning](https://semver.org/).
 
+## [3.4.1] - 2026-08-10
+
+A release whose entire content is making the project describe itself correctly.
+Nothing about how DNAInsight reads DNA changed.
+
+### Fixed
+- **The dashboard never advertised cross-vendor concordance.** It shipped in
+  v3.2.0 with a route, a module and a subsystem flag that reported `available`,
+  and the one surface that tells a user what the build can do stayed silent
+  about it for three releases. One row was missing from the capability table in
+  `frontend/index.html`.
+
+  It was found by re-capturing the README screenshot, which is the argument for
+  re-capturing it.
+
+- **The README screenshot showed a v3.1.0 banner.** It was the first visual on
+  the page and it had been wrong through v3.2, v3.3 and v3.4, because
+  re-capturing was a manual step nobody owned and nothing could detect: no test
+  reads pixels.
+
+- **The README disagreed with itself about how many tests there are.** The badge
+  and the comparison table said 3425, the project layout said 3280, and the real
+  number was 3491. It also said 32 v3 paths against 33 that exist, missed
+  `backend/concordance.py` and `backend/updater.py` from the project layout, and
+  described the Y backbone as wholly unverified when 35 of its 49 markers now
+  carry a primary-source rsID.
+
+### Added
+- **`tests/test_readme_currency.py`**, 9 tests. `test_readme_assets.py` already
+  proved the README's images would RENDER; nothing proved the README was TRUE.
+
+  Every count it states is now checked against the repository, in both
+  directions: every backend module and document must appear in the project
+  layout, and the layout may not name a file that stopped existing. The
+  self-agreement check is separate from the correctness check on purpose,
+  because three numbers that disagree with each other is a different defect from
+  three numbers that agree and are all wrong.
+
+- **`tools/capture_screenshot.py`** and **`docs/SCREENSHOT.md`**. The capture is
+  scripted and records the version it ran at, and a test fails when that version
+  falls behind `backend.__version__`. An image still cannot be parsed, but its
+  staleness is now detected on the release that causes it rather than three
+  releases later.
+
+  The script boots the real application, so it sets `DNAINSIGHT_DB_PATH`,
+  `DNAINSIGHT_UPLOAD_DIR` and `DNAINSIGHT_REPORTS_DIR` to a temporary directory
+  **before importing `app`**, which is the fault `tools/isolated_db.py` exists to
+  prevent. The profile is the synthetic fixture and reads provider `generic`,
+  not `23andme`, because faking a detection result for a nicer screenshot would
+  put a false claim in the most visible image in the project.
+
+### Changed
+- **A fifth honesty behaviour is documented in the README.** "It will not
+  compare your genotype against a base that does not exist" covers the four
+  markers reclassified as length polymorphisms in v3.3.0 and v3.4.0, and why
+  those nodes are untypeable rather than merely unverified.
+
+- `tools/vfrontend.py` repinned for the one-line capability table change, with
+  the reason recorded next to the pin.
+
 ## [3.4.0] - 2026-08-10
 
 ### Added
