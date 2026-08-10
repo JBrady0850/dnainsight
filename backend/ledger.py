@@ -65,7 +65,8 @@ from __future__ import annotations
 import hashlib
 import json
 import sqlite3
-from datetime import datetime, timezone
+import threading
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from .database import get_connection, _add_column_if_missing
@@ -235,10 +236,45 @@ _SOURCE_LABELS: dict[str, str] = {
 # Small helpers
 # ---------------------------------------------------------------------------
 
+_STAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
+_stamp_lock = threading.Lock()
+_last_stamp = ""
+
+
 def _utc_now() -> str:
-    """UTC timestamp with microseconds, so two snapshots taken in the same
-    second still order deterministically."""
-    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+    """UTC timestamp with microseconds, STRICTLY INCREASING within the process.
+
+    The format alone was not enough, and the difference cost a green suite.
+
+    A microsecond FORMAT does not buy microsecond RESOLUTION. On Windows,
+    ``datetime.now()`` rides on ``time.time()``, which is served by
+    ``GetSystemTimeAsFileTime`` and advances in steps of roughly 15.6 ms. Three
+    snapshots written inside one of those steps all receive the SAME string, so
+    the previous docstring's promise that "two snapshots taken in the same
+    second still order deterministically" was false on the platform this
+    project is most used on.
+
+    The consequence was not a cosmetic tie. ``changes_for(since=...)`` drops a
+    comparison whose newer snapshot is at or before the cutoff, so when two
+    consecutive snapshots shared a stamp, a real reclassification was reported
+    as no change at all. That is the exact failure this project refuses
+    everywhere else: "nothing changed" and "we could not tell" are different
+    claims, and collapsing them is worse than either.
+
+    So the stamp is issued under a lock and never repeats or goes backwards. A
+    collision advances one microsecond past the last issued value, which also
+    absorbs a clock stepped backwards by NTP. Every stamp is fixed width, so
+    lexical order equals chronological order and SQL ``ORDER BY created_at``
+    keeps working untouched.
+    """
+    global _last_stamp
+    with _stamp_lock:
+        stamp = datetime.now(timezone.utc).strftime(_STAMP_FORMAT)
+        if _last_stamp and stamp <= _last_stamp:
+            previous = datetime.strptime(_last_stamp, _STAMP_FORMAT)
+            stamp = (previous + timedelta(microseconds=1)).strftime(_STAMP_FORMAT)
+        _last_stamp = stamp
+        return stamp
 
 
 def _text(value: Any) -> str:
@@ -1108,6 +1144,22 @@ def changes_for(profile_id: int, *, since: str | None = None,
 
     cutoff = _text(since).rstrip("Z") if since else ""
 
+    # Databases written before the strictly-increasing stamp landed in v3.2.2
+    # can hold several snapshots sharing one created_at, because the Windows
+    # clock advances in steps of roughly 15.6 ms. A bare timestamp then does not
+    # identify WHICH of them the caller meant, and no tie-break invented here
+    # can recover an identity the cutoff never carried. Guessing the earliest
+    # silently drops a comparison; guessing the latest silently adds one.
+    #
+    # So the filter is left exactly as it was and the ambiguity is DECLARED. A
+    # caller told "nothing changed" deserves to know the cutoff was ambiguous,
+    # which is the same distinction between an absent answer and a zero answer
+    # that the rest of this module already refuses to collapse.
+    ambiguous = 0
+    if cutoff:
+        ambiguous = sum(1 for h in headers
+                        if _text(h["created_at"]).rstrip("Z") == cutoff)
+
     all_changes: list[dict] = []
     comparisons: list[dict] = []
     for older, newer in zip(headers, headers[1:]):
@@ -1157,6 +1209,13 @@ def changes_for(profile_id: int, *, since: str | None = None,
         "counts": counts,
         "material_count": len(material),
         "truncated": truncated,
+        "since_ambiguous": ambiguous > 1,
+        "since_note": (
+            f"The cutoff you supplied matches {ambiguous} snapshots that share "
+            "one timestamp, so it cannot identify which of them you meant. "
+            "Comparisons at that instant may be missing from this result. "
+            "Snapshots written from v3.2.2 onward cannot share a timestamp."
+        ) if ambiguous > 1 else "",
         "headline": _headline(material, all_changes),
     }
 

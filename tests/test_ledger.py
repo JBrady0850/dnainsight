@@ -11,6 +11,7 @@ directory, and the attribute so the already-imported module actually obeys.
 
 import json
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 import pytest
@@ -939,3 +940,102 @@ class TestPruning:
         ledger.prune_snapshots(1, keep=1)
         survivor = ledger.latest_snapshot(1)
         assert survivor is not None and "snp:rs1" in survivor["entries"]
+
+
+class TestTimestampsAreStrictlyIncreasing:
+    """A microsecond FORMAT is not microsecond RESOLUTION.
+
+    On Windows, datetime.now() rides on time.time(), which advances in steps of
+    roughly 15.6 ms. Snapshots written inside one step used to receive the same
+    created_at string, and changes_for(since=...) then reported a real
+    reclassification as no change at all. That failure appeared once as an
+    intermittent red run on a suite that was green minutes earlier, which is the
+    worst way for a correctness bug to announce itself.
+    """
+
+    def test_a_burst_of_stamps_never_repeats(self):
+        stamps = [ledger._utc_now() for _ in range(500)]
+        assert len(set(stamps)) == len(stamps)
+
+    def test_a_burst_of_stamps_never_goes_backwards(self):
+        stamps = [ledger._utc_now() for _ in range(500)]
+        assert stamps == sorted(stamps)
+
+    def test_a_coarse_clock_cannot_produce_a_tie(self, monkeypatch):
+        # Every call lands in the same 15.6 ms tick, as on Windows.
+        frozen = datetime(2026, 8, 10, 12, 0, 0, 15600, tzinfo=timezone.utc)
+
+        class FrozenClock(datetime):
+            @classmethod
+            def now(cls, tz=None):
+                return frozen
+
+        monkeypatch.setattr(ledger, "datetime", FrozenClock)
+        stamps = [ledger._utc_now() for _ in range(20)]
+        assert len(set(stamps)) == 20
+        assert stamps == sorted(stamps)
+
+    def test_a_clock_stepped_backwards_does_not_reorder_snapshots(self, monkeypatch):
+        moments = [datetime(2026, 8, 10, 12, 0, 5, 0, tzinfo=timezone.utc),
+                   datetime(2026, 8, 10, 12, 0, 1, 0, tzinfo=timezone.utc)]
+
+        class SteppingClock(datetime):
+            @classmethod
+            def now(cls, tz=None):
+                return moments.pop(0) if moments else datetime(
+                    2026, 8, 10, 12, 0, 1, 0, tzinfo=timezone.utc)
+
+        monkeypatch.setattr(ledger, "datetime", SteppingClock)
+        first, second = ledger._utc_now(), ledger._utc_now()
+        assert second > first
+
+    def test_the_stamp_stays_fixed_width_so_lexical_order_is_chronological(self):
+        stamp = ledger._utc_now()
+        assert len(stamp) == len("2026-08-10T12:00:00.000000Z")
+        assert stamp.endswith("Z")
+
+
+class TestSinceDeclaresAnAmbiguousCutoff:
+    """Databases written before v3.2.2 can still hold tied created_at values.
+
+    A bare timestamp cannot say WHICH of several snapshots sharing it the caller
+    meant, and no tie-break invented in changes_for can recover an identity the
+    cutoff never carried. Guessing the earliest silently drops a comparison and
+    guessing the latest silently adds one, so the ambiguity is reported instead.
+    """
+
+    def _tied_history(self, monkeypatch):
+        monkeypatch.setattr(ledger, "_utc_now", lambda: "2026-08-10T12:00:00.000000Z")
+        a = ledger.snapshot(1, [vus("rs1")], db_versions={"clinvar": "2026-06"})
+        b = ledger.snapshot(1, [snp("rs1", clinvar_sig_code=5)],
+                            db_versions={"clinvar": "2026-07"})
+        c = ledger.snapshot(1, [snp("rs1", clinvar_sig_code=5, review_stars=4)],
+                            db_versions={"clinvar": "2026-08"})
+        return a, b, c
+
+    def test_a_tied_cutoff_is_flagged_rather_than_guessed_at(self, monkeypatch):
+        _, b, _ = self._tied_history(monkeypatch)
+        payload = ledger.changes_for(1, since=ledger.get_snapshot(b)["created_at"])
+        assert payload["since_ambiguous"] is True
+        assert "cannot identify which of them you meant" in payload["since_note"]
+
+    def test_an_empty_result_from_a_tied_cutoff_is_never_silent(self, monkeypatch):
+        # The failure this whole class exists to prevent: being told nothing
+        # changed when the truth is that the question could not be answered.
+        _, b, _ = self._tied_history(monkeypatch)
+        payload = ledger.changes_for(1, since=ledger.get_snapshot(b)["created_at"])
+        if not payload["comparisons"]:
+            assert payload["since_note"]
+
+    def test_an_unambiguous_cutoff_carries_no_warning(self):
+        a = ledger.snapshot(1, [vus("rs1")], db_versions={"clinvar": "2026-06"})
+        ledger.snapshot(1, [snp("rs1", clinvar_sig_code=5)],
+                        db_versions={"clinvar": "2026-07"})
+        payload = ledger.changes_for(1, since=ledger.get_snapshot(a)["created_at"])
+        assert payload["since_ambiguous"] is False
+        assert payload["since_note"] == ""
+
+    def test_a_cutoff_matching_no_snapshot_is_not_ambiguous(self, monkeypatch):
+        self._tied_history(monkeypatch)
+        assert ledger.changes_for(1, since="2000-01-01")["since_ambiguous"] is False
+        assert ledger.changes_for(1, since="2099-01-01")["changes"] == []

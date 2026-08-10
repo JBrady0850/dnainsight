@@ -3,6 +3,54 @@
 All notable changes to DNAInsight are documented here. This project follows
 [Semantic Versioning](https://semver.org/).
 
+## [3.2.2] - 2026-08-10
+
+### Fixed
+- **`ledger._utc_now()` now issues strictly increasing timestamps.** A
+  microsecond FORMAT is not microsecond RESOLUTION, and the difference was
+  silently corrupting the reclassification ledger on Windows.
+
+  `datetime.now()` rides on `time.time()`, which on Windows is served by
+  `GetSystemTimeAsFileTime` and advances in steps of roughly 15.6 ms. Snapshots
+  written inside one step all received the SAME `created_at` string, so the old
+  docstring's promise that "two snapshots taken in the same second still order
+  deterministically" was false on the platform this project is most used on.
+
+  The consequence was not a cosmetic tie. `changes_for(since=...)` skips any
+  comparison whose newer snapshot is at or before the cutoff, so two consecutive
+  snapshots sharing a stamp made a real reclassification report as **no change
+  at all**. A user asking what changed since their last scan could be told
+  nothing had, while the ledger held the change.
+
+  Stamps are now issued under a lock and never repeat or move backwards. A
+  collision advances one microsecond past the last issued value, which also
+  absorbs a clock stepped backwards by NTP. Every stamp stays fixed width, so
+  lexical order still equals chronological order and `ORDER BY created_at` is
+  untouched.
+
+  **How this was found.** An intermittent failure of
+  `test_since_filters_out_earlier_comparisons` on Windows, on a suite that was
+  green minutes earlier and green 60 consecutive times on Linux. It was
+  reproduced deliberately by quantising the clock to a 15.6 ms tick before it
+  was treated as anything other than a flake.
+- **`changes_for` declares an ambiguous cutoff instead of guessing.** Databases
+  written before this release can still hold tied timestamps. A bare timestamp
+  cannot say WHICH of several snapshots sharing it the caller meant, and no
+  tie-break invented in `changes_for` recovers an identity the cutoff never
+  carried: guessing the earliest silently drops a comparison, guessing the
+  latest silently adds one. Both were prototyped and both were rejected.
+
+  The filter is therefore unchanged, and the payload gained `since_ambiguous`
+  and `since_note`. A caller told "nothing changed" is now also told the cutoff
+  matched several snapshots and the answer may be incomplete. Absent and zero
+  stay separate, which is the rule the rest of this module already follows.
+
+### Added
+- 9 tests in `tests/test_ledger.py`, 3410 total. They pin that a burst of stamps
+  never repeats and never goes backwards, that a frozen coarse clock still
+  yields distinct increasing stamps, that a backward clock step does not reorder
+  snapshots, and that an empty result from a tied cutoff is never silent.
+
 ## [3.2.1] - 2026-08-10
 
 ### Added
