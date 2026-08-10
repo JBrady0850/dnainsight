@@ -1,10 +1,10 @@
-DNAInsight v3.1.0
+DNAInsight v3.1.1
 
 ![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Bundled SNPs](https://img.shields.io/badge/Bundled_SNPs-122_curated-orange)
 ![Genosets](https://img.shields.io/badge/Genosets-65-orange)
-![Tests](https://img.shields.io/badge/Tests-3280_passing-brightgreen)
+![Tests](https://img.shields.io/badge/Tests-3332_passing-brightgreen)
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy_Me_a_Coffee-support_this_project-FFDD00?logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/jbrady2852)
 
 ![DNAInsight dashboard showing a sample profile with findings, risk categories and next steps](DNAInsight.png)
@@ -29,14 +29,14 @@ that meaning CHANGES, where your data runs out, and what it could not check.
 | Provenance | none | signed reproducible manifests, plus a runtime audit of the bundling rule |
 | Input formats | consumer array exports | plus VCF, gVCF, BAM and CRAM, with the genome build detected and mismatches refused |
 | Ancestry | none | global proportions, local ancestry, chromosome painting |
-| Haplogroups | none | bundled Y and mtDNA backbones, with optional tools for depth |
+| Haplogroups | none | bundled Y and mtDNA backbones, both naming systems reported, with optional tools for depth |
 | Relatives | trio checks on loaded files | IBD across loaded kits, relationship ranges, parental phasing, chromosome browser |
 | Imputation | none | DR2 as a first-class field, imputed calls structurally capped below typed ones |
 | Pharmacogenomics | CPIC level per variant | star-allele diplotypes for 9 genes, Indeterminate by default, prescription guard |
 | Carrier screening | risk allele per variant | 11-gene panel with residual risk arithmetic |
 | Assistant | none | grounded local model, refusal-first, genotypes never leave the process |
 | Endpoints | 20 | plus 31 v3 paths |
-| Tests | 1929 | 3280 |
+| Tests | 1929 | 3332 |
 
 `CHANGELOG.md` has the full history, including the v3.1 installer and interface
 fixes.

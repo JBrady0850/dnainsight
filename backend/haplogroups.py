@@ -9,7 +9,22 @@ roughly 2,000 Y-SNPs out of the tens of thousands on a modern Y tree, and about
 2,500 mitochondrial positions out of 16,569 bases, which is around 15 percent of
 the mitochondrial genome. FamilyTreeDNA sells depth, so it has a commercial
 reason to be clear. 23andMe reports a shallow array call against an outdated
-tree and does not say so. MyHeritage does not offer the feature at all.
+tree and does not say so.
+
+MyHeritage added a Y-DNA haplogroup tier in 2026, sourced from the kit the user
+already sent, and caps it at what FamilyTreeDNA's comparison page calls
+Intermediate: Y-Adam down to the Metal Age, two notable connections and two
+ancient ones, with a paid Big Y-700 upgrade for anything deeper. That tier is
+capped by product decision rather than by the assay, since MyHeritage moved to
+low-pass whole genome sequencing in late 2025 and low-pass WGS reads the Y.
+Which is the point worth keeping in view here: the depth a vendor reports is a
+commercial choice, the depth the data supports is a measurement, and only one of
+those two numbers is in this module. Ours is the measurement.
+
+Checked 2026-08-09 against the FamilyTreeDNA MyHeritage upgrade page. An earlier
+version of this docstring said MyHeritage did not offer the feature at all,
+which was true when written and is not now. Competitive claims in comments go
+stale silently, so this one carries its date.
 
 DNAInsight's differentiator is telling the user exactly where their data runs
 out. So the resolution ceiling is a first-class returned field on every call,
@@ -76,6 +91,7 @@ is information about reliability, and a silent merge destroys it.
 
 from __future__ import annotations
 
+import re
 import tempfile
 from pathlib import Path
 from typing import Any, Iterable, Sequence
@@ -183,8 +199,37 @@ TYPICAL_ARRAY = {
 
 def _y(node: str, parent: str | None, label: str, marker: str,
        rsid: str | None, ancestral: str | None, derived: str | None,
-       *, verified: bool = False, note: str = "") -> dict:
-    """Build one Y backbone entry. ``verified`` defaults False on purpose."""
+       *, verified: bool = False, note: str = "",
+       assembly: str | None = None, ref_carries: str | None = None,
+       dbsnp_checked: bool = False) -> dict:
+    """Build one Y backbone entry. ``verified`` defaults False on purpose.
+
+    THE THREE FIELDS THAT LOOK LIKE BOOKKEEPING AND ARE NOT
+    -------------------------------------------------------
+    ``assembly``, ``ref_carries`` and ``dbsnp_checked`` exist because dbSNP is
+    the obvious machine-readable source for confirming this table and it cannot
+    confirm the thing that matters most.
+
+    dbSNP reports REFERENCE over ALTERNATE. This table records ANCESTRAL over
+    DERIVED. Those are different questions, and on the Y chromosome they
+    routinely disagree, because the GRCh38 reference Y comes from a single
+    non-African lineage that carries the derived allele at many backbone nodes.
+    Worked example, and the reason this exists: dbSNP gives rs2032595 (M168, the
+    CT node) as chrY:12702062 T>C forward, while this table gives M168 as
+    ancestral C, derived T. Both are right. The reference simply carries the
+    derived state there.
+
+    A builder that mapped ``ref`` onto ``ancestral`` would invert roughly half
+    this tree and every test in the suite would still pass, because the data
+    would be internally consistent and externally backwards. So an entry may not
+    claim ``verified`` until it also records which assembly it was checked
+    against and which state that assembly's reference carries.
+    ``tests/test_haplogroup_nomenclature.py`` enforces that and will fail the
+    build rather than trust anyone to remember it.
+
+    ``ref_carries`` is "ancestral", "derived", or None for not yet established.
+    None is the honest default and is never treated as "ancestral".
+    """
     return {
         "system": "Y",
         "node": node,
@@ -195,6 +240,9 @@ def _y(node: str, parent: str | None, label: str, marker: str,
         "ancestral": (ancestral or "").upper() or None,
         "derived": (derived or "").upper() or None,
         "verified": bool(verified),
+        "assembly": assembly,
+        "ref_carries": ref_carries,
+        "dbsnp_checked": bool(dbsnp_checked),
         "note": note,
     }
 
@@ -555,6 +603,53 @@ def _mt_keys(variant: dict) -> list[str]:
     return keys
 
 
+_LEADING_LETTERS = re.compile(r"^[A-Za-z]+")
+
+
+def snp_name(entry: dict) -> str | None:
+    """The SNP-based name for a node, for example ``J-M267`` for J1.
+
+    Two naming systems are in circulation and they describe the same nodes.
+    The older letter-number form (J1, R1b1a1b) encodes a position in the tree,
+    so it gets renumbered every time the tree is revised and a saved result
+    silently goes stale. The SNP-based form (J-M267, R-M269) names the mutation
+    instead, which does not move. FamilyTreeDNA reports the second, this
+    project's labels are the first, and a user comparing the two had no way to
+    know they were looking at one node rather than two.
+
+    That confusion is not hypothetical. A widely shared claim in August 2026
+    held that consumer vendors "misclassify J1 as generic J-M267". M267 is the
+    SNP that defines J1, so the two strings are the same haplogroup and there
+    was no misclassification to report. Emitting both names removes the
+    ambiguity at the source.
+
+    Returns None for the root, which no marker defines.
+    """
+    marker = (entry or {}).get("marker")
+    if not marker:
+        return None
+    label = entry.get("label") or entry.get("node") or ""
+    match = _LEADING_LETTERS.match(str(label))
+    if not match:
+        return None
+    return f"{match.group(0)}-{marker}"
+
+
+def equivalent_names(entry: dict) -> list[str]:
+    """Every name this one node answers to, label first, no duplicates.
+
+    Order is deliberate. The label leads because it is what the rest of this
+    codebase keys on, and callers that take the first element get the value
+    they got before this function existed.
+    """
+    entry = entry or {}
+    names: list[str] = []
+    for candidate in (entry.get("label"), snp_name(entry), entry.get("node")):
+        if candidate and candidate not in names:
+            names.append(candidate)
+    return names
+
+
 def unverified_markers() -> dict:
     """Every backbone entry whose rsID or alleles are not confirmed.
 
@@ -566,6 +661,13 @@ def unverified_markers() -> dict:
         {
             "node": entry["node"], "marker": entry.get("marker"),
             "rsid": entry.get("rsid"), "note": entry.get("note", ""),
+            # What the builder still has to establish for this row. Carried
+            # here so the audit list states the remaining work instead of just
+            # naming the row: an rsID alone cannot settle which state is
+            # ancestral, because dbSNP answers reference over alternate.
+            "assembly": entry.get("assembly"),
+            "ref_carries": entry.get("ref_carries"),
+            "dbsnp_checked": bool(entry.get("dbsnp_checked")),
         }
         for name, entry in sorted(Y_BACKBONE.items())
         if name != "root" and not entry.get("verified")
@@ -805,6 +907,14 @@ def _backbone_payload(system: str, tree: dict, *, resolved: bool,
         "state": "called" if resolved else "unresolved",
         "haplogroup": stopped_at if resolved else None,
         "label": tree[stopped_at]["label"] if resolved else None,
+        # Both naming systems, so a result can be compared against a vendor
+        # report without the reader having to know they describe one node.
+        # Empty rather than guessed when nothing resolved: an unresolved call
+        # has no node to name, and inventing one here would be the same class
+        # of error as reporting an untested marker as ancestral.
+        "equivalent_names": (equivalent_names(tree[stopped_at])
+                             if resolved else []),
+        "also_written_as": (snp_name(tree[stopped_at]) if resolved else None),
         "path": chain,
         "path_markers": path_markers,
         "assumed": assumed,

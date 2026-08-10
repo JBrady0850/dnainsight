@@ -3,6 +3,67 @@
 All notable changes to DNAInsight are documented here. This project follows
 [Semantic Versioning](https://semver.org/).
 
+## [3.1.1] - 2026-08-09
+
+### Added
+- Both haplogroup naming systems on every call. `snp_name()` and
+  `equivalent_names()` render a node in the SNP-based form as well as the
+  letter-number one, so J1 also reports as **J-M267** and R1b1a1b as
+  **R-M269**. Every Y payload gained `equivalent_names` and `also_written_as`.
+
+  This came from a real misreading. A widely shared claim held that consumer
+  vendors "misclassify J1 as generic J-M267". M267 is the SNP that defines J1,
+  so the two strings name the same node and there was no misclassification to
+  report. A DNAInsight result sat next to a FamilyTreeDNA result with no way to
+  see they agreed. Low resolution and a wrong call are different failures and
+  this project exists to keep them apart, so the fix belongs in the payload
+  rather than in documentation.
+- `assembly`, `ref_carries` and `dbsnp_checked` on every Y backbone entry, and
+  the rule that no entry may claim `verified` without all three.
+
+  dbSNP is the obvious source for confirming that table and it cannot answer the
+  question that matters. It reports **reference over alternate**; the table
+  records **ancestral over derived**. On the Y these routinely disagree, because
+  the GRCh38 reference Y comes from a lineage carrying the derived allele at
+  many backbone nodes. dbSNP gives rs2032595 (M168) as chrY:12702062 T>C
+  forward while the table gives ancestral C, derived T, and both are correct.
+  A builder mapping `ref` onto `ancestral` would have inverted roughly half the
+  tree with the entire suite still green, since the data would be internally
+  consistent and externally backwards. The same shape as the CPIC positive-strand
+  conflicts in `docs/KNOWN_GAPS.md`.
+- `tests/test_haplogroup_nomenclature.py`, 28 tests, and `tests/test_version_consistency.py`, 9 tests. J1 and J2 equivalence sets
+  may never intersect, no name may be claimed by two nodes, and nothing may be
+  marked verified without a recorded reference orientation.
+- `NOTICE` at the repository root, for attribution-licensed data. Currently
+  lists none.
+
+### Changed
+- `data/DATA_SOURCES.md` now permits **CC-BY** alongside CC0 and public domain,
+  on the owner's explicit instruction of 2026-08-09. Share-alike and
+  non-commercial terms remain refused. The rule existed to stop a licence
+  stripping the MIT grant from downstream users, and attribution does not do
+  that. No CC-BY data is bundled yet; `licence_audit()` is deliberately left
+  strict until the first such file actually lands.
+- `unverified_markers()` rows now carry `assembly`, `ref_carries` and
+  `dbsnp_checked`, so the audit list states the remaining work rather than only
+  naming the row.
+
+### Fixed
+- A stale competitive claim in the `haplogroups.py` docstring asserting that
+  MyHeritage does not offer haplogroups. MyHeritage added a Y-DNA tier in 2026,
+  capped at Intermediate by product decision rather than by the assay. The
+  corrected passage carries the date it was checked, because claims about other
+  vendors go stale silently.
+- `tools/vversion.py` compared every version string in the repository against
+  every other one, including the built data artefacts, whose versions are
+  deliberately independent of the application's. It could therefore never pass,
+  and had reported a mismatch on every run of the release gate since v2.0 while
+  being carried as a standing "safe to ship" warning. A warning that is always
+  on is a warning nobody reads, so a genuine version skew would have looked
+  identical to every other run. Application and artefact declarations are now
+  checked within their own groups. **The release gate reports zero blockers and
+  zero warnings for the first time.**
+
 ## [3.1.0] - 2026-08-04
 
 ### Added

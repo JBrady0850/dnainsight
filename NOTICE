@@ -1,0 +1,56 @@
+DNAInsight
+Copyright (c) 2026 John Brady
+Licensed under the MIT License. See LICENSE.
+
+================================================================================
+THIRD-PARTY DATA ATTRIBUTION
+================================================================================
+
+This file records attribution for bundled data that carries an attribution
+requirement. It exists because `data/DATA_SOURCES.md` was amended on 2026-08-09
+to permit CC-BY licensed data alongside CC0 and public domain data, and CC-BY
+requires that credit travel with the work.
+
+Share-alike and non-commercial terms remain refused. See `data/DATA_SOURCES.md`
+for the full policy and for the complete list of every source the project
+touches, including the ones it deliberately refuses.
+
+--------------------------------------------------------------------------------
+CC-BY SOURCES CURRENTLY BUNDLED
+--------------------------------------------------------------------------------
+
+None.
+
+The policy permitting them is approved and no such file has been added yet. When
+the first one lands, it is listed here with its title, author, licence version
+and a link to the licence text, and `provenance.SOURCES` is updated in the same
+change so `licence_audit()` can verify the claim.
+
+--------------------------------------------------------------------------------
+CC0 AND PUBLIC DOMAIN SOURCES
+--------------------------------------------------------------------------------
+
+These carry no attribution requirement and are credited here as a courtesy
+rather than an obligation. `data/DATA_SOURCES.md` is the authoritative record.
+
+  CPIC                Clinical Pharmacogenetics Implementation Consortium
+                      CC0-1.0
+
+  ClinVar             National Center for Biotechnology Information, NIH
+                      US Government work, public domain
+
+  gnomAD              Genome Aggregation Database, Broad Institute
+                      CC0-1.0
+
+  dbSNP               National Center for Biotechnology Information, NIH
+                      US Government work, public domain
+
+--------------------------------------------------------------------------------
+TOOLS INVOKED AS SUBPROCESSES
+--------------------------------------------------------------------------------
+
+DNAInsight can invoke external programs that the user installs themselves, into
+their own home directory, outside this repository tree. None of them is
+imported, linked, vendored or redistributed here, and the subprocess boundary is
+the licence boundary. Their licences are their own and are recorded in
+`backend/external.py` alongside each registry entry.

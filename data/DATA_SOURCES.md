@@ -3,7 +3,33 @@
 Every external dataset DNAInsight touches, what it is used for, and what may
 legally be done with it. Referenced from `CHANGELOG.md`.
 
-Last reviewed: 2026-08-04.
+Last reviewed: 2026-08-09.
+
+## Amendment 2026-08-09: attribution licences are now permitted
+
+The rule below said CC0 and public domain only. It now also permits **CC-BY**,
+on the owner's explicit instruction of 2026-08-09, with attribution recorded in
+this document and in `NOTICE` at the repository root.
+
+The reasoning is that CC-BY is not the hazard the original rule was written
+against. That rule exists to stop a **share-alike or non-commercial** term
+attaching itself to the repository and stripping the MIT grant from downstream
+users. CC-BY does neither. It imposes an attribution obligation, which is a
+documentation duty rather than a licence change, and MIT already carries a
+notice-retention requirement of its own. Share-alike and non-commercial terms
+remain refused, and nothing about SNPedia or PharmGKB changes.
+
+**No CC-BY data is bundled today.** This amendment records an approved policy,
+not an exercised one. The reason it was approved is that the Y phylogeny
+supplements needed to verify `Y_BACKBONE` are almost all CC-BY, and the CC0-only
+rule would have left that table permanently unverifiable.
+
+`licence_audit()` in `backend/provenance.py` is deliberately **not** relaxed as
+part of this amendment. It still refuses anything outside CC0 and public domain,
+because loosening a guard before there is anything for it to guard costs a
+protection and buys nothing. The first CC-BY artefact to actually land must
+update `provenance.SOURCES` in the same change that adds the file, and that
+change is where the audit gets extended.
 
 ## The project's position, in one paragraph
 
