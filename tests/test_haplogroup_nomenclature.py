@@ -268,8 +268,12 @@ class TestIndelMarkersAreWrongInKindNotInValue:
         return {n: e for n, e in h.Y_BACKBONE.items()
                 if e.get("variant_type") not in (None, "snv")}
 
-    def test_the_two_known_indels_are_recorded_as_such(self):
-        assert {e["marker"] for e in self._indels().values()} == {"M17", "M91"}
+    def test_the_known_indels_are_recorded_as_such(self):
+        # M60 and M175 joined M17 and M91 in v3.4.0. Both were found by the
+        # Karafet 2008 supplement and both were confirmed by dbSNP, which
+        # returns ins for rs2032623 and delins for rs2032678.
+        assert ({e["marker"] for e in self._indels().values()}
+                == {"M17", "M91", "M60", "M175"})
 
     def test_an_indel_clears_the_single_base_fields(self):
         # Widening these to hold "GGGG" would have been compared against an
@@ -280,9 +284,26 @@ class TestIndelMarkersAreWrongInKindNotInValue:
 
     def test_an_indel_records_whole_sequences_instead(self):
         for name, entry in self._indels().items():
-            assert entry["ancestral_seq"], name
-            assert entry["derived_seq"], name
+            # An INSERTION has an empty ancestral sequence. "" is a recorded
+            # value and None is not, so the assertion is "established" rather
+            # than "truthy"; the earlier truthiness check would have rejected
+            # a correctly recorded insertion.
+            assert entry["ancestral_seq"] is not None, name
+            assert entry["derived_seq"] is not None, name
+            assert entry["ancestral_seq"] or entry["derived_seq"], name
             assert len(entry["ancestral_seq"]) != len(entry["derived_seq"]), name
+
+    def test_the_insertion_records_an_empty_ancestral_sequence(self):
+        entry = h.Y_BACKBONE["B"]
+        assert entry["marker"] == "M60"
+        assert entry["variant_type"] == "ins"
+        assert entry["ancestral_seq"] == ""
+        assert entry["derived_seq"] == "T"
+
+    def test_m175_carries_the_dbsnp_sequences(self):
+        entry = h.Y_BACKBONE["O"]
+        assert (entry["ancestral_seq"], entry["derived_seq"]) == (
+            "CTTCTCTTCTC", "CTTCTC")
 
     def test_m17_carries_the_dbsnp_sequences(self):
         entry = h.Y_BACKBONE["R1a1a"]
@@ -317,8 +338,9 @@ class TestIndelMarkersAreWrongInKindNotInValue:
 
     def test_untypeable_markers_reports_them_apart_from_unverified_ones(self):
         report = h.untypeable_markers()
-        assert report["count"] == 2
-        assert {row["marker"] for row in report["markers"]} == {"M17", "M91"}
+        assert report["count"] == 4
+        assert ({row["marker"] for row in report["markers"]}
+                == {"M17", "M91", "M60", "M175"})
         assert "structural ceiling" in report["reason"]
 
 
@@ -349,9 +371,22 @@ class TestTheDbsnpAuditIsRecordedWithoutOverclaiming:
         assert carried.count("derived") == 10
         assert carried.count("ancestral") == 7
 
-    def test_the_unresolved_m20_conflict_is_recorded_rather_than_silently_fixed(self):
-        note = h.Y_BACKBONE["L"]["note"]
-        assert "CONFLICT" in note and "rs3911" in note
+    def test_the_m20_conflict_is_now_resolved_by_a_second_source(self):
+        """v3.2.1 recorded this conflict; v3.4.0 closes it.
+
+        dbSNP gives rs3911 as A/G and the table recorded derived C, which
+        matched nothing. Karafet 2008 Supplementary Table 1 row 19 gives A->G.
+        Two independent sources agree, so the stored C was simply wrong. The
+        conflict is resolved by evidence rather than by picking a side, and the
+        note still records what was wrong and why.
+        """
+        entry = h.Y_BACKBONE["L"]
+        assert entry["marker"] == "M20"
+        assert entry["rsid"] == "rs3911"
+        assert (entry["ancestral"], entry["derived"]) == ("A", "G")
+        note = entry["note"]
+        assert "RESOLVED" in note and "rs3911" in note
+        assert "CONFLICT" not in note
 
     def test_multi_allelic_sites_are_flagged_not_treated_as_conflicts(self):
         flagged = {e["marker"] for e in h.Y_BACKBONE.values()

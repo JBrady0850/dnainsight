@@ -181,3 +181,119 @@ One batched E-utilities request. It needs the network and nothing else. It reads
 `tests/test_y_dbsnp_audit.py` covers the classification logic offline against
 real dbSNP records captured on the run date, including the multi-allelic SPDI
 parsing whose absence produced the discarded draft described above.
+
+
+---
+
+# Re-run 2026-08-10, v3.4.0
+
+Run after the Karafet 2008 supplement was folded in. **35 of 49 markers are now
+reachable by dbSNP, up from 17.** No row of `Y_BACKBONE` was modified by this
+run and every entry remains `verified: false`.
+
+## What this run independently confirms
+
+The audit is a report, so its value is what it corroborates from a different
+direction than the publication did.
+
+**M20 now returns `consistent`.** dbSNP gives rs3911 as A/G. The previous run
+could not comment, because the table recorded a derived C that dbSNP has no
+allele for. The supplement gives A->G, the table was corrected to A->G, and
+dbSNP agrees. That conflict is closed by two independent sources rather than by
+a judgement call.
+
+**M267 now returns `consistent`.** dbSNP gives rs9341313 as T/G against the
+corrected T->G. The pair had been stored C->A, the source pair complemented and
+reversed.
+
+**M145 and P143 return `strand`, which is the expected answer.** Both are the
+same call read on the opposite strand, and the table records the strand rather
+than rewriting the alleles.
+
+**Five markers return `CLASS`, and four of those are the audit working.** M60
+comes back `ins`, M175 `delins CTTCTCTTCTC/CTTCTC`, M17 `delins GGGG/GGG`.
+dbSNP is reporting that these sites are length polymorphisms, which is exactly
+what they are now recorded as. The verdict fires because the entry no longer
+carries a base pair to compare, so the comparison is skipped rather than faked.
+
+**M2 (rs3893) and M91 (rs2032651) come back empty**: no class, no positions, no
+alleles. Both are 1994-2001 era accessions and the likeliest explanation is that
+they have been merged into newer ones, which `esummary` does not follow. The
+audit reports them as `CLASS` because it has nothing to compare, not because a
+class conflict was found. Neither carries `dbsnp_checked`. **Following those
+merges is the next concrete change to this tool**, and it is a tool change
+rather than a data change.
+
+## What still cannot be settled here
+
+14 markers carry no rsID and are unreachable: M31, M35, P15, F1329, F929, P37.2,
+M429, L15, M410, P331, L298, M178, M122, M420. Six post-date the 2008 paper and
+are recorded as permanently unresolvable from it. Five were genotyped by that
+survey and assigned no RefSNP ID. Two, M31 and M429, are held because the
+supplement and the stored pair conflict.
+
+The reference-orientation counts below remain the material result. **10 of 30
+determinable markers have a reference carrying the DERIVED allele**, plus one
+more on the opposite strand. A builder that mapped `ref` onto `ancestral` would
+invert every one of those and nothing in the suite would catch it.
+
+## Full output
+
+```
+node    marker rsid        class   GRCh38        GRCh37        ref/alt       anc>der   verdict                     ref_carries
+------------------------------------------------------------------------------------------------------------------------------
+B       M60    rs2032623   ins     Y:19716186    Y:21878073    /T            >        CLASS                       undetermined
+BT      M91    rs2032651   None    None          None          /             >        CLASS                       undetermined
+C       M130   rs35284970  snv     Y:2866813     Y:2734854     C/T           C>T       consistent                  ancestral
+C-M217  M217   rs2032668   snv     Y:13325453    Y:15437333    A/C           A>C       consistent                  ancestral
+CF      P143   rs4141886   snv     Y:12077161    Y:14197867    A/G           C>T       strand                      derived (opposite strand)
+CT      M168   rs2032595   snv     Y:12702062    Y:14813991    T/C           C>T       consistent                  derived
+D       M174   rs2032602   snv     Y:12842354    Y:14954280    T/A/C         T>C       consistent (multi-allelic)  ancestral
+DE      M145   rs3848982   snv     Y:19555322    Y:21717208    C/T           G>A       strand                      ancestral (opposite strand)
+E       M96    rs9306841   snv     Y:19617112    Y:21778998    C/G           G>C       consistent                  derived
+E-M2    M2     rs3893      None    None          None          /             A>G       CLASS                       undetermined
+F       M89    rs2032652   snv     Y:19755427    Y:21917313    T/C           C>T       consistent                  derived
+G       M201   rs2032636   snv     Y:12915617    Y:15027529    G/T           G>T       consistent                  ancestral
+H       M69    rs2032673   snv     Y:19732172    Y:21894058    T/C           T>C       consistent                  ancestral
+I       M170   rs2032597   snv     Y:12735858    Y:14847792    A/C           A>C       consistent                  ancestral
+I1      M253   rs17307677  snv     Y:16050954    Y:18162834    T/C           C>T       consistent                  derived
+I2      M438   rs17307294  snv     Y:14526924    Y:16638804    A/G           A>G       consistent                  ancestral
+J       M304   rs13447352  snv     Y:20587967    Y:22749853    A/C           A>C       consistent                  ancestral
+J1      M267   rs9341313   snv     Y:20579932    Y:22741818    T/G           T>G       consistent                  ancestral
+J2      M172   rs2032604   snv     Y:12857709    Y:14969634    T/G           T>G       consistent                  ancestral
+K       M9     rs3900      snv     Y:19568371    Y:21730257    G/C           C>G       consistent                  derived
+L       M20    rs3911      snv     Y:19571568    Y:21733454    A/G           A>G       consistent                  ancestral
+N       M231   rs9341278   snv     Y:13357844    Y:15469724    G/A/T         G>A       consistent (multi-allelic)  ancestral
+NO      M214   rs2032674   snv     Y:13360045    Y:15471925    T/C           T>C       consistent                  ancestral
+O       M175   rs2032678   delins  Y:13396820    Y:15508700    CTTCTCTTCTC/CTTCTC>        CLASS                       undetermined
+P       M45    rs2032631   snv     Y:19705901    Y:21867787    A/G/T         G>A       consistent (multi-allelic)  derived
+Q       M242   rs8179021   snv     Y:12906671    Y:15018582    C/T           C>T       consistent                  ancestral
+Q-M3    M3     rs3894      snv     Y:16984483    Y:19096363    G/A/T         C>T       strand                      ancestral (opposite strand)
+R       M207   rs2032658   snv     Y:13470103    Y:15581983    G/A           A>G       consistent                  derived
+R-M269  M269   rs9786153   snv     Y:20577481    Y:22739367    C/G/T         T>C       consistent (multi-allelic)  derived
+R-P312  P312   rs34276300  snv     Y:19995425    Y:22157311    A/C/G         A>G       consistent (multi-allelic)  ancestral
+R-U106  U106   rs16981293  snv     Y:8928037     Y:8796078     C/T           C>T       consistent                  ancestral
+R1      M173   rs2032624   snv     Y:12914512    Y:15026424    C/A           A>C       consistent                  derived
+R1a1a   M17    rs3908      delins  Y:19571279    Y:21733165    GGGG/GGG      >        CLASS                       undetermined
+R1b     M343   rs9786184   snv     Y:3019783     Y:2887824     A/C/G         C>A       consistent (multi-allelic)  derived
+T       M184   rs20320     snv     Y:12786229    Y:14898163    G/A           G>A       consistent                  ancestral
+
+consistent                   21   M130, M217, M168, M96, M89, M201, M69, M170, M253, M438, M304, M267, M172, M9, M20, M214, M242, M207, U106, M173, M184
+consistent (multi-allelic)    6   M174, M231, M45, M269, P312, M343
+strand                        3   P143, M145, M3
+CLASS                         5   M60, M91, M2, M175, M17
+
+what the reference carries:
+  ancestral                      17   M130, M217, M174, M201, M69, M170, M438, M304, M267, M172, M20, M231, M214, M242, P312, U106, M184
+  ancestral (opposite strand)     2   M145, M3
+  derived                        10   M168, M96, M89, M253, M9, M45, M207, M269, M173, M343
+  derived (opposite strand)       1   P143
+  undetermined                    5   M60, M91, M2, M175, M17
+
+audited 35 of 49 markers.
+14 carry no rsID and cannot be reached by dbSNP:
+  M31, M35, P15, F1329, F929, P37.2, M429, L15, M410, P331, L298, M178, M122, M420
+
+dbSNP cannot settle ancestral against derived. No value above may be
+copied into an ancestral or derived field on the strength of this run.
+```

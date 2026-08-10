@@ -148,9 +148,12 @@ def test_marker_keys_prefers_the_rsid_then_the_marker_name():
 
 
 def test_marker_keys_falls_back_to_the_marker_name_when_no_rsid_is_recorded():
-    entry = hg.Y_BACKBONE["I2"]
+    # I2/M438 stood here until v3.4.0 gave it rs17307294 from the Karafet 2008
+    # supplement. The example moved to a marker that survey genotyped and
+    # deliberately left without a RefSNP ID.
+    entry = hg.Y_BACKBONE["E-M35"]
     assert entry["rsid"] is None
-    assert hg.marker_keys(entry) == ["m438"]
+    assert hg.marker_keys(entry) == ["m35"]
 
 
 # ---------------------------------------------------------------------------

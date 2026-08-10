@@ -1,4 +1,4 @@
-DNAInsight v3.3.0
+DNAInsight v3.4.0
 
 ![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)

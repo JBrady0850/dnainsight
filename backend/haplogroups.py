@@ -123,7 +123,12 @@ __all__ = [
 # ---------------------------------------------------------------------------
 
 TREE_NAME = "DNAInsight backbone"
-TREE_VERSION = "0.1"
+# 0.2, v3.4.0: 17 Y rsIDs resolved against Karafet et al. 2008 Supplementary
+# Table 1, M20's derived allele corrected, three allele pairs transposed back to
+# the source orientation, and two more markers reclassified as length
+# polymorphisms. A call made against 0.1 is not comparable to one made against
+# 0.2, which is the entire reason this string rides on every payload.
+TREE_VERSION = "0.2"
 
 # Bumped whenever any marker, allele or edge below changes. A stored call that
 # carries an older stamp must be recomputed, never re-displayed as current.
@@ -445,6 +450,218 @@ def _apply_audit(backbone: dict[str, dict]) -> None:
 
 
 _apply_audit(Y_BACKBONE)
+
+
+# ---------------------------------------------------------------------------
+# The Karafet 2008 supplement, folded in as a THIRD and separate layer.
+#
+# Karafet TM, Mendez FL, Meilerman MB, Underhill PA, Zegura SL, Hammer MF.
+# "New binary polymorphisms reshape and increase resolution of the human Y
+# chromosomal haplogroup tree." Genome Research 18:830-838, 2008.
+# Supplementary Table 1, 599 markers over 12 positional columns.
+#
+# WHY THIS IS A THIRD PASS AND NOT MERGED INTO THE TABLE ABOVE
+# -----------------------------------------------------------
+# There are now three kinds of claim in this module and they have different
+# strengths. The literal table is what was asserted from literature recall.
+# `_apply_audit` is what dbSNP MEASURED. This pass is what a primary
+# publication STATES. Merging them into one row would make it impossible to
+# tell afterwards which rows are load-bearing on which source, which is the
+# same reason `_apply_audit` was kept separate in v3.3.0.
+#
+# WHAT A PUBLICATION BUYS AND DOES NOT BUY
+# ----------------------------------------
+# It buys the rsID, the allele pair and the variant class. It does NOT buy
+# `verified`. That flag also requires the reference orientation, and dbSNP is
+# the only thing here that supplies it. So nothing below is promoted.
+#
+# EXTRACTION, AND WHY THE METHOD IS RECORDED
+# ------------------------------------------
+# Supplementary Table 1 is laid out in POSITIONAL columns. A reading-order PDF
+# extractor can lift a RefSNP ID onto the wrong marker and emit a row that
+# looks entirely normal. These values came from `pdftotext -layout`, and the
+# column ordering was checked against pages 2, 3, 4 and 7 rendered at 170 dpi
+# before any row was trusted. 583 of 599 rows parse under a strict column
+# regex; the 16 that do not are line-wrap artifacts.
+# ---------------------------------------------------------------------------
+
+_KARAFET = "Karafet et al. 2008, Genome Research 18:830, Supplementary Table 1"
+
+
+def _k(row: int, mutation: str, ypos: str) -> str:
+    return (f"{_KARAFET} row {row}: {mutation} at Y-position {ypos} "
+            f"(2008 assembly, NOT liftover-safe).")
+
+
+# marker -> (row, rsID, mutation, Y-position, extra). The stored allele pair
+# already matches the source in every row here; only the rsID is new.
+_KARAFET_RSIDS: dict[str, tuple] = {
+    "M2":   (1,   "rs3893",     "A->G", "12606580", "Listed as M2=SY81."),
+    "M3":   (2,   "rs3894",     "C->T", "17605757", ""),
+    "M69":  (64,  "rs2032673",  "T->C", "20353446", ""),
+    "M130": (570, "rs35284970", "C->T", "2794854",  "Listed as RPS4Y711=M130."),
+    "M172": (161, "rs2032604",  "T->G", "13479028", ""),
+    "M174": (163, "rs2032602",  "T->C", "13463674", ""),
+    "M184": (171, "rs20320",    "G->A", "13407557", "Listed as M184=USP9Y+3178."),
+    "M214": (200, "rs2032674",  "T->C", "13981319", ""),
+    "M217": (203, "rs2032668",  "A->C", "13946727", ""),
+    "M231": (213, "rs9341278",  "G->A", "13979118", ""),
+    "M438": (481, "rs17307294", "A->G", "15148198", "Listed as P215=M438."),
+    "P143": (416, "rs4141886",  "G->A", "12707867",
+             "The stored C->T pair is the exact reverse complement of the "
+             "source G->A: the same call read on the opposite strand. The "
+             "pair is left as it stands and the strand difference is recorded "
+             "here rather than silently rewritten."),
+}
+
+# Markers the survey genotyped and assigned NO RefSNP ID. Recorded so the
+# absence reads as measured rather than as an oversight. rsid stays None.
+_KARAFET_NO_RSID: dict[str, tuple] = {
+    "M35":   (32,  "G->C", "20201091"),
+    "P15":   (294, "C->T", "21653414"),
+    "P37.2": (315, "T->C", "13001692"),
+    "M410":  (276, "A->G", "2811678"),
+    "M122":  (115, "T->C", "20224062"),
+}
+
+# marker -> (row, rsID or None, ancestral, derived, Y-position, why).
+# The stored pair ran the wrong way round. Not a strand difference: reversing
+# the direction is required, and for M267 complementing as well.
+_KARAFET_TRANSPOSED: dict[str, tuple] = {
+    "M145": (135, "rs3848982", "G", "A", "20176596",
+             "Was recorded A->G. Listed as M145=P205."),
+    "M178": (165, None, "T", "C", "20201143",
+             "Was recorded C->T. The survey assigned no RefSNP ID."),
+    "M267": (220, "rs9341313", "T", "G", "21151206",
+             "Was recorded C->A, which is the source pair complemented AND "
+             "reversed. The source orientation is adopted verbatim."),
+}
+
+# marker -> (row, rsID, variant_type, ancestral_seq, derived_seq, position, why).
+# The same class error v3.3.0 found in M17 and M91, in two more markers that
+# were not flagged then. dbSNP agrees with the class on both.
+_KARAFET_INDELS: dict[str, tuple] = {
+    "M60": (54, "rs2032623", "ins", "", "T", "20337461-20337460",
+            "Single-base insertion, NOT a C>A substitution. dbSNP rs2032623 "
+            "returns snp_class ins, which agrees. This row previously recorded "
+            "ancestral C, derived A; neither allele describes the variant."),
+    "M175": (164, "rs2032678", "del", "CTTCTCTTCTC", "CTTCTC", "14018100-14018104",
+             "Five-base deletion, NOT an A>G substitution. dbSNP rs2032678 "
+             "returns snp_class delins with SPDI alleles CTTCTCTTCTC/CTTCTC, "
+             "which agrees. M175 defines O, so that node cannot be called from "
+             "array base calls at all."),
+}
+
+# marker -> (row, refused value, why nothing is written).
+_KARAFET_HOLDS: dict[str, tuple] = {
+    "M31": (28, "G->C at Y-position 20199142, no RefSNP ID assigned",
+            "The stored pair is G->A. The ancestral base agrees and the "
+            "derived base does not. No strand or direction operation "
+            "reconciles A with C."),
+    "M429": (399, "rs17306671, T->A at Y-position 12541334, listed as P125=M429",
+             "The stored pair is A->C, and the reverse complement of T->A is "
+             "A->T. Because the alleles conflict, the rsID that travels with "
+             "them is not written either."),
+}
+
+# marker -> why this source can never resolve it. Recorded so no future
+# session spends effort re-reading a supplement that predates the marker.
+_KARAFET_ABSENT: dict[str, str] = {
+    "F1329": "F series, Wei et al. 2013.",
+    "F929":  "F series, Wei et al. 2013.",
+    "L15":   "FTDNA L discovery series.",
+    "L298":  "FTDNA L discovery series.",
+    "P331":  "The P series in that paper stops short of P331.",
+    "M420":  "Underhill et al. 2010.",
+}
+
+_M20_RESOLVED = (
+    "RESOLVED. This row recorded ancestral A, derived C, and dbSNP gives "
+    "rs3911 as A/G with no C allele at the site, which is why v3.2.1 could not "
+    "reconcile the two. " + _KARAFET + " row 19 gives M20 as A->G at "
+    "Y-position 20192842. The supplement and dbSNP agree, so the derived "
+    "allele is G and the stored C was simply wrong. The rsID was never in "
+    "doubt. Superseded the conflict note carried since v3.2.1."
+)
+
+_M91_RSID = (
+    " " + _KARAFET + " row 84 assigns M91 rs2032651 and states the 9T to 8T "
+    "contraction independently of the article body, so the sequences above are "
+    "now confirmed by the supplement as well. NCBI esummary returns an empty "
+    "record for rs2032651, which is a 2001-era accession and has most likely "
+    "been merged forward, so dbsnp_checked stays false. The supplement also "
+    "assigns M91 to haplogroup A rather than BT; that is a 2008-tree "
+    "convention difference and is NOT acted on here."
+)
+
+
+def _apply_karafet(backbone: dict[str, dict]) -> None:
+    """Fold the 2008 supplement in. Runs AFTER the dbSNP audit, by design."""
+    for entry in backbone.values():
+        marker = entry.get("marker")
+        if not marker:
+            continue
+
+        if marker in _KARAFET_RSIDS:
+            row, rsid, mutation, ypos, extra = _KARAFET_RSIDS[marker]
+            entry["rsid"] = rsid
+            entry["note"] = " ".join(x for x in (_k(row, mutation, ypos), extra) if x)
+
+        elif marker in _KARAFET_NO_RSID:
+            row, mutation, ypos = _KARAFET_NO_RSID[marker]
+            entry["note"] = (_k(row, mutation, ypos) + " The survey genotyped "
+                             "this marker and assigned it no RefSNP ID, so "
+                             "rsid stays None rather than being guessed.")
+
+        elif marker in _KARAFET_TRANSPOSED:
+            row, rsid, anc, der, ypos, why = _KARAFET_TRANSPOSED[marker]
+            entry["rsid"] = rsid
+            entry["ancestral"] = anc
+            entry["derived"] = der
+            entry["note"] = _k(row, f"{anc}->{der}", ypos) + " " + why
+
+        elif marker in _KARAFET_INDELS:
+            row, rsid, vtype, anc_seq, der_seq, ypos, why = _KARAFET_INDELS[marker]
+            entry["rsid"] = rsid
+            entry["variant_type"] = vtype
+            # An INSERTION has an empty ancestral sequence by definition.
+            # That is "" and not None: None means not established, "" means
+            # established as nothing there, and collapsing the two would
+            # lose the distinction this module exists to preserve.
+            entry["ancestral_seq"] = anc_seq
+            entry["derived_seq"] = der_seq
+            # Same rule as _apply_audit: clear the single-base fields rather
+            # than widening them, because every reader treats them as one base.
+            entry["ancestral"] = None
+            entry["derived"] = None
+            entry["verified"] = False
+            entry["assembly"] = _DBSNP_ASSEMBLY
+            entry["dbsnp_checked"] = True
+            entry["note"] = _k(row, vtype, ypos) + " " + why
+
+        elif marker in _KARAFET_HOLDS:
+            row, refused, why = _KARAFET_HOLDS[marker]
+            entry["note"] = (
+                f"HELD. {_KARAFET} row {row} gives {refused}. {why} Exactly one "
+                f"side is wrong and nothing available says which, so NO value "
+                f"is written. " + _UNVERIFIED_Y)
+
+        elif marker in _KARAFET_ABSENT:
+            entry["note"] = (
+                f"Absent from Karafet et al. 2008; the marker post-dates that "
+                f"survey, so the 2008 supplement can never resolve it. "
+                f"{_KARAFET_ABSENT[marker]} " + _UNVERIFIED_Y)
+
+        elif marker == "M20":
+            entry["derived"] = "G"
+            entry["note"] = _M20_RESOLVED
+
+        elif marker == "M91":
+            entry["rsid"] = "rs2032651"
+            entry["note"] = entry["note"] + _M91_RSID
+
+
+_apply_karafet(Y_BACKBONE)
 
 
 # ---------------------------------------------------------------------------

@@ -3,6 +3,101 @@
 All notable changes to DNAInsight are documented here. This project follows
 [Semantic Versioning](https://semver.org/).
 
+## [3.4.0] - 2026-08-10
+
+### Added
+- **`_apply_karafet()`, a third and separate source layer.** Karafet et al.
+  2008, Genome Research 18:830-838, Supplementary Table 1 lists 599 markers with
+  primer pairs, RefSNP IDs and mutations.
+
+  It is a third pass rather than an edit to the table because there are now
+  three kinds of claim in the module and they are not equally strong. The
+  literal table is what was asserted from literature recall, `_apply_audit` is
+  what dbSNP **measured**, and this pass is what a publication **states**.
+  Merging them would make it impossible to tell afterwards which rows rest on
+  which source, which is the same reason `_apply_audit` was kept separate.
+
+- **`tests/test_y_backbone_karafet2008.py`**, 64 tests over the new layer,
+  including a test that the passes stay in order and that no published value
+  sets `ref_carries`.
+
+### Changed
+- **17 more Y markers carry an rsID from a primary source**, and M91 gains one
+  it did not have: M2, M3, M60, M69, M91, M130, M145, M172, M174, M175, M184,
+  M214, M217, M231, M267, M438, P143. `Y_BACKBONE` goes from **17 to 35 rows
+  reachable by `tools/audit_y_dbsnp.py`**, which roughly doubles what the audit
+  can see.
+
+  Extraction used `pdftotext -layout`, not `pypdf`, and the column ordering was
+  checked against pages 2, 3, 4 and 7 rendered at 170 dpi before any row was
+  trusted. That check is not ceremony. Supplementary Table 1 is laid out in
+  positional columns, and a reading-order extractor can lift a RefSNP ID onto
+  the wrong marker while emitting a row that looks entirely normal.
+
+- **Five markers are recorded as deliberately having no rsID**: M35, P15,
+  P37.2, M410, M122. The survey genotyped all five and assigned no RefSNP ID.
+  That absence is now a measured fact rather than an apparent oversight, which
+  is what stops a later session filling the field in with a guess.
+
+- **`TREE_VERSION` 0.1 -> 0.2.** The tree data changed materially.
+
+### Fixed
+- **M20 is resolved.** The row recorded ancestral A, derived C; dbSNP gives
+  rs3911 as A/G with no C allele at the site, which is why v3.2.1 recorded a
+  conflict it could not settle. Supplementary Table 1 row 19 gives **A->G** at
+  Y-position 20192842. The supplement and dbSNP agree, so the derived allele is
+  G and the stored C was simply wrong. Resolved by evidence, not by picking a
+  side. The rsID was never in doubt.
+
+- **Two more markers were indels stored as substitutions.** M60 is a +1 bp
+  insertion (rs2032623) and M175 a -5 bp deletion (rs2032678). This is the same
+  class error v3.3.0 found in M17 and M91, in two markers nothing had flagged,
+  and dbSNP confirms both independently: `ins` for rs2032623, `delins` with SPDI
+  alleles `CTTCTCTTCTC/CTTCTC` for rs2032678.
+
+  `untypeable_markers()` therefore reports **4**, not 2. M175 defines O, so that
+  node joins R1a1a and BT as unreachable from array base calls. That is a
+  structural ceiling and no amount of coverage lifts it.
+
+  An insertion records `ancestral_seq` as `""` and not `None`. None means not
+  established; `""` means established as nothing there. The v3.3.0 test asserted
+  both sequences were truthy, which would have rejected a correctly recorded
+  insertion, so it now asserts both are established instead.
+
+- **Three allele pairs ran the wrong way round** and now match the source: M145
+  to G->A, M178 to T->C, M267 to T->G. M267 had been recorded C->A, which is the
+  source pair complemented **and** reversed.
+
+### Held, deliberately not changed
+- **M31 and M429 stay held.** Row 28 gives M31 as G->C with no RefSNP ID against
+  a stored G->A; row 399 gives M429 as rs17306671 T->A against a stored A->C,
+  and the reverse complement of T->A is A->T. Neither complementing nor
+  transposing reconciles either pair. Exactly one side is wrong in each case and
+  nothing available says which, so **no value is written**, including M429's
+  rsID, which travels with the alleles that conflict.
+
+- **Six markers cannot be resolved from this source at all** and now say so:
+  F1329, F929 (Wei et al. 2013), L15, L298 (FTDNA series), P331 (beyond the P
+  series in that paper), M420 (Underhill et al. 2010). Recorded so no future
+  session re-reads a supplement that predates the marker.
+
+- **Nothing was promoted to `verified`, and no Karafet row sets
+  `ref_carries`.** A publication gives ancestral over derived. Only dbSNP
+  supplies the reference orientation, and a builder that mapped reference onto
+  ancestral would invert roughly half this tree with every test still green. A
+  test now enforces the division of labour between the two passes.
+
+- **M91's rsID is recorded, `dbsnp_checked` is not set.** NCBI `esummary`
+  returns an empty record for rs2032651, a 2001-era accession that has most
+  likely been merged forward. Recording a check that never succeeded would be
+  the same kind of overclaim this module is built to avoid. The same applies to
+  rs3893.
+
+- **The clade A question is recorded, not acted on.** Supplementary Table 1
+  assigns M91 to haplogroup A and the article states clade A is defined by M91
+  and P97, while `Y_BACKBONE` puts M91 on BT and M31 on A. That is a 2008-tree
+  convention difference and resolving it needs ISOGG or YFull.
+
 ## [3.3.0] - 2026-08-10
 
 ### Changed
