@@ -248,3 +248,112 @@ class TestPayloadExposesBothNames:
                 continue
             other_names = set(h.equivalent_names(h.Y_BACKBONE[other]))
             assert not (set(call["equivalent_names"]) & other_names)
+
+
+class TestIndelMarkersAreWrongInKindNotInValue:
+    """M17 and M91 are indels that were recorded as base substitutions.
+
+    An indel recorded as a substitution is not a wrong value that a better
+    allele would fix. A consumer array reports two base calls at a position and
+    a deletion is not a base, so no genotype can ever satisfy the rule. The
+    nodes those markers define are unreachable from array data, and that is a
+    structural ceiling rather than missing coverage.
+
+    M17 was confirmed against dbSNP rs3908 (delins, SPDI GGGG:GGG). M91 is
+    stated as 9T to 8T in the Karafet et al. 2008 text and has no rsID, so it
+    carries sequences from the publication and remains unverified.
+    """
+
+    def _indels(self):
+        return {n: e for n, e in h.Y_BACKBONE.items()
+                if e.get("variant_type") not in (None, "snv")}
+
+    def test_the_two_known_indels_are_recorded_as_such(self):
+        assert {e["marker"] for e in self._indels().values()} == {"M17", "M91"}
+
+    def test_an_indel_clears_the_single_base_fields(self):
+        # Widening these to hold "GGGG" would have been compared against an
+        # array base call and silently never matched.
+        for name, entry in self._indels().items():
+            assert entry["ancestral"] is None, name
+            assert entry["derived"] is None, name
+
+    def test_an_indel_records_whole_sequences_instead(self):
+        for name, entry in self._indels().items():
+            assert entry["ancestral_seq"], name
+            assert entry["derived_seq"], name
+            assert len(entry["ancestral_seq"]) != len(entry["derived_seq"]), name
+
+    def test_m17_carries_the_dbsnp_sequences(self):
+        entry = h.Y_BACKBONE["R1a1a"]
+        assert (entry["ancestral_seq"], entry["derived_seq"]) == ("GGGG", "GGG")
+
+    def test_m91_carries_the_published_homopolymer_lengths(self):
+        entry = h.Y_BACKBONE["BT"]
+        assert len(entry["ancestral_seq"]) == 9
+        assert len(entry["derived_seq"]) == 8
+
+    def test_an_indel_may_never_be_marked_verified(self):
+        for name, entry in self._indels().items():
+            assert entry["verified"] is False, name
+
+    def test_an_indel_has_no_reference_state(self):
+        # An indel has no single reference base, so ref_carries cannot be
+        # filled in and must not be guessed at.
+        for name, entry in self._indels().items():
+            assert entry["ref_carries"] is None, name
+
+    def test_a_substitution_carries_no_sequences(self):
+        for name, entry in h.Y_BACKBONE.items():
+            if entry.get("variant_type") == "snv":
+                assert entry["ancestral_seq"] is None, name
+                assert entry["derived_seq"] is None, name
+
+    def test_an_indel_can_never_be_called_from_an_array_genotype(self):
+        # The load-bearing behaviour. Even handed a real base call at the site,
+        # the marker must not resolve to derived or ancestral.
+        state, _ = h.marker_state(h.Y_BACKBONE["R1a1a"], {"rs3908": ("G", "G")})
+        assert state == h.UNUSABLE
+
+    def test_untypeable_markers_reports_them_apart_from_unverified_ones(self):
+        report = h.untypeable_markers()
+        assert report["count"] == 2
+        assert {row["marker"] for row in report["markers"]} == {"M17", "M91"}
+        assert "structural ceiling" in report["reason"]
+
+
+class TestTheDbsnpAuditIsRecordedWithoutOverclaiming:
+    """v3.3.0 folded the dbSNP audit into the table. It settles class and
+    position; it cannot settle ancestral against derived, and does not pretend to.
+    """
+
+    def _audited(self):
+        return {n: e for n, e in h.Y_BACKBONE.items() if e.get("dbsnp_checked")}
+
+    def test_every_audited_row_names_the_assembly_it_was_checked_against(self):
+        for name, entry in self._audited().items():
+            assert entry["assembly"] == "GRCh38", name
+
+    def test_the_audit_marked_nothing_verified(self):
+        # dbSNP answers reference over alternate. The table records ancestral
+        # over derived. Recording one as the other is the inversion the
+        # ref_carries guard exists to prevent.
+        verified = [n for n, e in h.Y_BACKBONE.items()
+                    if e.get("verified") and n != "root"]
+        assert verified == []
+
+    def test_the_reference_carries_the_derived_allele_more_often_than_not(self):
+        # Measured, not asserted from memory: 10 of the 17 determinable nodes.
+        carried = [e["ref_carries"] for e in h.Y_BACKBONE.values()
+                   if e.get("ref_carries")]
+        assert carried.count("derived") == 10
+        assert carried.count("ancestral") == 7
+
+    def test_the_unresolved_m20_conflict_is_recorded_rather_than_silently_fixed(self):
+        note = h.Y_BACKBONE["L"]["note"]
+        assert "CONFLICT" in note and "rs3911" in note
+
+    def test_multi_allelic_sites_are_flagged_not_treated_as_conflicts(self):
+        flagged = {e["marker"] for e in h.Y_BACKBONE.values()
+                   if e.get("multi_allelic")}
+        assert flagged == {"M45", "M343", "M269", "P312"}

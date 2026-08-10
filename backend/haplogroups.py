@@ -243,6 +243,15 @@ def _y(node: str, parent: str | None, label: str, marker: str,
         "assembly": assembly,
         "ref_carries": ref_carries,
         "dbsnp_checked": bool(dbsnp_checked),
+        # A marker is a base substitution until something establishes it is not.
+        # "snv" is the honest default because every row here was recorded as a
+        # substitution; where that turned out to be wrong in KIND, the audit
+        # table below overwrites this and clears the single-base fields.
+        # ancestral_seq and derived_seq carry whole sequences for indels, and
+        # stay None for substitutions so there is one place to read each fact.
+        "variant_type": "snv",
+        "ancestral_seq": None,
+        "derived_seq": None,
         "note": note,
     }
 
@@ -321,6 +330,121 @@ Y_BACKBONE: dict[str, dict] = {
     "R-P312":  _y("R-P312", "R-M269", "R1b1a1b1a1b", "P312", "rs34276300", "A", "G",
                   note=_UNVERIFIED_Y),
 }
+
+
+# ---------------------------------------------------------------------------
+# dbSNP audit, run 2026-08-10, recorded here rather than edited into 18 rows.
+#
+# Applied as a table so the provenance of every changed field is visible in one
+# place and can be re-derived by `python tools/audit_y_dbsnp.py`. See
+# docs/Y_BACKBONE_AUDIT.md for the full run and its limits.
+#
+# WHAT THIS DOES NOT DO: it does not mark anything verified. dbSNP settles
+# variant class, position and the reference/alternate pair. It cannot settle
+# ancestral against derived, which is the assignment `verified` is about. The
+# audit measured exactly why that matters: the GRCh38 reference Y carries the
+# DERIVED allele at 10 of the 17 nodes where the state is determinable, so a
+# builder mapping `ref` onto `ancestral` would invert 59 percent of this table.
+# ---------------------------------------------------------------------------
+
+_DBSNP_ASSEMBLY = "GRCh38"
+
+# marker -> which state the GRCh38 reference carries
+_DBSNP_REF_CARRIES: dict[str, str] = {
+    "M168": "derived",   "M96":  "derived",   "M89":  "derived",
+    "M201": "ancestral", "M170": "ancestral", "M253": "derived",
+    "M304": "ancestral", "M9":   "derived",   "M20":  "ancestral",
+    "M45":  "derived",   "M242": "ancestral", "M207": "derived",
+    "M173": "derived",   "M343": "derived",   "M269": "derived",
+    "U106": "ancestral", "P312": "ancestral",
+}
+
+# Markers dbSNP reports as multi-allelic. The recorded pair is a subset of the
+# observed set in every case, which is normal and is not a conflict. Recorded
+# because reading only the first SPDI of the comma-separated list makes all
+# four look like conflicts, which is a false accusation about real data.
+_DBSNP_MULTI_ALLELIC = ("M45", "M343", "M269", "P312")
+
+_M20_CONFLICT = (
+    "CONFLICT, unresolved. dbSNP rs3911 records A/G at chrY:19571568 (GRCh38), "
+    "single-allelic. This table records ancestral A, derived C. There is no C "
+    "allele in dbSNP and complementing does not reconcile the two, so one of "
+    "the rsID assignment and the allele pair is wrong. Not corrected here "
+    "because the audit cannot say which. See docs/Y_BACKBONE_AUDIT.md."
+)
+
+# Markers that are NOT base substitutions. An indel recorded as a substitution
+# is wrong in KIND, not in value, and no allele edit fixes it.
+#
+# marker -> (variant_type, ancestral_seq, derived_seq, note)
+_INDEL_CORRECTIONS: dict[str, tuple] = {
+    "M17": (
+        "del", "GGGG", "GGG",
+        "Single-base deletion in a four-base G homopolymer, NOT a G>A "
+        "substitution. dbSNP rs3908 gives snp_class delins, SPDI "
+        "NC_000024.10:19571278:GGGG:GGG, HGVS NC_000024.10:g.19571282del, "
+        "SEQ=[G/-]. This row previously recorded ancestral G, derived A; there "
+        "is no A allele at that site. M17 defines R1a1a, so that node cannot "
+        "be called from array base calls at all.",
+    ),
+    "M91": (
+        "del", "TTTTTTTTT", "TTTTTTTT",
+        "Length polymorphism in a T homopolymer, 9T to 8T, NOT an A>T "
+        "substitution. Stated as such in the Karafet et al. 2008 text. This row "
+        "previously recorded ancestral A, derived T. No rsID has been "
+        "established, so the sequences are from the publication rather than "
+        "from dbSNP and the row stays unverified.",
+    ),
+}
+
+
+def _apply_audit(backbone: dict[str, dict]) -> None:
+    """Fold the recorded audit results into the backbone at import time.
+
+    Deliberately separate from the table above so that a reader can see what
+    was asserted from literature recall and what was later measured, rather
+    than finding the two silently merged into one row.
+    """
+    for entry in backbone.values():
+        marker = entry.get("marker")
+        if not marker:
+            continue
+
+        carries = _DBSNP_REF_CARRIES.get(marker)
+        if carries:
+            entry["assembly"] = _DBSNP_ASSEMBLY
+            entry["ref_carries"] = carries
+            entry["dbsnp_checked"] = True
+        if marker in _DBSNP_MULTI_ALLELIC:
+            entry["multi_allelic"] = True
+
+        correction = _INDEL_CORRECTIONS.get(marker)
+        if correction:
+            variant_type, ancestral_seq, derived_seq, note = correction
+            entry["variant_type"] = variant_type
+            entry["ancestral_seq"] = ancestral_seq
+            entry["derived_seq"] = derived_seq
+            # The single-base fields are cleared rather than stuffed with a
+            # multi-base string. Everything that reads them, marker_state
+            # included, treats them as one base, and a widened value would be
+            # compared against an array call and silently never match.
+            entry["ancestral"] = None
+            entry["derived"] = None
+            entry["verified"] = False
+            entry["note"] = note
+            # M17 WAS checked against dbSNP, which is how the class error was
+            # found, so dbsnp_checked records that truthfully. ref_carries stays
+            # None: an indel has no single reference base to carry a state.
+            # M91 has no rsID, so nothing was checked and the flag stays false.
+            if entry.get("rsid"):
+                entry["assembly"] = _DBSNP_ASSEMBLY
+                entry["dbsnp_checked"] = True
+
+        if marker == "M20":
+            entry["note"] = _M20_CONFLICT
+
+
+_apply_audit(Y_BACKBONE)
 
 
 # ---------------------------------------------------------------------------
@@ -648,6 +772,45 @@ def equivalent_names(entry: dict) -> list[str]:
         if candidate and candidate not in names:
             names.append(candidate)
     return names
+
+
+def untypeable_markers() -> dict:
+    """Markers that are not base substitutions and cannot be called from an array.
+
+    Separate from ``unverified_markers`` because these are a different failure.
+    An unverified marker might be right and nobody checked. These are known to
+    be wrong in KIND: a consumer array reports two base calls per position, and
+    a deletion is not a base, so no genotype can ever satisfy the rule. Reporting
+    them as merely unusable would hide that the ceiling is structural rather
+    than a matter of coverage, which is the same distinction between "not
+    present" and "never checked" that the rest of this module holds.
+    """
+    rows = [
+        {
+            "node": entry["node"],
+            "marker": entry.get("marker"),
+            "label": entry.get("label"),
+            "variant_type": entry.get("variant_type"),
+            "ancestral_seq": entry.get("ancestral_seq"),
+            "derived_seq": entry.get("derived_seq"),
+            "note": entry.get("note", ""),
+        }
+        for entry in Y_BACKBONE.values()
+        if entry.get("variant_type") not in (None, "snv")
+    ]
+    rows.sort(key=lambda row: str(row["marker"]))
+    return {
+        "system": "Y",
+        "count": len(rows),
+        "markers": rows,
+        "reason": (
+            "These markers are insertions or deletions, not base substitutions. "
+            "A consumer array reports two base calls at a position, so no array "
+            "genotype can satisfy them and the nodes they define cannot be "
+            "reached from array data at all. This is a structural ceiling, not "
+            "missing coverage."
+        ),
+    }
 
 
 def unverified_markers() -> dict:

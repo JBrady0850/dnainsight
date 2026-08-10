@@ -500,6 +500,16 @@ def haplogroups_view(pid: int):
         result["unverified_markers"] = _haplogroups.unverified_markers()
     except Exception:
         pass
+
+    # Kept apart from unverified_markers on purpose. An unverified marker might
+    # be right and nobody checked. An untypeable one is known to be an indel,
+    # which no array base call can ever satisfy, so the ceiling it imposes is
+    # structural rather than a matter of coverage. Collapsing the two would tell
+    # a user their array fell short when the marker was never callable at all.
+    try:
+        result["untypeable_markers"] = _haplogroups.untypeable_markers()
+    except Exception:
+        pass
     result["tree"] = _haplogroups.tree_stamp()
     return jsonify(result)
 

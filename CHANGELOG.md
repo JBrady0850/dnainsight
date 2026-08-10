@@ -3,6 +3,92 @@
 All notable changes to DNAInsight are documented here. This project follows
 [Semantic Versioning](https://semver.org/).
 
+## [3.3.0] - 2026-08-10
+
+### Changed
+- **`Y_BACKBONE` now records what a marker IS, not only what its alleles are.**
+  Entries gained `variant_type` ("snv" by default), `ancestral_seq` and
+  `derived_seq`. A marker that is not a base substitution clears the
+  single-base `ancestral` and `derived` fields and carries whole sequences
+  instead.
+
+  Widening the existing fields to hold "GGGG" was considered and rejected. Every
+  reader of those fields, `marker_state` included, treats them as one base, so a
+  widened value would have been compared against an array call and silently
+  never matched. A field that cannot match is worse than a field that is
+  absent, because absence is visible.
+
+### Fixed
+- **M17 is a deletion, not a G>A substitution.** Confirmed against dbSNP rs3908:
+  `snp_class: delins`, SPDI `NC_000024.10:19571278:GGGG:GGG`, HGVS
+  `g.19571282del`, `SEQ=[G/-]`. A single-base deletion inside a four-base G
+  homopolymer. There is no A allele at that site and there never was.
+- **M91 is a 9T to 8T length polymorphism, not an A>T substitution.** Stated as
+  such in the Karafet et al. 2008 text. No rsID has been established, so the
+  sequences come from the publication and the row stays unverified.
+- **Both corrections change what the tree can honestly claim.** M91 defines BT,
+  which sits on the path to every non-A haplogroup, so BT now reports as
+  ASSUMED rather than confirmed on essentially every call. That is not a
+  regression; it is the first accurate statement this project has made about
+  that node. Four tests that encoded the old assumption were updated to assert
+  the corrected behaviour, with the reason written into each.
+
+### Added
+- `untypeable_markers()` and `untypeable_markers` on the haplogroups payload,
+  reported separately from `unverified_markers`. An unverified marker might be
+  right and nobody checked. An untypeable one is an indel that no array base
+  call can ever satisfy, so its ceiling is STRUCTURAL rather than a matter of
+  coverage. Collapsing the two would tell a user their array fell short when the
+  marker was never callable at all, which is the same "not present" against
+  "never checked" distinction the rest of the project already holds.
+- The dbSNP audit folded into the table as a visible provenance block:
+  `assembly`, `ref_carries` and `dbsnp_checked` on 18 rows, and a `multi_allelic`
+  flag on M45, M343, M269 and P312.
+
+  **Nothing was marked `verified`.** dbSNP settles class, position and the
+  reference/alternate pair; it cannot settle ancestral against derived, which is
+  the assignment `verified` is about. The audit measured why that matters: the
+  GRCh38 reference Y carries the DERIVED allele at 10 of the 17 determinable
+  nodes, so a builder mapping `ref` onto `ancestral` would invert 59 percent of
+  this table.
+- The unresolved M20 conflict recorded in its note rather than quietly patched.
+  dbSNP rs3911 carries A/G single-allelic; the table records ancestral A,
+  derived C. One of the rsID assignment and the allele pair is wrong and the
+  audit cannot say which, so neither was changed.
+- 15 tests, 3425 total.
+
+### Fixed, unrelated to the backbone
+- **`datetime.utcnow()` removed from all 9 call sites** in `backend/database.py`
+  and `backend/routes.py`. It is deprecated and scheduled for removal.
+
+  The obvious replacement is not a drop-in. `datetime.now(timezone.utc).isoformat()`
+  appends "+00:00", so every row written after the change would carry a
+  different string shape from every row written before it, inside columns this
+  application sorts and displays, and one call site appends a literal "Z" which
+  would have produced "+00:00Z". `database._utc_now_iso()` converts back to a
+  naive value before formatting, so the stored string is byte-identical to every
+  release up to 3.2.2 and no migration is needed.
+
+### Decided
+- **`REFUSAL_AADR` stays in force.** The Harvard Dataverse record states CC0 1.0,
+  which answers the first of the two grounds the exclusion rested on. The
+  second, that a compendium cannot grant rights its components did not grant, is
+  a question about the constituent studies and nothing read so far addresses it.
+  A licence declaration by an aggregator is evidence about the aggregator's
+  intent, not proof the underlying rights existed to be granted.
+  `data/DATA_SOURCES.md` now records the CC0 finding, the citation, both grounds
+  and what would settle the open one, so the next reader does not re-litigate
+  ground 1 and mistake it for the whole question.
+- **NCBI dbSNP recorded as a source**, US Government work and public domain,
+  with an explicit note on the reference-against-ancestral distinction and on
+  the 31 markers it cannot reach because it does not index marker names.
+
+### Still open
+- **Karafet 2008 Supplemental Table 1 remains unobtained.** The PMC article page
+  now returns a CAPTCHA challenge rather than the article, and no route around
+  that was attempted. Without it, 31 of 49 markers carry no rsID and cannot be
+  audited, including M60, M175 and M267.
+
 ## [3.2.2] - 2026-08-10
 
 ### Fixed

@@ -378,14 +378,33 @@ bundled, and the subprocess boundary is the licence boundary.
 
 - **Name:** AADR, Allen Ancient DNA Resource
 - **Used for:** **nothing.** Listed so the exclusion is a recorded decision.
-- **Licence identifier:** Unknown. **The terms were not readable at review time**
-  and the compendium aggregates many datasets, each carrying its own upstream
-  terms.
+- **Licence identifier:** **CC0 1.0**, read 2026-08-10. The Harvard Dataverse
+  record for the AADR states `License/Data Use Agreement: CC0 1.0`. CC0 already
+  sat inside the original bundling rule, so no part of the CC-BY amendment is
+  needed to accept it.
+- **Citation:** Mallick S, Micco A, Mah M, Ringbauer H, Lazaridis I, Olalde I,
+  Patterson N, Reich D (2024). The Allen Ancient DNA Resource (AADR): a curated
+  compendium of ancient human genomes. *Scientific Data* 11, 182.
 - **In repo:** No, and it is not fetchable through any flag.
-- **Why:** an unread licence is not a permissive licence. The honest state is
-  "excluded until read", not "probably fine". If someone reads the terms and the
-  per-dataset terms underneath them, this section can be rewritten with an
-  answer rather than an absence.
+- **Why the refusal STANDS anyway, decided 2026-08-10:** the exclusion rested on
+  two grounds and reading the licence answered only the first.
+
+  1. *The terms were not readable.* **Answered.** They are CC0 1.0.
+  2. *A compendium cannot grant rights its components did not grant.*
+     **Unanswered.** The AADR aggregates many published datasets, each with its
+     own upstream terms, and the Dataverse record speaks for the compendium
+     rather than for the constituent studies. Nothing read so far addresses
+     whether every contributing study permitted redistribution under CC0.
+
+  A licence declaration by an aggregator is evidence about the aggregator's
+  intent, not proof that the underlying rights existed to be granted. Ground 2
+  is the load-bearing one and it is still open, so `REFUSAL_AADR` remains in
+  force. This is recorded as a decision with a reason rather than an absence, so
+  that the next reader does not re-litigate ground 1 and mistake it for the
+  whole question.
+- **What would settle it:** an audit of the constituent studies' own terms, or a
+  statement from the compendium's maintainers that redistribution rights were
+  obtained for every included dataset.
 
 ## 15. PhyloTree, ISOGG and YFull
 
@@ -431,6 +450,33 @@ bundled, and the subprocess boundary is the licence boundary.
 - **Redistribution constraint:** falls entirely on the user who pulls the model.
   DNAInsight sends it finding text and citations over loopback and stores none
   of its output as a bundled artefact.
+
+## 18. NCBI dbSNP
+
+- **Name:** NCBI dbSNP, queried through E-utilities `esummary`, `db=snp`
+- **Used for:** auditing the Y backbone in `backend/haplogroups.py`. Variant
+  class, chromosome, GRCh38 and GRCh37 positions, and the reference/alternate
+  allele set. `tools/audit_y_dbsnp.py` runs it and `docs/Y_BACKBONE_AUDIT.md`
+  records the result.
+- **Licence identifier:** US Government work, **public domain**. NCBI databases
+  carry no copyright restriction on their content, which puts dbSNP inside the
+  bundling rule without any amendment.
+- **In repo:** derived values only, and only where they are facts dbSNP can
+  actually settle: `assembly`, `ref_carries`, `variant_type`, `ancestral_seq`
+  and `derived_seq` on audited backbone rows, plus the positions quoted in
+  `docs/Y_BACKBONE_AUDIT.md`. No bulk extract of dbSNP is stored.
+- **What it cannot settle, recorded because the distinction is load-bearing:**
+  dbSNP reports **reference over alternate**. The backbone records **ancestral
+  over derived**. On the Y these routinely disagree, because the GRCh38
+  reference Y descends from a lineage carrying the derived allele at many
+  backbone nodes. The audit measured it: the reference carries the derived
+  allele at **10 of the 17** nodes where the state is determinable. So no dbSNP
+  value is written into an `ancestral` or `derived` field, and no row was marked
+  `verified` on the strength of the audit.
+- **What it cannot reach:** dbSNP does not index Y marker NAMES. `esearch` for
+  M91, M175 and M267 each returns zero hits, so the 31 backbone markers that
+  carry no rsID could not be audited at all and are reported as unaudited rather
+  than assumed correct.
 
 ## Adding a new source
 

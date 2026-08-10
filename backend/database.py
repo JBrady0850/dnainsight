@@ -6,7 +6,25 @@ import sqlite3
 import json
 import os
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
+
+
+def _utc_now_iso() -> str:
+    """UTC timestamp in the exact shape _utc_now_iso() produced.
+
+    datetime.now(timezone.utc) is deprecated and scheduled for removal. The obvious
+    replacement, datetime.now(timezone.utc).isoformat(), is NOT a drop-in: it
+    appends "+00:00", so every row written after the change would carry a
+    different string shape from every row written before it, inside columns this
+    application already sorts and displays. One call site also appends a literal
+    "Z", which would have produced "+00:00Z".
+
+    So the timezone-aware value is converted back to a naive one before
+    formatting. The stored string is byte-identical to what shipped for every
+    release up to 3.2.2, and no migration is needed.
+    """
+    return datetime.now(timezone.utc).replace(tzinfo=None).isoformat()
+
 
 
 def _resolve_db_path() -> Path:
@@ -207,7 +225,7 @@ def create_profile(name: str, dob: str, sex: str, provider: str) -> int:
     conn = get_connection()
     cur = conn.execute(
         "INSERT INTO profiles (name, dob, sex, provider, created_at) VALUES (?, ?, ?, ?, ?)",
-        (name, dob, sex, provider, datetime.utcnow().isoformat())
+        (name, dob, sex, provider, _utc_now_iso())
     )
     pid = cur.lastrowid
     conn.commit()
@@ -248,7 +266,7 @@ def record_upload(profile_id: int, filename: str, snp_count: int) -> int:
     conn = get_connection()
     cur = conn.execute(
         "INSERT INTO snp_uploads (profile_id, filename, snp_count, uploaded_at) VALUES (?, ?, ?, ?)",
-        (profile_id, filename, snp_count, datetime.utcnow().isoformat())
+        (profile_id, filename, snp_count, _utc_now_iso())
     )
     uid = cur.lastrowid
     conn.commit()
@@ -268,7 +286,7 @@ def upsert_finding(profile_id: int, upload_id: int, finding: dict):
         (profile_id, finding["rsid"])
     ).fetchone()
 
-    now = datetime.utcnow().isoformat()
+    now = _utc_now_iso()
     fields = (
         finding.get("gene", ""),
         finding.get("chromosome", ""),
@@ -376,7 +394,7 @@ def record_report(profile_id: int, report_type: str, fmt: str, filepath: str) ->
     conn = get_connection()
     cur = conn.execute(
         "INSERT INTO reports (profile_id, report_type, format, filepath, created_at) VALUES (?,?,?,?,?)",
-        (profile_id, report_type, fmt, filepath, datetime.utcnow().isoformat())
+        (profile_id, report_type, fmt, filepath, _utc_now_iso())
     )
     rid = cur.lastrowid
     conn.commit()

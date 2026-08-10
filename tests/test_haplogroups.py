@@ -97,7 +97,16 @@ def test_every_y_node_has_an_existing_parent_and_a_marker():
             continue
         assert entry["parent"] in hg.Y_BACKBONE, name
         assert entry["marker"], name
-        assert entry["derived"], name
+        # Every node states its derived state SOMEWHERE, but not always as a
+        # single base. M17 and M91 are indels, so they carry derived_seq and
+        # their single-base fields are None rather than holding a multi-base
+        # string that nothing could ever match against an array call.
+        if entry.get("variant_type") == "snv":
+            assert entry["derived"], name
+            assert entry["derived_seq"] is None, name
+        else:
+            assert entry["derived_seq"], name
+            assert entry["derived"] is None, name
 
 
 def test_every_mt_node_has_an_existing_parent_and_defining_variants():
@@ -232,7 +241,14 @@ def test_call_y_backbone_walks_a_fully_derived_path():
     assert call["haplogroup"] == "R-M269"
     assert call["state"] == "called"
     assert call["path"][0] == "root"
-    assert call["assumed"] == []
+    # BT is ASSUMED, not confirmed, and this is the correct answer rather than
+    # a gap to close. BT is defined by M91, which the v3.3.0 dbSNP audit
+    # established is a 9T to 8T length polymorphism and not a base
+    # substitution. A consumer array reports two base calls per position, so no
+    # array genotype can ever satisfy M91. BT sits on the path to every
+    # non-A haplogroup, so this shows up on essentially every call, and saying
+    # "assumed" is the honest form of it.
+    assert call["assumed"] == ["BT"]
 
 
 def test_call_y_backbone_stops_where_the_next_marker_is_ancestral():
@@ -411,8 +427,13 @@ def test_resolution_ceiling_counts_markers_in_the_tree():
 def test_resolution_ceiling_counts_only_the_markers_this_array_reads():
     genotypes = derived_map("R-M269")
     ceiling = hg.resolution_ceiling(genotypes, "Y")
-    assert ceiling["markers_available"] == len(genotypes)
-    assert ceiling["markers_missing"] == ceiling["markers_in_tree"] - len(genotypes)
+    # One fewer than the genotypes supplied: M91 is an indel, so a base call at
+    # its position is not a usable reading of it and must not be counted as
+    # coverage the array does not really have.
+    untypeable_on_path = 1
+    assert ceiling["markers_available"] == len(genotypes) - untypeable_on_path
+    assert ceiling["markers_missing"] == (
+        ceiling["markers_in_tree"] - len(genotypes) + untypeable_on_path)
 
 
 def test_resolution_ceiling_coverage_is_the_computed_ratio():
@@ -514,7 +535,10 @@ def test_write_y_array_input_lists_only_markers_that_were_called(tmp_path):
     path = hg.write_y_array_input(genotypes, workdir=tmp_path)
     text = Path(path).read_text(encoding="utf-8")
     body = [ln for ln in text.splitlines() if not ln.startswith("#")]
-    assert len(body) == len(hg.path_to("R-M269")) - 1
+    # Minus the root, which carries no marker, and minus M91, which is an indel
+    # an array cannot call. Writing it into the tool input would hand a
+    # downstream caller a base call for a length polymorphism.
+    assert len(body) == len(hg.path_to("R-M269")) - 2
     assert "rs16981293" not in text
     assert hg.TREE_VERSION in text
 

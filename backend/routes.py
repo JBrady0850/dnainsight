@@ -20,7 +20,7 @@ import csv
 import json
 import threading
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 from flask import Blueprint, request, jsonify, send_file, current_app
 from werkzeug.utils import secure_filename
 
@@ -469,7 +469,7 @@ def export_findings_json(pid: int):
 
     findings = db.get_findings(pid)
     payload = {
-        "exported_at": datetime.utcnow().isoformat() + "Z",
+        "exported_at": datetime.now(timezone.utc).replace(tzinfo=None).isoformat() + "Z",
         "app_version": APP_VERSION,
         "patient": {
             "name": profile["name"],
@@ -483,7 +483,7 @@ def export_findings_json(pid: int):
 
     buf = io.BytesIO(json.dumps(payload, indent=2).encode("utf-8"))
     safe = profile["name"].replace(" ", "_")
-    ts   = datetime.utcnow().strftime("%Y%m%d")
+    ts   = datetime.now(timezone.utc).strftime("%Y%m%d")
     return send_file(
         buf,
         mimetype="application/json",
@@ -523,7 +523,7 @@ def export_findings_csv(pid: int):
 
     bytes_buf = io.BytesIO(buf.getvalue().encode("utf-8-sig"))  # utf-8-sig for Excel BOM
     safe = profile["name"].replace(" ", "_")
-    ts   = datetime.utcnow().strftime("%Y%m%d")
+    ts   = datetime.now(timezone.utc).strftime("%Y%m%d")
     return send_file(
         bytes_buf,
         mimetype="text/csv",
