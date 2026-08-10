@@ -87,6 +87,7 @@ _ancestry = _mod("ancestry")
 _diplotype = _mod("diplotype")
 _carrier = _mod("carrier")
 _assistant = _mod("assistant")
+_concordance = _mod("concordance")
 
 
 def _need(module, name: str):
@@ -571,7 +572,47 @@ def phasing_view(pid: int):
 
 
 # ---------------------------------------------------------------------------
-# 6. Imputation
+# 6. Cross-vendor concordance
+# ---------------------------------------------------------------------------
+
+@api_v3.route("/api/profiles/<int:pid>/concordance", methods=["GET"])
+def concordance_view(pid: int):
+    """How much the user's own kits agree, with every disagreement classified.
+
+    merge.py already pools kits and already refuses to reconcile a conflict. It
+    never said WHICH two files disagreed or out of how many shared positions,
+    which is the number a user with two kits actually wants.
+
+    The reason this is an endpoint rather than a field is the classification.
+    Most apparent vendor disagreement is strand orientation, and publishing the
+    raw conflict count as a vendor error rate would be a false accusation about
+    a named company in the most credible form one can take, a statistic. So the
+    payload separates genuine disagreement from orientation artifacts and from
+    the palindromic sites where the two cannot be told apart, and never folds
+    that third bucket into either neighbour.
+
+    Not to be confused with ``/conflicts/sources``, which is about ClinVar, the
+    GWAS Catalog and CPIC disagreeing over an interpretation. This endpoint is
+    about two of the user's own files disagreeing over a base call.
+    """
+    error, merged = _guard_merged(_concordance, "concordance", pid)
+    if error:
+        return error
+    try:
+        result = _concordance.analyse(merged, findings=_findings_for(pid))
+    except Exception as exc:
+        return _err(f"Concordance analysis failed: {exc}", 500)
+    result["scope"] = (
+        "Only the DNA files you have loaded into this profile are compared, and "
+        "only against each other. This is not an accuracy measurement against "
+        "any truth set: DNAInsight has no reference genome for you, so it can "
+        "say that two of your files disagree but never which of them is right."
+    )
+    return jsonify(result)
+
+
+# ---------------------------------------------------------------------------
+# 7. Imputation
 # ---------------------------------------------------------------------------
 
 @api_v3.route("/api/profiles/<int:pid>/imputation", methods=["POST"])
@@ -664,7 +705,7 @@ def imputation_safety(pid: int):
 
 
 # ---------------------------------------------------------------------------
-# 7. Pharmacogenomics: diplotypes and the prescription guard
+# 8. Pharmacogenomics: diplotypes and the prescription guard
 # ---------------------------------------------------------------------------
 
 @api_v3.route("/api/profiles/<int:pid>/pgx/diplotypes", methods=["GET"])
@@ -729,7 +770,7 @@ def prescription_guard(pid: int):
 
 
 # ---------------------------------------------------------------------------
-# 8. Carrier screening
+# 9. Carrier screening
 # ---------------------------------------------------------------------------
 
 @api_v3.route("/api/profiles/<int:pid>/carrier", methods=["GET"])
@@ -822,7 +863,7 @@ def acmg_view(pid: int):
 
 
 # ---------------------------------------------------------------------------
-# 9. Reclassification ledger
+# 10. Reclassification ledger
 # ---------------------------------------------------------------------------
 
 @api_v3.route("/api/profiles/<int:pid>/snapshots", methods=["GET"])
@@ -894,7 +935,7 @@ def addendum_view(pid: int):
 
 
 # ---------------------------------------------------------------------------
-# 10. Provenance and the signed manifest
+# 11. Provenance and the signed manifest
 # ---------------------------------------------------------------------------
 
 @api_v3.route("/api/profiles/<int:pid>/manifest", methods=["POST"])
@@ -987,7 +1028,7 @@ def source_conflicts(pid: int):
 
 
 # ---------------------------------------------------------------------------
-# 11. Grounded local assistant
+# 12. Grounded local assistant
 # ---------------------------------------------------------------------------
 
 @api_v3.route("/api/profiles/<int:pid>/assistant", methods=["POST"])
@@ -1039,7 +1080,7 @@ def assistant_contract():
 
 
 # ---------------------------------------------------------------------------
-# 12. Capability map
+# 13. Capability map
 # ---------------------------------------------------------------------------
 
 @api_v3.route("/api/v3/capabilities", methods=["GET"])

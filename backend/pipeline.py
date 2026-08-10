@@ -119,7 +119,7 @@ def available_subsystems() -> dict[str, bool]:
     # it can only produce an answer when fastmixture and a panel exist.
     for name in ("ledger", "provenance", "sequencing", "haplogroups",
                  "relatedness", "imputation", "ancestry", "diplotype",
-                 "carrier", "assistant"):
+                 "carrier", "assistant", "concordance"):
         out[name] = _try(name) is not None
 
     try:

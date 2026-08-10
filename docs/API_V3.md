@@ -374,7 +374,68 @@ out" from "we could not" without a second lookup. Where both parents are
 heterozygous at a heterozygous child position, nothing is determined and the
 position is reported ambiguous rather than guessed.
 
-### 4.6 Imputation
+### 4.6 Cross-vendor concordance
+
+| Method | Path | Query | Notes |
+|---|---|---|---|
+| GET | `/api/profiles/<pid>/concordance` | | how much your own kits agree, with every disagreement classified |
+
+Every response carries `scope`:
+
+> Only the DNA files you have loaded into this profile are compared, and only
+> against each other. This is not an accuracy measurement against any truth set:
+> DNAInsight has no reference genome for you, so it can say that two of your
+> files disagree but never which of them is right.
+
+`merge.py` has pooled kits and retained conflicts since v2.0 and deliberately
+refuses to reconcile them. What it never said was WHICH two files disagreed or
+out of how many shared positions, which is the number a user with two kits
+actually wants.
+
+**Every disagreement is classified before it is counted.** Most apparent vendor
+disagreement is strand orientation, not error: one company reports a SNP on the
+plus strand and another on the minus strand, so the same person reads AA in one
+file and TT in the other. Publishing that as a vendor error rate would be a
+false accusation about a named company in the most credible form one can take,
+a statistic.
+
+| Class | Meaning |
+|---|---|
+| `orientation_artifact` | one call is the exact complement of the other and neither is an irreducible heterozygote, so the complement explains it completely |
+| `indeterminate` | at least one call is a palindromic A/T or C/G heterozygote, which reads the same on either strand, so a flip and a real difference cannot be told apart |
+| `genuine` | the residue, and only once every other explanation is ruled out |
+| `agreement` | the two calls match |
+| `not_comparable` | at least one side is not a pair of ACGT base calls |
+
+`genuine + orientation_artifact + indeterminate == conflicts`, always. **The
+indeterminate bucket is never folded into either neighbour.** Folding it into
+genuine overstates vendor disagreement; folding it into artifact hides real
+disagreement. Same treatment "not testable on your array" gets in genosets and
+"strand ambiguous" gets in scoring.
+
+**No rate without its denominator.** Every rate travels with `shared`. A pair
+that shares nothing reports `comparable: false` and `null` rates, never 0.0 and
+never 100.0, because "they never agreed" and "we never compared them" are
+different claims.
+
+**`findings_covered` is `null` when no findings were supplied and `0` when they
+were supplied and none were covered.** Null means nobody asked; zero means
+someone asked and the answer was none.
+
+**One kit returns `available: false`, `not_attempted: true` and `totals: null`.**
+Totals of zero would claim a comparison ran and found nothing. One kit is an
+absent comparison, not a failed one.
+
+Same-provider pairs are compared and flagged with `same_provider`, never
+dropped: two kits from one vendor years apart ran on different chips. Kits with
+no declared provider each form their own coverage group, because pooling every
+undeclared kit together would invent a vendor that agreed with itself.
+
+Not to be confused with `/conflicts/sources` in 4.11, which is about ClinVar,
+the GWAS Catalog and CPIC disagreeing over an interpretation. This endpoint is
+about two of your own files disagreeing over a base call.
+
+### 4.7 Imputation
 
 | Method | Path | Body | Notes |
 |---|---|---|---|
@@ -405,7 +466,7 @@ hardest and degrades the DR2 figures themselves for those people; accuracy falls
 sharply below about 1 percent minor allele frequency, which is exactly where
 clinical interest lives; and **no imputed call is confirmatory**.
 
-### 4.7 Pharmacogenomics
+### 4.8 Pharmacogenomics
 
 | Method | Path | Body | Notes |
 |---|---|---|---|
@@ -445,7 +506,7 @@ language, and `audit_language` exists so the claim is testable rather than
 believed. Output is scoped to the medicines supplied, not a 500-row interaction
 table the user has to search.
 
-### 4.8 Carrier screening
+### 4.9 Carrier screening
 
 | Method | Path | Body or query | Notes |
 |---|---|---|---|
@@ -496,7 +557,7 @@ result. It also prints its own list discrepancy: 82 genes encoded against a
 published count of 81, not reconciled item by item. Carrying probes for three
 BRCA founder variants is not BRCA testing.
 
-### 4.9 Reclassification ledger
+### 4.10 Reclassification ledger
 
 | Method | Path | Query or body | Notes |
 |---|---|---|---|
@@ -539,7 +600,7 @@ against the evidence that existed at the time.
 With one snapshot on record the addendum returns a well-formed baseline payload.
 The first scan genuinely has nothing to compare against and that is not an error.
 
-### 4.10 Provenance and manifests
+### 4.11 Provenance and manifests
 
 | Method | Path | Body | Notes |
 |---|---|---|---|
@@ -577,7 +638,7 @@ resolved."` Every conflict carries both positions with `verdict: null` and
 `resolved: false`, and the ordering is stable so repeated calls produce
 identical output.
 
-### 4.11 Grounded local assistant
+### 4.12 Grounded local assistant
 
 | Method | Path | Body | Notes |
 |---|---|---|---|

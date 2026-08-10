@@ -3,6 +3,84 @@
 All notable changes to DNAInsight are documented here. This project follows
 [Semantic Versioning](https://semver.org/).
 
+## [3.2.0] - 2026-08-10
+
+### Added
+- `backend/concordance.py` and `GET /api/profiles/<pid>/concordance`.
+  Cross-vendor agreement across the kits already loaded into a profile: which
+  two files disagree, out of how many positions they could have disagreed over,
+  and what kind of disagreement it is.
+
+  `merge.py` has pooled kits and retained conflicts since v2.0, and it
+  deliberately refuses to reconcile them. What it never said was WHICH two files
+  disagreed or what the denominator was, which is the number a user with two
+  kits actually wants.
+
+  The module is derived, read-only and additive. It never mutates the merged set
+  and nothing it returns changes which genotype the rest of the application uses.
+- Conflict classification, which is the reason this is a module and not a field.
+  Most apparent vendor disagreement is strand orientation, not error. One company
+  reports a SNP on the plus strand and another on the minus strand, so the same
+  person reads AA in one file and TT in the other and nothing is wrong with
+  either. Publishing that as a vendor error rate would be a false accusation
+  about a named company in the most credible form one can take, a statistic.
+
+  So every disagreement is classified before it is counted:
+
+  - `orientation_artifact`, one call is the exact complement of the other and
+    neither is an irreducible heterozygote, so the complement explains it
+  - `indeterminate`, at least one call sits on a palindromic A/T or C/G
+    heterozygote, where a strand flip and a real difference cannot be told apart
+  - `genuine`, the residue, and only once every other explanation is ruled out
+
+  The indeterminate bucket is never folded into either neighbour. Folding it
+  into genuine overstates vendor disagreement; folding it into artifact hides
+  real disagreement. It is the same treatment "not testable on your array"
+  already gets in `genosets.py` and "strand ambiguous" gets in `scoring.py`.
+- `tests/test_concordance.py`, 44 tests, written before the module. Four lines
+  are pinned there specifically: a palindromic disagreement is never resolved,
+  an unparsed genotype can never become evidence against a company, the three
+  buckets always sum to the conflict total, and AG against CT is an artifact
+  while AA against GG is genuine.
+
+### Changed
+- `pipeline.available_subsystems()` reports `concordance`, so the capability map
+  can gate the control the same way it gates every other v3 subsystem.
+- `backend/routes_v3.py` gained section 6 and renumbered the sections after it.
+
+### Notes on the implementation, recorded because they are easy to get wrong
+- All strand logic is delegated to `backend/orientation.py`, which already owns
+  the complement table and the ambiguity rule. A second copy would drift, and
+  drift in strand handling produces results that are internally consistent and
+  externally backwards, which is the same failure mode the v3.1.1 `ref_carries`
+  guard exists to prevent.
+- Genotypes are validated against ACGT specifically, **not** against the keys of
+  `orientation.COMPLEMENT`. That table tolerates no-call and indel symbols on
+  purpose, so that flipping a whole file leaves them intact. Inheriting that
+  tolerance here would have let `NN` become evidence that two companies
+  disagree.
+- No rate is reported without its denominator. Every rate travels with `shared`,
+  and a pair with nothing in common reports `comparable: false` with a rate of
+  `null`, never 0.0 and never 100.0. "They never agreed" and "we never compared
+  them" are different claims.
+- `findings_covered` is `null` when no findings were supplied and `0` when
+  findings were supplied and none were covered. Null means nobody asked.
+- A single kit returns `available: false` with `not_attempted: true` and
+  `totals: null`. Totals of zero would claim a comparison ran and found nothing,
+  which did not happen. One kit is an absent comparison, not a failed one.
+- Same-provider pairs are compared and flagged with `same_provider`, never
+  dropped. Two kits from one vendor years apart ran on different chips and their
+  agreement with each other is a real number.
+- Kits with no declared provider each form their own coverage group. Pooling
+  every undeclared kit into one bucket would invent a vendor that agreed with
+  itself.
+- A known property, stated rather than hidden: a palindromic heterozygote reads
+  the same on either strand, so two kits always agree there. Those positions
+  count towards agreement and the agreement rate is very slightly optimistic as
+  a result. They are left in because excluding positions from a denominator for
+  being too easy is its own distortion, and the indeterminate count sits next to
+  the rate.
+
 ## [3.1.1] - 2026-08-09
 
 ### Added
